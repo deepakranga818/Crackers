@@ -96,6 +96,13 @@ export default function App() {
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute("content", config.seo.description);
+    for (const [property, value] of [
+      ["og:title", config.seo.title],
+      ["og:description", config.seo.description],
+    ])
+      document
+        .querySelector(`meta[property="${property}"]`)
+        ?.setAttribute("content", value);
     const entries: [string, string | null][] = [
       ["canonical", config.seo.canonical],
       ["og:image", config.seo.ogImage],
@@ -648,7 +655,7 @@ export default function App() {
           <h3>Contact the seller</h3>
           <a href={`tel:+${config.whatsapp}`}>{config.phoneDisplay}</a>
           <p>{config.address || "Shop address awaiting verification"}</p>
-          <p>{config.hours || "Business hours awaiting confirmation"}</p>
+          {config.hours && <p>{config.hours}</p>}
           {canOrder && (
             <a
               href={`https://wa.me/${config.whatsapp}`}
@@ -670,12 +677,15 @@ export default function App() {
           {footerPolicy("cancellation", "Cancellation and returns")}
           {footerPolicy("safety", "Safety and legal information")}
           <details>
-            <summary>Privacy in this preview</summary>
+            <summary>Privacy</summary>
             <p>
-              Cart IDs and quantities and your sound preference may be stored on
-              this device. Buyer details remain in memory. If you choose
-              WhatsApp, your request is shared with WhatsApp and the seller when
-              you press Send. No analytics are installed.
+              Your cart (product IDs and quantities) and sound preference are
+              saved on this device only. The name, mobile number, address and
+              notes you enter stay in your browser and are not stored by this
+              website. When you continue, they go into a WhatsApp message to the
+              seller. Nothing is shared until you press Send in WhatsApp; after
+              that, WhatsApp and the seller handle the message. No analytics or
+              ad trackers are installed.
             </p>
           </details>
         </div>

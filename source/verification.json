@@ -1,0 +1,72 @@
+{
+  "location": {
+    "group": "business-config",
+    "verified": false,
+    "requires": "Seller's real operating location and shop/pickup address, entered in src/business.ts (address and fulfilment[].address).",
+    "reference": null,
+    "reviewDate": null
+  },
+  "serviceAreas": {
+    "group": "business-config",
+    "verified": false,
+    "requires": "The pickup and/or delivery methods the seller will actually run. For delivery, an allowlist of serviceable PIN codes in fulfilment[].servicePins.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "policies": {
+    "group": "business-config",
+    "verified": false,
+    "requires": "Seller-written cancellation/returns, safety/handling and privacy texts in business.policies.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "taxTreatment": {
+    "group": "business-config",
+    "verified": false,
+    "requires": "Seller's GST/tax treatment and any delivery charge, set in business.tax and fulfilment[].chargePaise. Until then the amount is labelled Estimated.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "licences": {
+    "group": "licence",
+    "verified": false,
+    "requires": "Seller's valid explosives/fireworks sale licence(s) for the operating location. Verify privately, never commit scans; record only a non-sensitive reference and date.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "onlineOrdering": {
+    "group": "legal",
+    "verified": false,
+    "requires": "Written legal confirmation that accepting crackers orders online or through WhatsApp is lawful at the seller's location. The Supreme Court order of 23 Oct 2018 restricts online acceptance and sale; see docs/LAUNCH.md.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "permittedProducts": {
+    "group": "legal",
+    "verified": false,
+    "requires": "Confirmation that every listed product may be sold at the location, including joined crackers/laris (dc-023, dc-024) and any green-crackers-only rule.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "saleDates": {
+    "group": "legal",
+    "verified": false,
+    "requires": "Sale and delivery dates permitted by the applicable authority for the seller's location this year.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "certification": {
+    "group": "product-certification",
+    "verified": false,
+    "requires": "Per-product certification evidence (for example PESO approval or green-cracker QR verification). No product is currently claimed certified or green.",
+    "reference": null,
+    "reviewDate": null
+  },
+  "hostApproval": {
+    "group": "hosting",
+    "verified": false,
+    "requires": "Written confirmation from the chosen host that this business and product category is permitted under its current terms. GitHub Pages does not qualify: its terms bar sites primarily facilitating commercial transactions.",
+    "reference": null,
+    "reviewDate": null
+  }
+}

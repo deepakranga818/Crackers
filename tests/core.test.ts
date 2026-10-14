@@ -1,4 +1,8 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import checklist from "../source/verification.json";
+import { business } from "../src/business";
 import data from "../src/products.json";
 import mapping from "../source/category-map.json";
 import {
@@ -83,7 +87,7 @@ describe("source integrity", () => {
     expect(Object.keys(mapping)).toHaveLength(46);
     expect(
       products.filter((p) => !p.categoryReviewed).map((p) => p.sourceNumber),
-    ).toEqual([29, 30, 31, 37, 38, 44]);
+    ).toEqual([29, 30, 31, 37, 38]);
     for (const p of products)
       expect(mapping[p.id as keyof typeof mapping].expectedName).toBe(p.name);
   });
@@ -277,9 +281,13 @@ describe("buyer and WhatsApp", () => {
         "1. *POP-UP (Pop- gol size)* — Qty: 3 × ₹10 = ₹30",
         "2. *POP-UP (Pop- long size)* — Qty: 1 × ₹20 = ₹20",
         "",
+        "Product subtotal: ₹50",
+        "",
         "💰 *Total: ₹50*",
         "",
         "👤 *Buyer:* Deepak",
+        "📞 *Mobile:* 9992230740",
+        "🚚 *Fulfilment:* to be confirmed on WhatsApp",
         "",
         "Wishing you and your family a very Happy Diwali! 🪔✨🎇",
       ].join("\n"),
@@ -379,5 +387,116 @@ describe("buyer and WhatsApp", () => {
     expect(() =>
       makeRequest({ "dc-001": 1 }, products, buyer, config),
     ).toThrow();
+  });
+});
+describe("units, fulfilment and message contents", () => {
+  const c = { ...config, urlThreshold: 100000 };
+  it("keeps confirmed units, buyer details and fulfilment in the message", () => {
+    const { message } = makeRequest({ "dc-001": 2 }, ready, buyer, c);
+    expect(message).toContain("Qty: 2 × ₹10 = ₹20 (Unit: Test unit)");
+    expect(message).toContain("Product subtotal: ₹20");
+    expect(message).toContain("📞 *Mobile:* 9992230740");
+    expect(message).toContain("🚚 *Fulfilment:* Delivery");
+    expect(message).toContain("📍 *Address:* 12 Test Road, Test area, Delhi");
+    expect(message).toContain("Fulfilment charge: to be confirmed on WhatsApp");
+    expect(message).toContain("Estimated amount:");
+    const pickup = makeRequest(
+      { "dc-001": 1 },
+      ready,
+      { ...buyer, method: "shop" },
+      {
+        ...c,
+        fulfilment: [
+          {
+            ...c.fulfilment[0],
+            id: "shop",
+            type: "pickup",
+            address: "1 Shop Road",
+            chargePaise: 0,
+          },
+        ],
+      },
+    );
+    expect(pickup.message).toContain("🚚 *Fulfilment:* Pickup — 1 Shop Road");
+  });
+  it("refuses a request containing a product with an unresolved unit", () => {
+    const unresolved = ready.map((p) =>
+      p.id === "dc-002" ? { ...p, sellingUnit: null } : p,
+    );
+    expect(() =>
+      makeRequest({ "dc-001": 1 }, unresolved, buyer, c),
+    ).not.toThrow();
+    expect(() =>
+      makeRequest({ "dc-001": 1, "dc-002": 1 }, unresolved, buyer, c),
+    ).toThrow();
+  });
+  it("prices a saved cart at the current Sheet price, not an older one", () => {
+    const cart = { "dc-001": 2 };
+    const before = totals(cart, ready, c).subtotal;
+    const changed = ready.map((p) =>
+      p.id === "dc-001" ? { ...p, pricePaise: p.pricePaise! + 500 } : p,
+    );
+    expect(totals(cart, changed, c).subtotal).toBe(before + 1000);
+    expect(makeRequest(cart, changed, buyer, c).message).toContain(
+      "Qty: 2 × ₹15 = ₹30",
+    );
+  });
+  it("always addresses the seller's WhatsApp number", () => {
+    const { url } = makeRequest({ "dc-001": 1 }, ready, buyer, c);
+    expect(new URL(url).pathname).toBe("/919992230740");
+    expect(() =>
+      makeRequest({ "dc-001": 1 }, ready, buyer, {
+        ...c,
+        whatsapp: "910000000000",
+      }),
+    ).toThrow();
+  });
+});
+describe("launch verification", () => {
+  const open = Object.values(checklist).some(
+    (i) => !(i.verified && i.reference),
+  );
+  it("lists every required flag with its group and what it requires", () => {
+    expect(Object.keys(checklist).sort()).toEqual(
+      [...requiredVerifications].sort(),
+    );
+    for (const item of Object.values(checklist)) {
+      expect([
+        "business-config",
+        "licence",
+        "legal",
+        "product-certification",
+        "hosting",
+      ]).toContain(item.group);
+      expect(item.requires.length).toBeGreaterThan(20);
+      if (item.verified) expect(item.reference).toBeTruthy();
+    }
+  });
+  it("keeps public ordering and the deploy gate closed while any item lacks evidence", () => {
+    expect(open).toBe(true);
+    expect(orderingAllowed(business)).toBe(false);
+    expect(business.verification.hostApproval).toBe(false);
+    let status = 0;
+    try {
+      execFileSync(process.execPath, ["scripts/check-publication.mjs"], {
+        stdio: "pipe",
+      });
+    } catch (e) {
+      status = (e as { status: number }).status;
+    }
+    expect(status).toBe(1);
+  });
+  it("keeps page title, description and Open Graph metadata equal to the config", () => {
+    const html = readFileSync("index.html", "utf8");
+    const title = /<title>([^<]*)<\/title>/.exec(html)![1];
+    const meta = (attr: string, name: string) =>
+      new RegExp(`<meta[^>]*?${attr}="${name}"[^>]*?content="([^"]*)"`).exec(
+        html,
+      )![1];
+    expect(title).toBe(business.seo.title);
+    expect(meta("name", "description")).toBe(business.seo.description);
+    expect(meta("property", "og:title")).toBe(business.seo.title);
+    expect(meta("property", "og:description")).toBe(business.seo.description);
+    expect(html).toContain('content="noindex,nofollow"');
   });
 });

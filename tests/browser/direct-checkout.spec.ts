@@ -57,6 +57,12 @@ test("single-step mobile checkout applies Sheet offers and includes every select
     expect(message).toContain("Offer (10% off): −₹14");
     expect(message).toContain("Coupon: CRACK10");
     expect(message).toContain("Total: ₹126");
+    expect(message).toContain("Product subtotal: ₹140");
+    expect(message).toContain("📞 *Mobile:* 9992230740");
+    expect(message).toContain("🚚 *Fulfilment:* to be confirmed on WhatsApp");
+    await expect(page.locator("body")).not.toContainText(
+      /order (sent|confirmed|placed)/i,
+    );
     expect(message).not.toContain("Catalogue version");
     expect(message).not.toContain("Demo");
     await expect(page.locator(".request-preview")).toHaveCount(0);

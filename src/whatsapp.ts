@@ -1,5 +1,5 @@
 import type { Business, Buyer, Cart, Product } from "./model";
-import { safeField, validateBuyer } from "./buyer";
+import { normalizeMobile, safeField, validateBuyer } from "./buyer";
 import { blockedReason, orderingAllowed, rupees, totals } from "./pricing";
 export type RequestDraft = {
   fingerprint: string;
@@ -74,38 +74,46 @@ export function makeRequest(
     const p = products.find((p) => p.id === id)!;
     const unit =
       p.sellingUnit && !p.sellingUnit.startsWith("Demo unit")
-        ? ` (${safeField(p.sellingUnit)})`
+        ? ` (Unit: ${safeField(p.sellingUnit)})`
         : "";
     lines.push(
       `${i + 1}. *${safeField(p.name)} (${safeField(p.originalCategory)})* — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}${unit}`,
     );
   });
   lines.push("");
-  if (
-    calculated.discount > 0 ||
-    calculated.delivery ||
-    calculated.tax !== null
-  ) {
-    lines.push(`Product subtotal: ${rupees(calculated.subtotal)}`);
-    if (calculated.discount > 0)
-      lines.push(
-        `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
-      );
-    if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
-    if (calculated.delivery)
-      lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
-    if (calculated.tax !== null)
-      lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
-    lines.push("");
-  }
+  lines.push(`Product subtotal: ${rupees(calculated.subtotal)}`);
+  if (calculated.discount > 0)
+    lines.push(
+      `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
+    );
+  if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
+  if (calculated.delivery === null)
+    lines.push("Fulfilment charge: to be confirmed on WhatsApp");
+  else if (calculated.delivery > 0)
+    lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
+  if (calculated.tax !== null)
+    lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
+  lines.push("");
   lines.push(`💰 *${calculated.label}: ${calculated.text}*`, "");
-  lines.push(`👤 *Buyer:* ${clean.name}`);
+  lines.push(
+    `👤 *Buyer:* ${clean.name}`,
+    `📞 *Mobile:* ${normalizeMobile(buyer.mobile)}`,
+  );
+  // Undecided arrangements (or the local demo fixture) must not claim a method or place.
+  const pickupAddress = !method.id.startsWith("demo-") && method.address;
+  lines.push(
+    `🚚 *Fulfilment:* ${
+      method.type === "delivery"
+        ? "Delivery"
+        : pickupAddress
+          ? `Pickup — ${safeField(pickupAddress)}`
+          : "to be confirmed on WhatsApp"
+    }`,
+  );
   if (method.type === "delivery")
     lines.push(
       `📍 *Address:* ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
     );
-  else if (!method.id.startsWith("demo-"))
-    lines.push(`📍 *Pickup:* ${safeField(method.address || c.address || "")}`);
   if (clean.landmark) lines.push(`📌 *Landmark:* ${clean.landmark}`);
   if (clean.notes) lines.push(`📝 *Notes:* ${clean.notes}`);
   lines.push("", "Wishing you and your family a very Happy Diwali! 🪔✨🎇");

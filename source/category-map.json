@@ -366,7 +366,7 @@
     "variantLabel": "Anar Bomb - 5 piece",
     "packDetails": "5 piece",
     "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "rationale": "Ambiguous: sheet says \"Anar Bomb - 5 piece\" but the box image reads \"SOUND CRACKER NEW\". Seller to choose Anar or Sound crackers."
   },
   "dc-030": {
     "expectedName": "Ganga Jamana RL",
@@ -375,7 +375,7 @@
     "variantLabel": "Anar Bomb - 5 piece",
     "packDetails": "5 piece",
     "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "rationale": "Ambiguous: sheet says \"Anar Bomb - 5 piece\" but the box image reads \"SOUND AND LIGHT\". Seller to choose Anar or Sound crackers."
   },
   "dc-031": {
     "expectedName": "Mighty RL /ANTI Banti",
@@ -384,7 +384,7 @@
     "variantLabel": "Anar bomb - 10 piece",
     "packDetails": "10 piece",
     "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "rationale": "Ambiguous: sheet says \"Anar bomb - 10 piece\"; box image reads \"Flower Bomb\" (flower effect plus bang). Seller to choose Anar or Sound crackers."
   },
   "dc-037": {
     "expectedName": "3 piece Shower SRL",
@@ -393,7 +393,7 @@
     "variantLabel": "Fountain Rocket - 3 Piece",
     "packDetails": "3 Piece",
     "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "rationale": "Ambiguous: sheet says \"Fountain Rocket - 3 Piece\"; box image (Tabla/Guitar Music Party) shows no rocket or category label. Seller to confirm Fountain or Rocket."
   },
   "dc-038": {
     "expectedName": "3 piece Shower NSV",
@@ -402,15 +402,15 @@
     "variantLabel": "Single shot Rocket Flower - 3 Piece",
     "packDetails": "3 Piece",
     "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "rationale": "Ambiguous: sheet says \"Single shot Rocket Flower - 3 Piece\"; box image (Prithvi 3 pieces) shows tubes with no category label. Seller to confirm Rocket or Flower."
   },
   "dc-044": {
     "expectedName": "AK 47 MR",
     "expectedCategory": "Anar - Handhandle",
-    "categoryId": "review",
+    "categoryId": "pots",
     "variantLabel": "Anar - Handhandle",
     "packDetails": null,
-    "reviewed": false,
-    "rationale": "Ambiguous composite type; seller confirmation needed"
+    "reviewed": true,
+    "rationale": "Sheet category text says \"Anar\"; box image shows a spark effect and no contradicting category label."
   }
 }

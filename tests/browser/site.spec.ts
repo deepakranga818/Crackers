@@ -4,6 +4,13 @@ test("catalogue has all products, combined search, details, and disabled orderin
 }) => {
   await page.goto("/");
   await expect(page.locator(".product-card")).toHaveCount(46);
+  await expect(page.locator(".product-card .price-row del")).toHaveCount(46);
+  await expect(
+    page.locator(".product-card").first().locator("del"),
+  ).toContainText("₹13");
+  await expect(
+    page.locator(".product-card").first().locator(".save"),
+  ).toHaveText("23% off");
   await expect(page.getByRole("button", { name: /Open cart/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(
     0,

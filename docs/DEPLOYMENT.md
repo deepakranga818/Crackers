@@ -1,6 +1,13 @@
 # GitHub-connected hosting
 
-Do not use GitHub Pages for this commercial project. No public host has been enabled.
+Do not use GitHub Pages for this commercial project. [GitHub's Pages terms](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits) say Pages is not for sites "primarily directed at either facilitating commercial transactions".
+
+## Current hosting status (14 October 2026)
+
+- **Source code:** stays on GitHub, `deepakranga818/Crackers`.
+- **Legacy preview:** before this was resolved, a catalogue-only preview (ordering off, noindex) was published to GitHub Pages. `.github/workflows/pages.yml` is now manual-only and runs `scripts/check-publication.mjs` first, so it cannot redeploy until every item in `source/verification.json` (including `hostApproval`) and `source/publication-approval.json` holds a real reference. To take the existing preview down: repository Settings → Pages → Unpublish site (owner action).
+- **Prepared alternative:** `netlify.toml` builds from the GitHub repo, runs the same gate and sets security headers; other static hosts (for example Cloudflare Pages) can use the same `npm run build` and `dist`. Netlify's [Acceptable Use Policy](https://www.netlify.com/legal/acceptable-use-policy/) requires lawful use and has no fireworks category; Cloudflare's [terms](https://www.cloudflare.com/policies/terms/) are likewise a general lawful-use clause. Neither is an approval. `hostApproval` stays unverified until the chosen host confirms in writing that this category is acceptable and the seller has legal clearance for the location.
+- **Public ordering:** off. `orderingEnabled` is false, every verification item is unverified, and ordering can only be exercised locally with `npm run dev:demo`.
 
 ## Provider terms checked on 14 October 2026
 

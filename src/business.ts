@@ -1,7 +1,15 @@
 import source from "./products.json";
 import type { Business, Product } from "./model";
+import checklist from "../source/verification.json";
 
-// Business verification is evidence-based. Never switch these on solely to expose controls.
+// Business verification is evidence-based. Flags come from source/verification.json and
+// count as verified only with a recorded reference. Never switch these on solely to expose controls.
+const verification = Object.fromEntries(
+  Object.entries(checklist).map(([key, item]) => [
+    key,
+    item.verified === true && !!item.reference,
+  ]),
+);
 export const business: Business = {
   brand: "Diwali Collection",
   whatsapp: "919992230740",
@@ -12,18 +20,7 @@ export const business: Business = {
   offers: source.offers,
   orderingEnabled: false,
   publicCatalogueVerified: false,
-  verification: {
-    location: false,
-    licences: false,
-    onlineOrdering: false,
-    permittedProducts: false,
-    certification: false,
-    serviceAreas: false,
-    saleDates: false,
-    hostApproval: false,
-    policies: false,
-    taxTreatment: false,
-  },
+  verification,
   fulfilment: [],
   maxQuantity: 99,
   urlThreshold: 4000,
@@ -36,13 +33,15 @@ export const business: Business = {
   },
   soundVolume: 0.09,
   seo: {
-    title: "Diwali Collection · Catalogue preview",
+    title: "Diwali Collection · Diwali Crackers Catalogue",
     description:
-      "Explore the Diwali crackers catalogue. Selling units and availability require confirmation.",
+      "Browse the Diwali crackers catalogue with prices and offers. Selling units and availability are confirmed by the seller.",
     canonical: null,
     ogImage: null,
   },
 };
+// Local-only fixture for testing the ordering-enabled flow. It needs demo mode and a
+// localhost hostname, so a deployed site can never switch ordering on through it.
 export const isLocalDemo =
   import.meta.env.MODE === "demo" &&
   ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);

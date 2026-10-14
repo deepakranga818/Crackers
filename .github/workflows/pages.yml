@@ -1,7 +1,8 @@
 name: Deploy to GitHub Pages
+# Manual only. GitHub Pages terms bar sites primarily facilitating commercial transactions, so this
+# is not an approved production host. The gate below fails until source/verification.json
+# (including hostApproval) and source/publication-approval.json hold real evidence.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,6 +19,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - run: node scripts/check-publication.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
