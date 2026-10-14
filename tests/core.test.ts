@@ -245,6 +245,46 @@ describe("buyer and WhatsApp", () => {
     expect(draft.message).toContain("Estimated amount: ₹4,250");
     expect(draft.message).not.toContain("Catalogue version");
   });
+  it("formats the order like the owner's WhatsApp template", () => {
+    const draft = makeRequest(
+      { "dc-001": 3, "dc-002": 1 },
+      ready.map((p) => ({ ...p, sellingUnit: "Demo unit" })),
+      { ...buyer, name: "Deepak", method: "demo-pickup" },
+      {
+        ...config,
+        offers: undefined,
+        urlThreshold: 100000,
+        fulfilment: [
+          {
+            ...config.fulfilment[0],
+            id: "demo-pickup",
+            type: "pickup",
+            chargePaise: 0,
+          },
+        ],
+      },
+    );
+    expect(draft.message).toBe(
+      [
+        "🎆 *DIWALI CRACKERS ORDER* 🪔",
+        "",
+        "Hello! 👋",
+        "",
+        "I would like to order the following crackers:",
+        "",
+        "*🛍️ Order Details*",
+        "",
+        "1. *POP-UP (Pop- gol size)* — Qty: 3 × ₹10 = ₹30",
+        "2. *POP-UP (Pop- long size)* — Qty: 1 × ₹20 = ₹20",
+        "",
+        "💰 *Total: ₹50*",
+        "",
+        "👤 *Buyer:* Deepak",
+        "",
+        "Wishing you and your family a very Happy Diwali! 🪔✨🎇",
+      ].join("\n"),
+    );
+  });
   it("accepts Indian scripts, normalizes mobile and checks service areas separately", () => {
     expect(validateBuyer(buyer, config)).toEqual({});
     expect(normalizeMobile("+91 99922-30740")).toBe("9992230740");
@@ -284,8 +324,10 @@ describe("buyer and WhatsApp", () => {
     );
     expect(draft.url.startsWith("https://wa.me/919992230740?text=")).toBe(true);
     expect(new URL(draft.url).searchParams.get("text")).toBe(draft.message);
-    expect(draft.message).toContain("Product subtotal: ₹70");
-    expect(draft.message).toContain("Notes: ₹ & + # % 🎆 ITEMS Total: ₹0");
+    expect(draft.message).toContain(
+      "💰 *Estimated amount: ₹70 + applicable fulfilment charge*",
+    );
+    expect(draft.message).toContain("📝 *Notes:* ₹ & + # % 🎆 ITEMS Total: ₹0");
     expect(draft.message).toContain("दीपक");
     expect(
       makeRequest(
@@ -305,7 +347,7 @@ describe("buyer and WhatsApp", () => {
     const cart = Object.fromEntries(ready.map((p) => [p.id, 1]));
     const draft = makeRequest(cart, ready, buyer, config);
     expect(draft.long).toBe(true);
-    expect(draft.message).toContain("46. 100 Shot");
+    expect(draft.message).toContain("46. *100 Shot");
     expect(new URL(draft.url).searchParams.get("text")).toContain(
       draft.reference,
     );
@@ -324,7 +366,7 @@ describe("buyer and WhatsApp", () => {
     );
     expect(updated.long).toBe(false);
     expect(new URL(updated.url).searchParams.get("text")).toBe(updated.message);
-    expect(updated.message).toContain("46. 100 Shot");
+    expect(updated.message).toContain("46. *100 Shot");
   });
   it("blocks empty cart, disabled ordering and unverified products", () => {
     expect(() => makeRequest({}, ready, buyer, config)).toThrow();

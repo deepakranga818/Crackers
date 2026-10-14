@@ -1,5 +1,5 @@
 import type { Business, Buyer, Cart, Product } from "./model";
-import { normalizeMobile, safeField, validateBuyer } from "./buyer";
+import { safeField, validateBuyer } from "./buyer";
 import { blockedReason, orderingAllowed, rupees, totals } from "./pricing";
 export type RequestDraft = {
   fingerprint: string;
@@ -59,57 +59,56 @@ export function makeRequest(
       timeStyle: "long",
       timeZone: "Asia/Kolkata",
     }).format(new Date()) + " (Asia/Kolkata)";
+  // WhatsApp bold is a single asterisk, so *text* renders like the owner's template.
   const lines = [
-    "Hi! I'd like to order these crackers:",
+    "🎆 *DIWALI CRACKERS ORDER* 🪔",
     "",
-    `Name: ${clean.name}`,
-    `Mobile: ${normalizeMobile(buyer.mobile)}`,
+    "Hello! 👋",
+    "",
+    "I would like to order the following crackers:",
+    "",
+    "*🛍️ Order Details*",
     "",
   ];
-  if (method.type === "delivery")
-    lines.push(
-      `Address: ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
-    );
-  else if (!method.id.startsWith("demo-"))
-    lines.push(
-      `Pickup location: ${safeField(method.address || c.address || "")}`,
-    );
-  if (clean.landmark) lines.push(`Landmark: ${clean.landmark}`);
-  lines.push("", "ITEMS");
   Object.entries(cart).forEach(([id, qty], i) => {
     const p = products.find((p) => p.id === id)!;
+    const unit =
+      p.sellingUnit && !p.sellingUnit.startsWith("Demo unit")
+        ? ` (${safeField(p.sellingUnit)})`
+        : "";
     lines.push(
-      `${i + 1}. ${safeField(p.name)} (${safeField(p.originalCategory)})`,
-    );
-    if (p.sellingUnit && !p.sellingUnit.startsWith("Demo unit"))
-      lines.push(`Unit: ${safeField(p.sellingUnit)}`);
-    lines.push(
-      `Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}`,
-      "",
+      `${i + 1}. *${safeField(p.name)} (${safeField(p.originalCategory)})* — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}${unit}`,
     );
   });
-  lines.push(
-    `Total units: ${calculated.units}`,
-    `Product subtotal: ${rupees(calculated.subtotal)}`,
-  );
-  if (calculated.discount > 0)
+  lines.push("");
+  if (
+    calculated.discount > 0 ||
+    calculated.delivery ||
+    calculated.tax !== null
+  ) {
+    lines.push(`Product subtotal: ${rupees(calculated.subtotal)}`);
+    if (calculated.discount > 0)
+      lines.push(
+        `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
+      );
+    if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
+    if (calculated.delivery)
+      lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
+    if (calculated.tax !== null)
+      lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
+    lines.push("");
+  }
+  lines.push(`💰 *${calculated.label}: ${calculated.text}*`, "");
+  lines.push(`👤 *Buyer:* ${clean.name}`);
+  if (method.type === "delivery")
     lines.push(
-      `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
-      `After offer: ${rupees(calculated.afterDiscount)}`,
+      `📍 *Address:* ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
     );
-  if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
-  if (calculated.delivery === null)
-    lines.push("Fulfilment charge: please confirm");
-  else if (calculated.delivery > 0)
-    lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
-  if (calculated.tax !== null)
-    lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
-  lines.push(`${calculated.label}: ${calculated.text}`);
-  if (clean.notes) lines.push("", `Notes: ${clean.notes}`);
-  lines.push(
-    "",
-    "Please confirm availability, collection/delivery and the final amount. Thank you!",
-  );
+  else if (!method.id.startsWith("demo-"))
+    lines.push(`📍 *Pickup:* ${safeField(method.address || c.address || "")}`);
+  if (clean.landmark) lines.push(`📌 *Landmark:* ${clean.landmark}`);
+  if (clean.notes) lines.push(`📝 *Notes:* ${clean.notes}`);
+  lines.push("", "Wishing you and your family a very Happy Diwali! 🪔✨🎇");
   const message = lines.join("\n");
   const full = `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(message)}`;
   const long = full.length > c.urlThreshold;

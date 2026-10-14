@@ -67,7 +67,7 @@ test("long order supports manual copying, download, popup and offline fallback w
     name: "Select and copy the complete order",
   });
   const message = await text.inputValue();
-  expect(message).toContain("46. 100 Shot");
+  expect(message).toContain("46. *100 Shot");
   expect(message).not.toContain("Catalogue version");
   const downloading = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download Order" }).click();

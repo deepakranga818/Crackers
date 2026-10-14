@@ -53,7 +53,7 @@ test("single-step mobile checkout applies Sheet offers and includes every select
     const url = await page.evaluate(() => (window as any).__whatsapp);
     const message = new URL(url).searchParams.get("text")!;
     expect(new URL(url).pathname).toBe("/919992230740");
-    expect(message).toContain("4. 15cm Ronak");
+    expect(message).toContain("4. *15cm Ronak");
     expect(message).toContain("Offer (10% off): −₹14");
     expect(message).toContain("Coupon: CRACK10");
     expect(message).toContain("Total: ₹126");
@@ -126,7 +126,7 @@ test("long orders prepare complete details inline and cart edits invalidate the 
   ).toBeVisible();
   await page.getByRole("button", { name: "Copy Complete Order" }).click();
   expect(await page.evaluate(() => (window as any).__copied)).toContain(
-    "46. 100 Shot",
+    "46. *100 Shot",
   );
   await page
     .getByRole("button", { name: "Continue to WhatsApp", exact: true })
@@ -148,6 +148,6 @@ test("long orders prepare complete details inline and cart edits invalidate the 
   ).toBeDisabled();
   await page.getByRole("button", { name: "Copy Complete Order" }).click();
   expect(await page.evaluate(() => (window as any).__copied)).toContain(
-    "Total units: 47",
+    "1. *POP-UP (Pop- gol size)* — Qty: 2 × ₹10 = ₹20",
   );
 });
