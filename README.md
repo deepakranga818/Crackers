@@ -17,6 +17,8 @@ npm run dev
 
 Open the printed localhost URL. `npm run build` reimports the workbook, typechecks and writes `dist/`. `npm run preview` serves that build locally. Run `npm test` for unit tests and `npx playwright install chromium` followed by `npm run test:browser` for browser tests. The Playwright configuration starts two localhost servers and records results in `reports/browser-results.json`.
 
+For the interactive preview with **Add to cart, buyer details and WhatsApp review**, run `npm run dev:demo -- --port 5173` and open http://127.0.0.1:5173/. Stop the catalogue dev server on that port first. `npm run dev` remains the catalogue-only preview.
+
 `npm run dev:demo` enables an explicitly labelled **localhost-only** test fixture with invented test units and a test pickup location. Those fixtures are not claims about the seller. They cannot enable ordering on a hosted domain. Never send a demo request to the seller. Browser tests intercept `window.open`; no WhatsApp message is sent.
 
 ## Source and updates

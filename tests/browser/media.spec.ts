@@ -8,13 +8,10 @@ test("real product assets load, multi-image gallery works, missing images remain
   await expect(
     page.getByRole("img", { name: "POP-UP packaging, image 1", exact: true }).first(),
   ).toBeVisible();
-  expect(
-    await page
-      .getByRole("img", { name: "POP-UP packaging, image 1", exact: true })
-      .first()
-      .evaluate(
-        (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
-      ),
+  await expect.poll(() => page
+    .getByRole("img", { name: "POP-UP packaging, image 1", exact: true })
+    .first()
+    .evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
   ).toBe(true);
   await page
     .getByRole("button", { name: "Details for 15cm Ronak, Phuljadi - Small" })

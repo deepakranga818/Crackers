@@ -472,6 +472,7 @@ select {
   padding: 18px;
 }
 .category-label {
+  font-weight: 700;
   font-size: 11px;
   color: #88552a;
   margin-bottom: 9px;
@@ -491,6 +492,7 @@ select {
   overflow-wrap: anywhere;
 }
 .variant {
+  font-weight: 600;
   color: var(--muted);
   font-size: 12px;
   min-height: 19px;

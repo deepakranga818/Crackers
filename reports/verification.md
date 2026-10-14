@@ -10,6 +10,8 @@
 - `node scripts/check-publication.mjs`: deliberately exits nonzero with the public-deployment blocker. Public catalogue and host/legal approval remain unresolved.
 - `git diff --cached --check`: no whitespace errors.
 
+The current user-facing localhost preview on port 5173 runs in demo mode so Add to cart, buyer details, request review and WhatsApp controls are visible. Production still builds catalogue-only. Category labels are bold (700), with source variants emphasized (600). Browser test servers use separate ports 5175 (catalogue) and 5174 (demo); mode-specific Vite caches and a single test worker prevent local preview/test startup contention. All 9 browser tests pass after these changes, including the complete WhatsApp URL flow with navigation intercepted.
+
 ## Browser scenarios
 
 Production catalogue: all 46 cards, combined search/category filters, zero-results recovery, details and Escape, visible unknown selling units, no ordering/cart controls.
@@ -29,7 +31,7 @@ Layout: 320, 360, 390, 430, 768 and 1280 CSS-pixel widths, no document horizonta
 - 360px: observed LCP **432ms**, observed CLS **0**.
 - 1280px: observed LCP **180ms**, observed CLS **0**.
 - Both show all 46 products and no horizontal overflow.
-- Production assets: JavaScript **284.38kB / 84.59kB gzip**; CSS **16.09kB / 4.46kB gzip**; HTML **0.66kB / 0.40kB gzip**. The 51 local optimized product images total approximately 5.44MB and are lazy-loaded.
+- Current production assets: JavaScript **284.38kB / 84.59kB gzip**; CSS **16.12kB / 4.47kB gzip**; HTML **0.66kB / 0.41kB gzip**. The 51 local optimized product images total approximately 5.44MB and are lazy-loaded.
 
 Raw results: `local-performance.json`. This is a local synthetic sample with the imported product photos, not a Core Web Vitals pass, field percentile or ordinary-phone benchmark. INP was not measured. Remeasure in the approved hosted environment.
 
