@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import data from "../../src/products.json" with { type: "json" };
-test("catalogue has all products, combined search, details, and disabled ordering", async ({
+test("catalogue has all products, combined search, details, and private-list ordering", async ({
   page,
 }) => {
   await page.goto("/");
@@ -14,9 +14,11 @@ test("catalogue has all products, combined search, details, and disabled orderin
   await expect(
     page.locator(".product-card").first().locator(".save"),
   ).toHaveText(`${Math.round(100 - (pricePaise * 100) / mrpPaise)}% off`);
-  await expect(page.getByRole("button", { name: /Open cart/ })).toHaveCount(0);
+  await expect(
+    page.getByText(/Private list for friends and family/),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(
-    0,
+    46,
   );
   await page.getByRole("searchbox").fill("phuljhari");
   await page.getByRole("button", { name: /Sparklers \/ Phuljadi/ }).click();
@@ -28,10 +30,50 @@ test("catalogue has all products, combined search, details, and disabled orderin
     .getByRole("button", { name: "Details for POP-UP, Pop- gol size" })
     .click();
   await expect(page.getByRole("dialog")).toContainText(
-    "Needs seller confirmation",
+    "To be confirmed with the seller",
   );
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+test("private list takes an order end to end and never claims it was sent", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.open = (url?: string | URL) => {
+      (window as any).__whatsapp = String(url);
+      return { opener: null } as any;
+    };
+  });
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Add to cart" }).first().click();
+  const proceed = page.getByRole("button", {
+    name: "Proceed to buyer details",
+  });
+  if (!(await proceed.isVisible()))
+    await page
+      .getByRole("region", { name: "Cart summary" })
+      .getByRole("button")
+      .click();
+  await proceed.click();
+  await page.getByLabel("Full name *").fill("Deepak");
+  await page.getByLabel("Mobile number *").fill("9992230740");
+  await page.getByRole("checkbox").check();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
+  const url = await page.evaluate(() => (window as any).__whatsapp);
+  const message = new URL(url).searchParams.get("text")!;
+  const first = data.products[0];
+  expect(new URL(url).pathname).toBe("/919992230740");
+  expect(message).toContain(
+    `1. *${first.name} (${first.originalCategory})* — Qty: 1 × ₹${first.pricePaise / 100} = ₹${first.pricePaise / 100} (Unit: to be confirmed)`,
+  );
+  expect(message).toContain("👤 *Buyer:* Deepak");
+  expect(message).toContain("Estimated amount:");
+  await expect(page.locator("body")).not.toContainText(
+    /order (sent|confirmed|placed)/i,
+  );
 });
 test("mobile cart restores and opens a concise discounted WhatsApp order directly", async ({
   page,

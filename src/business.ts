@@ -1,6 +1,12 @@
 import source from "./products.json";
 import type { Business, Product } from "./model";
 import checklist from "../source/verification.json";
+import approval from "../source/publication-approval.json";
+
+// "private-friends": an unlisted, noindex list for the owner and friends. Ordering works, but
+// no licence, legal or hosting item is marked verified. A public launch needs audience "public"
+// and every item in source/verification.json verified with a reference.
+const privateAudience = approval.audience === "private-friends";
 
 // Business verification is evidence-based. Flags come from source/verification.json and
 // count as verified only with a recorded reference. Never switch these on solely to expose controls.
@@ -18,10 +24,22 @@ export const business: Business = {
   hours: null,
   catalogueVersion: source.version,
   offers: source.offers,
-  orderingEnabled: false,
+  orderingEnabled: privateAudience,
+  privateAudience,
   publicCatalogueVerified: false,
   verification,
-  fulfilment: [],
+  fulfilment: privateAudience
+    ? [
+        {
+          id: "whatsapp",
+          label: "Pickup or delivery arranged on WhatsApp",
+          type: "pickup",
+          verified: true,
+          chargePaise: null,
+          servicePins: [],
+        },
+      ]
+    : [],
   maxQuantity: 99,
   urlThreshold: 4000,
   tax: null,
@@ -29,7 +47,9 @@ export const business: Business = {
     privacy: null,
     cancellation: null,
     safety: null,
-    fulfilment: null,
+    fulfilment: privateAudience
+      ? "Pickup or delivery, and any charge, are arranged with the seller on WhatsApp after you send your order."
+      : null,
   },
   soundVolume: 0.09,
   seo: {
@@ -48,6 +68,7 @@ export const isLocalDemo =
 export const config: Business = isLocalDemo
   ? {
       ...business,
+      privateAudience: false,
       orderingEnabled: true,
       publicCatalogueVerified: true,
       address: "Local test fixture — no real pickup location",

@@ -49,6 +49,7 @@ export type Business = {
   hours: string | null;
   catalogueVersion: string;
   orderingEnabled: boolean;
+  privateAudience?: boolean;
   publicCatalogueVerified: boolean;
   verification: Record<string, boolean>;
   fulfilment: Fulfilment[];

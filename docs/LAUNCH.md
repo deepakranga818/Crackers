@@ -37,6 +37,8 @@ Owner inputs required:
 
 All ten are currently unverified. The owner's general instruction to build or host the site is not evidence for any of them.
 
+The site currently runs as a **private friends-and-family list** (`"audience": "private-friends"` in `source/publication-approval.json`). In that mode ordering works without any item being verified: unknown units, categories and availability show as "to be confirmed" and the seller settles them on WhatsApp; only products the Sheet marks unavailable are blocked. It must stay noindex. It is not a public launch, and sharing the link publicly would make it one.
+
 ## Fail-closed controls
 
 Keep `orderingEnabled=false` while unresolved. Catalogue mode removes cart/add/buyer/handoff controls. The orderability function also requires all verification flags, an address, a verified fulfilment method, valid enabled product data, reviewed category, confirmed unit and available status.

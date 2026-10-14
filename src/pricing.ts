@@ -17,18 +17,22 @@ export const requiredVerifications = [
   "policies",
   "taxTreatment",
 ];
+// A private friends list needs only a seller-arranged fulfilment method; a public shop needs
+// every verification item, an address and a verified method.
 export const orderingAllowed = (c: Business) =>
   c.orderingEnabled &&
-  c.publicCatalogueVerified &&
-  requiredVerifications.every((key) => c.verification[key] === true) &&
-  !!c.address?.trim() &&
-  c.fulfilment.some(
-    (f) =>
-      f.verified &&
-      (f.type === "delivery"
-        ? f.servicePins.length > 0
-        : !!(f.address || c.address)?.trim()),
-  );
+  (c.privateAudience === true
+    ? c.fulfilment.some((f) => f.verified)
+    : c.publicCatalogueVerified &&
+      requiredVerifications.every((key) => c.verification[key] === true) &&
+      !!c.address?.trim() &&
+      c.fulfilment.some(
+        (f) =>
+          f.verified &&
+          (f.type === "delivery"
+            ? f.servicePins.length > 0
+            : !!(f.address || c.address)?.trim()),
+      ));
 export function blockedReason(p: Product, c: Business): string | null {
   if (!orderingAllowed(c)) return "Ordering is currently disabled";
   if (
@@ -38,6 +42,9 @@ export function blockedReason(p: Product, c: Business): string | null {
     p.pricePaise! <= 0
   )
     return "Product data needs correction";
+  if (p.availability === "unavailable") return "Currently unavailable";
+  // Private list: unknown unit, type or availability are shown as "to be confirmed" and settled on WhatsApp.
+  if (c.privateAudience) return null;
   if (!p.categoryReviewed) return "Product type needs seller review";
   if (!p.sellingUnit?.trim()) return "Selling unit needs confirmation";
   if (p.availability !== "available")

@@ -1,7 +1,15 @@
 import {readFileSync} from 'node:fs';
 // Evaluate explicit release records rather than bypassing TypeScript business gates.
-const release=JSON.parse(readFileSync('source/publication-approval.json','utf8'));
+// Optional argv[2]: path to an alternative release manifest (used by tests).
+const release=JSON.parse(readFileSync(process.argv[2]??'source/publication-approval.json','utf8'));
 const checklist=JSON.parse(readFileSync('source/verification.json','utf8'));
+if(release.audience==='private-friends'){
+  // Private friends list: public approvals are not required, but it must stay unlisted.
+  const hidden=readFileSync('index.html','utf8').includes('content="noindex,nofollow"')&&/^Disallow:\s*\/\s*$/m.test(readFileSync('public/robots.txt','utf8'));
+  if(!hidden){console.error('Private deployment must keep noindex and a robots.txt Disallow.');process.exit(1);}
+  console.log('Private friends deployment: not a public launch; licence, legal and hosting items stay unverified.');
+  process.exit(0);
+}
 const open=Object.entries(checklist).filter(([,item])=>item.verified!==true||!item.reference);
 if(release.publicCatalogueVerified!==true || !release.reviewDate || !release.hostApprovalReference || !release.legalReviewReference){
   console.error('Public deployment blocked: catalogue legality and hosting approval are unresolved. See docs/LAUNCH.md.');

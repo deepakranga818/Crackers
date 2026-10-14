@@ -72,10 +72,9 @@ export function makeRequest(
   ];
   Object.entries(cart).forEach(([id, qty], i) => {
     const p = products.find((p) => p.id === id)!;
-    const unit =
-      p.sellingUnit && !p.sellingUnit.startsWith("Demo unit")
-        ? ` (Unit: ${safeField(p.sellingUnit)})`
-        : "";
+    const unit = p.sellingUnit?.startsWith("Demo unit")
+      ? ""
+      : ` (Unit: ${p.sellingUnit ? safeField(p.sellingUnit) : "to be confirmed"})`;
     lines.push(
       `${i + 1}. *${safeField(p.name)} (${safeField(p.originalCategory)})* — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}${unit}`,
     );

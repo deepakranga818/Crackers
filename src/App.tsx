@@ -296,7 +296,9 @@ export default function App() {
         {isLocalDemo
           ? "Local demo · test units and pickup only · do not send a real request"
           : canOrder
-            ? "Requests require seller confirmation"
+            ? config.privateAudience
+              ? "Private list for friends and family · not a public shop · the seller confirms every order"
+              : "Requests require seller confirmation"
             : "Catalogue preview · ordering is currently unavailable"}
       </div>
       <header>
@@ -756,7 +758,9 @@ export default function App() {
               <dt>Selling unit</dt>
               <dd>
                 {detail.sellingUnit ||
-                  "Needs seller confirmation — ordering blocked"}
+                  (config.privateAudience
+                    ? "To be confirmed with the seller"
+                    : "Needs seller confirmation — ordering blocked")}
               </dd>
               {detail.packDetails && (
                 <>
@@ -971,7 +975,9 @@ export default function App() {
               )}
               {method?.type === "pickup" && !isLocalDemo && (
                 <p className="callout">
-                  Pickup location: {method.address || config.address}
+                  {method.address || config.address
+                    ? `Pickup location: ${method.address || config.address}`
+                    : method.label}
                 </p>
               )}
               {method?.type === "delivery" && (

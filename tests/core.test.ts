@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import checklist from "../source/verification.json";
+import approval from "../source/publication-approval.json";
 import { business } from "../src/business";
 import data from "../src/products.json";
 import mapping from "../source/category-map.json";
@@ -472,19 +476,72 @@ describe("launch verification", () => {
       if (item.verified) expect(item.reference).toBeTruthy();
     }
   });
-  it("keeps public ordering and the deploy gate closed while any item lacks evidence", () => {
-    expect(open).toBe(true);
-    expect(orderingAllowed(business)).toBe(false);
-    expect(business.verification.hostApproval).toBe(false);
-    let status = 0;
+  const gate = (manifest: object) => {
+    const file = join(mkdtempSync(join(tmpdir(), "gate-")), "release.json");
+    writeFileSync(file, JSON.stringify(manifest));
     try {
-      execFileSync(process.execPath, ["scripts/check-publication.mjs"], {
+      execFileSync(process.execPath, ["scripts/check-publication.mjs", file], {
         stdio: "pipe",
       });
+      return 0;
     } catch (e) {
-      status = (e as { status: number }).status;
+      return (e as { status: number }).status;
     }
-    expect(status).toBe(1);
+  };
+  it("keeps public ordering and the public deploy gate closed while any item lacks evidence", () => {
+    expect(open).toBe(true);
+    expect(orderingAllowed({ ...business, privateAudience: false })).toBe(
+      false,
+    );
+    expect(business.publicCatalogueVerified).toBe(false);
+    expect(Object.values(business.verification).some(Boolean)).toBe(false);
+    expect(gate({ audience: "public", publicCatalogueVerified: false })).toBe(
+      1,
+    );
+    expect(
+      gate({
+        audience: "public",
+        publicCatalogueVerified: true,
+        reviewDate: "2026-10-14",
+        hostApprovalReference: "x",
+        legalReviewReference: "y",
+      }),
+    ).toBe(1);
+  });
+  it("lets a private friends list order without claiming any verification", () => {
+    expect(approval.audience).toBe("private-friends");
+    expect(business.privateAudience).toBe(true);
+    expect(orderingAllowed(business)).toBe(true);
+    expect(gate({ audience: "private-friends" })).toBe(0);
+    const unknown = {
+      ...products[0],
+      availability: "unknown",
+      sellingUnit: null,
+    };
+    expect(blockedReason(unknown, business)).toBeNull();
+    expect(
+      blockedReason({ ...unknown, availability: "unavailable" }, business),
+    ).toContain("unavailable");
+    expect(
+      blockedReason(unknown, { ...business, privateAudience: false }),
+    ).toContain("disabled");
+    const { message, url } = makeRequest(
+      { "dc-001": 2 },
+      products,
+      {
+        ...emptyBuyer,
+        name: "Deepak",
+        mobile: "9992230740",
+        method: "whatsapp",
+        acknowledged: true,
+      },
+      { ...business, urlThreshold: 100000 },
+    );
+    expect(new URL(url).pathname).toBe("/919992230740");
+    expect(message).toContain("(Unit: to be confirmed)");
+    expect(message).toContain("🚚 *Fulfilment:* to be confirmed on WhatsApp");
+    expect(message).toContain("Fulfilment charge: to be confirmed on WhatsApp");
+    expect(message).toContain("Estimated amount:");
   });
   it("keeps page title, description and Open Graph metadata equal to the config", () => {
     const html = readFileSync("index.html", "utf8");

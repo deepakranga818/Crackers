@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite for the owner's office/locality group. The authoritative source is the [Google Sheet](https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617), including prices, products, images and offers. All 46 product rows are retained; both POP-UP entries have separate stable IDs. Prices use integer paise. No backend, payment collection, login, analytics, service worker or fabricated stock.
 
-**Default: local catalogue preview, ordering disabled, search indexing disabled.** Public catalogue publication is unverified separately from ordering. Do not publish just because checkout controls are hidden. See [launch checklist](docs/LAUNCH.md).
+**Default: private friends-and-family list (ordering works, seller confirms everything on WhatsApp), search indexing disabled. A public launch needs `"audience": "public"` plus every item in `source/verification.json` verified.** Public catalogue publication is unverified separately from ordering. Do not publish just because checkout controls are hidden. See [launch checklist](docs/LAUNCH.md).
 
 ## Local setup
 

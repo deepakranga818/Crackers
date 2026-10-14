@@ -1,8 +1,11 @@
 name: Deploy to GitHub Pages
-# Manual only. GitHub Pages terms bar sites primarily facilitating commercial transactions, so this
-# is not an approved production host. The gate below fails until source/verification.json
-# (including hostApproval) and source/publication-approval.json hold real evidence.
+# Private friends-and-family site (audience "private-friends" in source/publication-approval.json).
+# GitHub Pages terms bar sites primarily facilitating commercial transactions and Pages URLs are
+# public, so this is not an approved production host. The gate below passes only for the private
+# audience (which must stay noindex) or once a public launch has full evidence recorded.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
