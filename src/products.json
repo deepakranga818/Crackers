@@ -1,5 +1,5 @@
 {
-  "version": "eadd0b78e859",
+  "version": "5ff3a6d829d3",
   "products": [
     {
       "id": "dc-001",
@@ -13,7 +13,9 @@
       "pricePaise": 1000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-001-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/3dlBP4GUl-q6"
       ],
@@ -39,7 +41,9 @@
       "pricePaise": 2000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-002-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/mxCumn90fWqD"
       ],
@@ -65,7 +69,9 @@
       "pricePaise": 2000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-003-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/D9IPqYVHlVoz"
       ],
@@ -91,7 +97,10 @@
       "pricePaise": 2000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-004-1.webp",
+        "images/dc-004-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/f1Jh2KypzZE8",
         "https://prnt.sc/iovzsYklaeep"
@@ -118,7 +127,10 @@
       "pricePaise": 4000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-005-1.webp",
+        "images/dc-005-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/qfNTm6qjbol_",
         "https://prnt.sc/M3wZhabrzP1p"
@@ -145,7 +157,9 @@
       "pricePaise": 8000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-006-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/3GC6mwQeU6Nr"
       ],
@@ -171,7 +185,9 @@
       "pricePaise": 7000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-007-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/Bh-AkEr9o84S"
       ],
@@ -197,7 +213,9 @@
       "pricePaise": 15000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-008-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/XCBuvDJR-LI2"
       ],
@@ -223,7 +241,9 @@
       "pricePaise": 20000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-009-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/KWkZ_MnHKDUC"
       ],
@@ -249,7 +269,10 @@
       "pricePaise": 15000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-010-1.webp",
+        "images/dc-010-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/A17l3yIk_SdW",
         "https://prnt.sc/PCAb8v8rEolF"
@@ -276,7 +299,9 @@
       "pricePaise": 18000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-011-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/mZYCBPS8z7qd"
       ],
@@ -302,7 +327,9 @@
       "pricePaise": 20000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-012-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/OxzrGWmaMYDl"
       ],
@@ -328,7 +355,9 @@
       "pricePaise": 30000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-013-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/FWgGy2OBc5-k"
       ],
@@ -354,7 +383,9 @@
       "pricePaise": 40000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-014-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/dIBxOQ_Vctyn"
       ],
@@ -380,7 +411,9 @@
       "pricePaise": 6000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-015-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/F3qVlCPgspiu"
       ],
@@ -406,7 +439,9 @@
       "pricePaise": 12000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-016-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/zxnFMdumMa-_"
       ],
@@ -432,7 +467,9 @@
       "pricePaise": 25000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-017-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/I4H-OCJjKlrh"
       ],
@@ -458,7 +495,9 @@
       "pricePaise": 25000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-018-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/baU3pGb1WDMQ"
       ],
@@ -484,7 +523,9 @@
       "pricePaise": 2000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-019-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/IfRk4Tb6OJQ9"
       ],
@@ -510,7 +551,9 @@
       "pricePaise": 8000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-020-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/q6e7dWALaChP"
       ],
@@ -536,7 +579,10 @@
       "pricePaise": 8000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-021-1.webp",
+        "images/dc-021-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/gUseMWKC0_uk",
         "https://prnt.sc/edAA3hDusRjK"
@@ -563,7 +609,10 @@
       "pricePaise": 5000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-022-1.webp",
+        "images/dc-022-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/Mj6b8QNbvk6c",
         "https://prnt.sc/ae5Z90WTdc_g"
@@ -590,7 +639,9 @@
       "pricePaise": 50000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-023-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/86JHW66IQ2Jk"
       ],
@@ -616,7 +667,9 @@
       "pricePaise": 80000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-024-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/sj97FFtPyxQX"
       ],
@@ -642,7 +695,9 @@
       "pricePaise": 15000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-025-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/HmaG0HY19KNa"
       ],
@@ -668,7 +723,9 @@
       "pricePaise": 25000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-026-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/kCqHJKoLLWGQ"
       ],
@@ -694,7 +751,10 @@
       "pricePaise": 35000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-027-1.webp",
+        "images/dc-027-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/wgilOuOZ3fTm",
         "https://prnt.sc/hXDF-Q13MiRQ"
@@ -721,7 +781,9 @@
       "pricePaise": 60000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-028-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/0gp8xxYK0LTl"
       ],
@@ -747,7 +809,9 @@
       "pricePaise": 18000,
       "sellingUnit": null,
       "packDetails": "5 piece",
-      "images": [],
+      "images": [
+        "images/dc-029-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/PDd6j2XjDr9z"
       ],
@@ -773,7 +837,9 @@
       "pricePaise": 20000,
       "sellingUnit": null,
       "packDetails": "5 piece",
-      "images": [],
+      "images": [
+        "images/dc-030-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/gJ8TbLCjLd9S"
       ],
@@ -799,7 +865,9 @@
       "pricePaise": 30000,
       "sellingUnit": null,
       "packDetails": "10 piece",
-      "images": [],
+      "images": [
+        "images/dc-031-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/WHFxrVGiJHr5"
       ],
@@ -825,7 +893,9 @@
       "pricePaise": 65000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-032-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/5t6j1UIfXnsa"
       ],
@@ -851,7 +921,9 @@
       "pricePaise": 70000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-033-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/xEFRVmPi2-Z9"
       ],
@@ -877,7 +949,9 @@
       "pricePaise": 20000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-034-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/sK6g3lAOOfLy"
       ],
@@ -903,7 +977,9 @@
       "pricePaise": 35000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-035-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/9q43eyjenoYR"
       ],
@@ -929,7 +1005,9 @@
       "pricePaise": 45000,
       "sellingUnit": null,
       "packDetails": "5 Piece",
-      "images": [],
+      "images": [
+        "images/dc-036-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/ofwSB_xAoQLv"
       ],
@@ -955,7 +1033,9 @@
       "pricePaise": 55000,
       "sellingUnit": null,
       "packDetails": "3 Piece",
-      "images": [],
+      "images": [
+        "images/dc-037-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/FTp6L68hZqSw"
       ],
@@ -981,7 +1061,9 @@
       "pricePaise": 35000,
       "sellingUnit": null,
       "packDetails": "3 Piece",
-      "images": [],
+      "images": [
+        "images/dc-038-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/PLNyTq39bXEy"
       ],
@@ -1007,7 +1089,9 @@
       "pricePaise": 35000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-039-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/kqQ-_n7m1NfK"
       ],
@@ -1033,7 +1117,10 @@
       "pricePaise": 75000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-040-1.webp",
+        "images/dc-040-2.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/4DzuYnN5tf6L",
         "https://prnt.sc/-9MbOvdSfPlR"
@@ -1060,7 +1147,9 @@
       "pricePaise": 80000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-041-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/i0bx2Q60s5RB"
       ],
@@ -1086,7 +1175,9 @@
       "pricePaise": 80000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-042-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/0GpWpTnib6tQ"
       ],
@@ -1112,7 +1203,9 @@
       "pricePaise": 75000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-043-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/ri2NFJlC6a7M"
       ],
@@ -1138,7 +1231,9 @@
       "pricePaise": 55000,
       "sellingUnit": null,
       "packDetails": null,
-      "images": [],
+      "images": [
+        "images/dc-044-1.webp"
+      ],
       "sourceImageLinks": [
         "https://prnt.sc/gJEouHiqbgeB"
       ],

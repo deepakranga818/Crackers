@@ -12,7 +12,7 @@ Owner inputs required:
 - Current national, state, municipal and court restrictions, sale dates and online-ordering permissions.
 - Permitted products and certification evidence for each product; no supplied product is claimed certified or green.
 - Confirmed selling unit for every product to be orderable.
-- Original product images and permission to use them.
+- Verify publication reuse rights for the 51 locally imported workbook-linked photos. Supply missing original photos for 60 Shot and 100 Shot.
 - Review ambiguous IDs dc-029, dc-030, dc-031 (Anar Bomb), dc-037 (Fountain Rocket), dc-038 (Single shot Rocket Flower), dc-044 (Anar - Handhandle).
 - Check Strings/Laddi IDs dc-023 and dc-024 against restrictions on joined crackers; being listed in a source sheet does not establish permission to sell.
 - Stock/availability policy; static carts do not reserve inventory.

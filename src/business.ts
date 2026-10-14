@@ -33,7 +33,7 @@ export const business: Business = {
     safety: null,
     fulfilment: null,
   },
-  soundVolume: 0.035,
+  soundVolume: 0.09,
   seo: {
     title: "Diwali Collection · Catalogue preview",
     description:

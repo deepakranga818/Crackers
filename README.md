@@ -42,9 +42,9 @@ Source pack text is descriptive evidence only; it does not establish the selling
 
 ## Product images and licences
 
-All 51 source screenshot-page URLs were audited; none were approved usable assets. See the image report. Obtain original product photographs and permission from the owner. Add optimized WebP files under `public/images/`, then list paths such as `images/dc-001-1.webp` in the manifest. Multiple entries produce a gallery. Source screenshot links never become runtime image URLs.
+All 51 source screenshot-page URLs now resolve to real product photographs on Lightshot's current `img.lightshot.app` image host. They have been downloaded and optimized as local WebP assets for 44 products, with multi-image galleries where supplied. `60 Shot` and `100 Shot` have no source photographs and keep the fallback. See the image report. Public reuse rights still require owner verification before publication. Source screenshot links never become runtime image URLs.
 
-`python scripts/resolve_images.py` audits linked pages without downloading image files. Use `--rights-confirmed` only when the owner has confirmed rights to reuse all linked assets. The resolver permits reviewed origins only, reports inaccessible/unapproved links, limits download size and never bypasses access controls. If a host changes, manually review before editing the allowlist. Run the importer after updating assets.
+`python scripts/resolve_images.py` audits linked pages without downloading image files. `python scripts/resolve_images.py --download-supplied-images` retrieves the workbook-linked assets for an authorized local build. Use `--rights-confirmed` only when the owner has actually confirmed publication reuse rights for all linked assets. The resolver permits reviewed origins only, reports inaccessible/unapproved links, limits download size and never bypasses access controls. If a host changes, manually review before editing the allowlist. Run the importer after updating assets.
 
 The diya/firework SVG and placeholders are original decorative code; they do not depict product packaging. Audio is original Web Audio synthesis (sine tones), with no recordings or external licences. System fonts avoid third-party font requests. No real product-image licence has been established. React, Vite and other dependencies retain their own licences in installed packages/lockfile.
 

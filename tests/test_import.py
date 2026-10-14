@@ -22,6 +22,7 @@ class ImportTests(unittest.TestCase):
             for folder in ['source','scripts','src','reports','public']:
                 (root/folder).mkdir()
             shutil.copytree(ROOT/'source',root/'source',dirs_exist_ok=True)
+            shutil.copytree(ROOT/'public',root/'public',dirs_exist_ok=True)
             shutil.copy(ROOT/'scripts/import_products.py',root/'scripts/import_products.py')
             book=openpyxl.load_workbook(root/'source/Diwali_Cracker.xlsx')
             book.active['B2']=None

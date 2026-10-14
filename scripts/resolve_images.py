@@ -1,12 +1,13 @@
-"""Build-time only. No access-control bypass; downloads require owner's rights approval."""
+"""Build-time import of user-supplied product images. No access-control bypass."""
 import argparse, concurrent.futures, html, json, re, urllib.request
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 from PIL import Image
 from io import BytesIO
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
 parser.add_argument('--rights-confirmed',action='store_true',help='Owner confirms rights to reuse all linked product images')
+parser.add_argument('--download-supplied-images',action='store_true',help='Download workbook-linked images for the authorized local website; publication rights still require review')
 args=parser.parse_args()
 products=json.loads((ROOT/'src/products.json').read_text(encoding='utf-8'))['products']
 
@@ -25,17 +26,17 @@ def resolve(pair):
         match=re.search(r'<img[^>]+class="[^"]*screenshot-image[^"]*"[^>]+src="([^"]+)"',page)
         if not match: match=re.search(r'<img[^>]+src="([^"]+)"[^>]+class="[^"]*screenshot-image[^"]*"',page)
         if not match: raise ValueError('No accessible screenshot image; original required')
-        direct=html.unescape(match.group(1)); parsed=urlparse(direct)
-        if parsed.scheme!='https' or parsed.hostname not in ['image.prntscr.com','i.imgur.com'] or parsed.username:
+        direct=urljoin(url,html.unescape(match.group(1))); parsed=urlparse(direct)
+        if parsed.scheme!='https' or parsed.hostname not in ['image.prntscr.com','img.lightshot.app','i.imgur.com'] or parsed.username:
             raise ValueError('Unapproved image origin; manual review required')
-        if not args.rights_confirmed: status='Image origin resolved; reuse rights unconfirmed; original/owner approval required'
+        if not (args.rights_confirmed or args.download_supplied_images): status='Image origin resolved; run authorized local download or confirm publication reuse rights'
         else:
             picture=Image.open(BytesIO(fetch(direct)))
             picture.thumbnail((960,960))
             asset=f'images/{product["id"]}-{index+1}.webp'
             (ROOT/'public/images').mkdir(exist_ok=True)
             picture.convert('RGB').save(ROOT/'public'/asset,'WEBP',quality=85)
-            status='Downloaded and optimized; owner reuse rights asserted'
+            status='Downloaded and optimized from supplied workbook; publication reuse rights still require review' if not args.rights_confirmed else 'Downloaded and optimized; owner reuse rights asserted'
     except Exception as error: status=f'Unavailable: {type(error).__name__}: {str(error)[:120]}'
     return product['id'],url,status,asset
 
@@ -45,7 +46,7 @@ manifest=json.loads((ROOT/'source/image-manifest.json').read_text())
 for identity,_,_,asset in results:
     if asset and asset not in manifest.setdefault(identity,[]): manifest[identity].append(asset)
 (ROOT/'source/image-manifest.json').write_text(json.dumps(manifest,indent=2))
-lines=['# Image asset report','',f'{len(jobs)} screenshot-page links audited. Runtime never loads these URLs.','', 'All image reuse requires owner rights confirmation. Do not download captcha, blocked pages or generic site imagery as products.','']
+lines=['# Image asset report','',f'{len(jobs)} screenshot-page links audited. Runtime never loads these URLs.','', 'Photos imported from the user-supplied workbook for the authorized local website. Public reuse rights require owner confirmation before launch. Do not download captcha, blocked pages or generic site imagery as products.','']
 lines += [f'- {identity}: {url} — {status}' for identity,url,status,_ in results]
 lines += [f'- {p["id"]} ({p["name"]}): no source links; original image required' for p in products if not p['sourceImageLinks']]
 (ROOT/'reports/image-report.md').write_text('\n'.join(lines),encoding='utf-8')

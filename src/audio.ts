@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-let context: AudioContext | undefined,
-  last = 0;
-// Original synthesized sine tones; no third-party recordings or audio licences.
+import { createSoundPlayer, type SoundKind } from "./sound-player";
+
 export function useAudio(volume: number) {
   const [enabled, setEnabled] = useState(() => {
     try {
@@ -12,71 +11,55 @@ export function useAudio(volume: number) {
   });
   const [activated, setActivated] = useState(false);
   const [status, setStatus] = useState("");
-  function tone(kind: "add" | "remove" | "welcome" | "handoff", force = false) {
-    if (
-      (!enabled && !force) ||
-      (!activated && !force) ||
-      document.hidden ||
-      Date.now() - last < 180
-    )
-      return;
-    last = Date.now();
-    try {
-      context ??= new AudioContext();
-      void context
-        .resume()
-        .catch(() => setStatus("Sound is unavailable. Shopping still works."));
-      const oscillator = context.createOscillator(),
-        gain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(
-        kind === "remove" ? 440 : kind === "handoff" ? 880 : 660,
-        context.currentTime,
-      );
-      oscillator.frequency.exponentialRampToValueAtTime(
-        kind === "remove" ? 220 : 1100,
-        context.currentTime + 0.12,
-      );
-      gain.gain.setValueAtTime(volume, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        context.currentTime + 0.18,
-      );
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start();
-      oscillator.stop(context.currentTime + 0.2);
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gain.disconnect();
-      };
-    } catch {
-      setStatus("Sound is unavailable. Shopping still works.");
-    }
+  const [player] = useState(() => createSoundPlayer(volume));
+  const unavailable = () => {
+    setActivated(false);
+    setStatus(
+      "Sound is unavailable. Shopping still works. Check browser or device mute settings, then try Enable festive sound again.",
+    );
+  };
+  function tone(kind: SoundKind) {
+    if (!enabled || !activated) return;
+    void player.play(kind).catch(unavailable);
   }
-  function toggle() {
-    const next = activated ? !enabled : true;
-    setEnabled(next);
-    setActivated(true);
+  function remember(value: boolean) {
     try {
-      localStorage.setItem("diwali-sound", String(next));
+      localStorage.setItem("diwali-sound", String(value));
     } catch {
       /* Preference lasts this visit. */
     }
-    if (next) tone("welcome", true);
-    else void context?.suspend().catch(() => {});
+  }
+  function toggle() {
+    if (enabled && activated) {
+      setEnabled(false);
+      setActivated(false);
+      setStatus("");
+      remember(false);
+      player.mute();
+      return;
+    }
+    // Start directly in the click handler to retain browser user activation.
+    void player
+      .play("welcome")
+      .then((played) => {
+        if (!played) return;
+        setEnabled(true);
+        setActivated(true);
+        setStatus("");
+        remember(true);
+      })
+      .catch(unavailable);
   }
   useEffect(() => {
     const hidden = () => {
-      if (document.hidden) void context?.suspend().catch(() => {});
+      if (document.hidden) player.mute();
     };
     document.addEventListener("visibilitychange", hidden);
     return () => {
       document.removeEventListener("visibilitychange", hidden);
-      void context?.close().catch(() => {});
-      context = undefined;
+      player.destroy();
     };
-  }, []);
+  }, [player]);
   return {
     toggle,
     tone,
