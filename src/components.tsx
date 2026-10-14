@@ -1,5 +1,28 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Product } from "./model";
+import { rupees } from "./pricing";
+
+// Selling price first, with the struck-through MRP and the saving when the Sheet has an MRP above it.
+export function Price({ product: p }: { product: Product }) {
+  if (p.pricePaise === null) return <strong>Price needs review</strong>;
+  const mrp = p.mrpPaise;
+  return (
+    <span className="price">
+      <strong>{rupees(p.pricePaise)}</strong>
+      {mrp != null && mrp > p.pricePaise && (
+        <>
+          <del className="mrp">
+            <span className="sr-only">MRP </span>
+            {rupees(mrp)}
+          </del>
+          <span className="save">
+            {Math.round(100 - (p.pricePaise * 100) / mrp)}% off
+          </span>
+        </>
+      )}
+    </span>
+  );
+}
 
 export function Modal({
   title,

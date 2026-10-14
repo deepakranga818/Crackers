@@ -19,7 +19,7 @@ import { emptyBuyer, type Buyer, type Product } from "./model";
 import { validateBuyer } from "./buyer";
 import { makeRequest, type RequestDraft } from "./whatsapp";
 import { useAudio } from "./audio";
-import { Modal, ProductImage, Quantity } from "./components";
+import { Modal, Price, ProductImage, Quantity } from "./components";
 
 export default function App() {
   const [query, setQuery] = useState(""),
@@ -558,11 +558,7 @@ export default function App() {
                       {p.variantLabel || p.originalCategory}
                     </p>
                     <div className="price-row">
-                      <strong>
-                        {p.pricePaise === null
-                          ? "Price needs review"
-                          : rupees(p.pricePaise)}
-                      </strong>
+                      <Price product={p} />
                       <button
                         className="details-button"
                         onClick={() => setDetail(p)}
@@ -742,9 +738,7 @@ export default function App() {
           <div className="detail-content">
             <p className="category-label">{detail.categoryLabel}</p>
             <h3>
-              {detail.pricePaise === null
-                ? "Price needs review"
-                : rupees(detail.pricePaise)}
+              <Price product={detail} />
             </h3>
             <dl>
               <dt>Original category</dt>

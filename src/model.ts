@@ -8,6 +8,7 @@ export type Product = {
   categoryLabel: string;
   variantLabel: string | null;
   pricePaise: number | null;
+  mrpPaise?: number | null;
   sellingUnit: string | null;
   packDetails: string | null;
   images: string[];
