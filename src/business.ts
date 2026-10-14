@@ -25,7 +25,7 @@ export const business: Business = {
   },
   fulfilment: [],
   maxQuantity: 99,
-  urlThreshold: 1800,
+  urlThreshold: 4000,
   tax: null,
   policies: {
     privacy: null,

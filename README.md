@@ -56,7 +56,11 @@ The cart badge counts units. Local storage stores schema, catalogue version, pro
 
 Buyer details are in React memory only. Returning to the cart preserves the form; Reset buyer details clears it. Refreshing the page intentionally discards buyer details. A reviewed request reference persists in memory for an unchanged request, changes on material edits, and resets on clear/refresh. User fields are flattened to a single line and rendered as text. All optional blank lines are omitted. Totals are shared between cart and request; no GST is assumed.
 
-WhatsApp opens only on explicit action and never automatically sends. Cart is retained. A short retry guard prevents rapid taps. A configured 1,800-character URL threshold conservatively triggers complete copy/download plus a short-reference chat link; this is not a universal browser limit. Manual selectable text appears when clipboard access fails. Product prices, stock and fulfilment require seller confirmation; client totals are not authoritative.
+WhatsApp opens only on explicit action and never automatically sends. Cart is retained. A short retry guard prevents rapid taps. Requests below the configurable 4,000-character encoded URL threshold prefill the **complete reviewed message**, including every item and the shared subtotal. This threshold is not a universal browser or WhatsApp limit; verify it on supported real devices before launch.
+
+For longer requests, Continue to WhatsApp is disabled until the complete message is copied successfully, or the buyer confirms manual copying/download for attachment. The chat link then contains a short reference: the buyer must paste the complete details or attach the downloaded file before tapping Send. No products or totals are truncated. Editing the cart or buyer details invalidates preparation for the old request. Failed clipboard access reveals selectable complete text. Product prices, stock and fulfilment require seller confirmation; client totals are not authoritative.
+
+Mobile checkout includes a fixed cart/subtotal bar, full-height cart and buyer views, large touch buttons, 16px form fields to avoid mobile auto-zoom, and a single-column catalogue on very narrow screens. Safe-area padding and content space keep the cart bar from covering the end of the page.
 
 ## GitHub and deployment
 

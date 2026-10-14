@@ -57,6 +57,9 @@ test("long message, failed clipboard, blocked popup, download and offline retry 
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Review complete request" }).click();
   await expect(page.getByText(/This request is too long/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
+  ).toBeDisabled();
   await expect(page.locator(".request-preview")).toContainText("46. 100 Shot");
   await page.getByRole("button", { name: "Copy Complete Request" }).click();
   await expect(
@@ -69,6 +72,9 @@ test("long message, failed clipboard, blocked popup, download and offline retry 
   expect(await readFile(path!, "utf8")).toBe(
     await page.locator(".request-preview").textContent(),
   );
+  await page
+    .getByRole("checkbox", { name: /I have copied the complete request/ })
+    .check();
   await page
     .getByRole("button", { name: "Continue to WhatsApp", exact: true })
     .click();

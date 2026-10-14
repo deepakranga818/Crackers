@@ -33,6 +33,12 @@ export default function App() {
     [clearConfirm, setClearConfirm] = useState(false);
   const [busy, setBusy] = useState(false),
     [online, setOnline] = useState(navigator.onLine);
+  const [preparedFingerprint, setPreparedFingerprint] = useState<string | null>(
+    null,
+  );
+  const [downloadRequested, setDownloadRequested] = useState(false);
+  const requestPrepared =
+    !draft?.long || preparedFingerprint === draft.fingerprint;
   const tapGuard = useRef(0);
   const announce = useCallback((s: string) => setToast(s), []);
   const { cart, save, update, notice } = useCart(products, config, announce);
@@ -56,7 +62,12 @@ export default function App() {
     if (cartOpen && stage !== "cart")
       requestAnimationFrame(() => {
         if (stage === "buyer") document.getElementById("buyer-name")?.focus();
-        else document.querySelector<HTMLElement>(".request-preview")?.focus();
+        else
+          document
+            .querySelector<HTMLElement>(
+              ".handoff-preparation, .request-preview",
+            )
+            ?.focus();
       });
   }, [cartOpen, stage]);
   useEffect(() => {
@@ -142,6 +153,7 @@ export default function App() {
       setStage("review");
       setHandoff("");
       setManualCopy(false);
+      setDownloadRequested(false);
     } catch (e) {
       announce((e as Error).message);
     }
@@ -163,6 +175,12 @@ export default function App() {
         );
         return;
       }
+      if (current.long && preparedFingerprint !== current.fingerprint) {
+        setHandoff(
+          "Copy the complete request first, or download it and confirm you will attach the file.",
+        );
+        return;
+      }
       tapGuard.current = Date.now();
       setBusy(true);
       window.setTimeout(() => setBusy(false), 1000);
@@ -170,7 +188,9 @@ export default function App() {
       if (opened) {
         opened.opener = null;
         setHandoff(
-          "WhatsApp opened. If you sent the request, wait for the seller’s confirmation.",
+          current.long
+            ? "WhatsApp opened. Paste the complete request or attach your downloaded file, then tap Send. Wait for the seller’s confirmation."
+            : "WhatsApp opened. If you sent the request, wait for the seller’s confirmation.",
         );
       } else
         setHandoff(
@@ -186,6 +206,7 @@ export default function App() {
     if (!draft) return;
     try {
       await navigator.clipboard.writeText(draft.message);
+      setPreparedFingerprint(draft.fingerprint);
       announce("Complete request copied.");
     } catch {
       setManualCopy(true);
@@ -203,6 +224,7 @@ export default function App() {
     link.href = url;
     link.download = `${draft.reference}.txt`;
     link.click();
+    setDownloadRequested(true);
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function field(
@@ -300,7 +322,7 @@ export default function App() {
               onClick={openCart}
               aria-label={`Open cart, ${amount.units} units`}
             >
-              <span aria-hidden="true">♧</span> Cart{" "}
+              <span aria-hidden="true">🛒</span> Cart{" "}
               <span className="badge" key={amount.units}>
                 {amount.units}
               </span>
@@ -642,6 +664,30 @@ export default function App() {
           <span>Made for a thoughtful celebration ✧</span>
         </div>
       </footer>
+      {canOrder && amount.units > 0 && !cartOpen && !detail && (
+        <>
+          <div
+            className="mobile-cart-bar"
+            role="region"
+            aria-label="Cart summary"
+          >
+            <div>
+              <strong>
+                {amount.units} {amount.units === 1 ? "unit" : "units"} selected
+              </strong>
+              <span>Product subtotal {rupees(amount.subtotal)}</span>
+            </div>
+            <button
+              className="button primary"
+              aria-label={`Review cart, ${amount.units} units`}
+              onClick={openCart}
+            >
+              View cart
+            </button>
+          </div>
+          <div className="mobile-cart-space" aria-hidden="true" />
+        </>
+      )}
       {!online && (
         <div className="offline" role="status">
           You are offline. Browsing works; WhatsApp requires a connection.
@@ -955,9 +1001,71 @@ export default function App() {
           {stage === "review" && draft && (
             <div className="review-content">
               <p className="callout">
-                WhatsApp will open with your request. Review it and tap Send.
-                Your order is confirmed only after the seller replies.
+                {draft.long
+                  ? "For this long request, copy the full details below and paste them in WhatsApp, or attach the downloaded request file. "
+                  : "WhatsApp will open with your complete request. "}
+                Review it and tap Send. Your order is confirmed only after the
+                seller replies.
               </p>
+              {draft.long && (
+                <section
+                  className="handoff-preparation"
+                  aria-label="Prepare complete WhatsApp request"
+                  tabIndex={-1}
+                >
+                  <h3>Send every item in your request</h3>
+                  <p>
+                    This request is too long for our configured chat-link limit.
+                    The chat link carries a reference, so you must paste the
+                    complete details or attach the file before sending.
+                  </p>
+                  <ol>
+                    <li>Copy Complete Request, or download the file.</li>
+                    <li>Continue to WhatsApp.</li>
+                    <li>
+                      Paste the details or attach the file, then tap Send.
+                    </li>
+                  </ol>
+                  <div className="copy-actions">
+                    <button className="primary" onClick={() => void copy()}>
+                      Copy Complete Request
+                    </button>
+                    <button onClick={download}>Download Request</button>
+                  </div>
+                  {manualCopy && (
+                    <label className="field">
+                      Select and copy the complete request
+                      <textarea
+                        readOnly
+                        rows={8}
+                        value={draft.message}
+                        onFocus={(event) => event.target.select()}
+                      />
+                    </label>
+                  )}
+                  {requestPrepared && (
+                    <p className="prepared-status" role="status">
+                      Complete request prepared. Paste it or attach the file in
+                      WhatsApp before tapping Send.
+                    </p>
+                  )}
+                  {(manualCopy || downloadRequested) && (
+                    <label className="ack">
+                      <input
+                        type="checkbox"
+                        checked={requestPrepared}
+                        onChange={(event) =>
+                          setPreparedFingerprint(
+                            event.target.checked ? draft.fingerprint : null,
+                          )
+                        }
+                      />
+                      I have copied the complete request, or downloaded it and
+                      will attach it in WhatsApp.
+                    </label>
+                  )}
+                </section>
+              )}
               <pre
                 className="request-preview"
                 tabIndex={0}
@@ -965,17 +1073,9 @@ export default function App() {
               >
                 {draft.message}
               </pre>
-              {draft.long && (
-                <p className="callout">
-                  This request is too long for our configured link limit. Copy
-                  or download the complete request, open the seller’s chat, then
-                  paste the details or attach the file. The chat link contains a
-                  short reference only.
-                </p>
-              )}
               <button
                 className="button whatsapp full"
-                disabled={busy}
+                disabled={busy || !requestPrepared}
                 onClick={handoffRequest}
               >
                 {handoff ? "Open WhatsApp again" : "Continue to WhatsApp"}
@@ -991,13 +1091,15 @@ export default function App() {
                 WhatsApp may require installation or a Web login. If it fails,
                 use the number and copy/download options.
               </p>
-              <div className="copy-actions">
-                <button onClick={() => void copy()}>
-                  Copy Complete Request
-                </button>
-                <button onClick={download}>Download Request</button>
-              </div>
-              {manualCopy && (
+              {!draft.long && (
+                <div className="copy-actions">
+                  <button onClick={() => void copy()}>
+                    Copy Complete Request
+                  </button>
+                  <button onClick={download}>Download Request</button>
+                </div>
+              )}
+              {manualCopy && !draft.long && (
                 <label className="field">
                   Select and copy the complete request
                   <textarea

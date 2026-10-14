@@ -111,12 +111,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1793,
+                  "duration": 1852,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:28.909Z",
+                  "startTime": "2026-10-14T11:11:14.226Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -145,12 +145,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 13058,
+                  "duration": 3487,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:31.894Z",
+                  "startTime": "2026-10-14T11:11:16.994Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -179,12 +179,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 873,
+                  "duration": 875,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:44.964Z",
+                  "startTime": "2026-10-14T11:11:20.497Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -194,7 +194,7 @@
           ],
           "id": "823e5510e2ed762314f8-a1c4e107e47e6d98f465",
           "file": "fallbacks.spec.ts",
-          "line": 87,
+          "line": 93,
           "column": 1
         }
       ]
@@ -221,12 +221,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 878,
+                  "duration": 845,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:45.864Z",
+                  "startTime": "2026-10-14T11:11:21.399Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -255,12 +255,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1191,
+                  "duration": 1130,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:46.755Z",
+                  "startTime": "2026-10-14T11:11:22.259Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -271,6 +271,82 @@
           "id": "66eff6f10bb92964d9d6-beb034533ee771e48828",
           "file": "media.spec.ts",
           "line": 32,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "mobile-checkout.spec.ts",
+      "file": "mobile-checkout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "mobile cart and complete four-product WhatsApp request work at 320, 360 and 390px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2878,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-14T11:11:23.417Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7838c6abe721b19c2eeb-d2ffb48680df2e949bf7",
+          "file": "mobile-checkout.spec.ts",
+          "line": 4,
+          "column": 1
+        },
+        {
+          "title": "a long request must be copied in full and re-prepared after changing the cart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1200,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-14T11:11:26.307Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7838c6abe721b19c2eeb-9954123c81f9cf36a04e",
+          "file": "mobile-checkout.spec.ts",
+          "line": 81,
           "column": 1
         }
       ]
@@ -297,12 +373,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 797,
+                  "duration": 793,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:47.978Z",
+                  "startTime": "2026-10-14T11:11:27.539Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -331,12 +407,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1809,
+                  "duration": 1884,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:48.785Z",
+                  "startTime": "2026-10-14T11:11:28.343Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -365,12 +441,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 899,
+                  "duration": 1070,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:50.604Z",
+                  "startTime": "2026-10-14T11:11:30.238Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -399,12 +475,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2546,
+                  "duration": 3090,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:00:51.515Z",
+                  "startTime": "2026-10-14T11:11:31.320Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -422,9 +498,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-14T11:00:22.172Z",
-    "duration": 33398.493,
-    "expected": 9,
+    "startTime": "2026-10-14T11:11:09.002Z",
+    "duration": 27197.052,
+    "expected": 11,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

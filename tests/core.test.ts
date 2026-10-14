@@ -272,6 +272,21 @@ describe("buyer and WhatsApp", () => {
     );
     expect(draft.url.length).toBeLessThan(config.urlThreshold);
   });
+  it("rebuilds a prior short-reference link when the transport configuration changes", () => {
+    const cart = Object.fromEntries(ready.map((p) => [p.id, 1]));
+    const previous = makeRequest(cart, ready, buyer, config);
+    expect(previous.long).toBe(true);
+    const updated = makeRequest(
+      cart,
+      ready,
+      buyer,
+      { ...config, urlThreshold: 100000 },
+      previous,
+    );
+    expect(updated.long).toBe(false);
+    expect(new URL(updated.url).searchParams.get("text")).toBe(updated.message);
+    expect(updated.message).toContain("46. 100 Shot");
+  });
   it("blocks empty cart, disabled ordering and unverified products", () => {
     expect(() => makeRequest({}, ready, buyer, config)).toThrow();
     expect(() =>

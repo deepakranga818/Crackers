@@ -42,6 +42,8 @@ export function makeRequest(
     Object.entries(cart).sort(),
     clean,
     c.catalogueVersion,
+    c.whatsapp,
+    c.urlThreshold,
     calculated,
     products
       .filter((p) => p.id in cart)
