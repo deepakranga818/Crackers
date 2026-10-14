@@ -1,0 +1,19 @@
+{
+  "conditions": "Single cold-page loads, headless Chromium, local production Vite preview, Windows, no CPU/network throttling. Not field Core Web Vitals; INP not measured.",
+  "results": [
+    {
+      "lcp": 1536,
+      "cls": 0,
+      "viewportWidth": 360,
+      "horizontalOverflow": false,
+      "products": 46
+    },
+    {
+      "lcp": 168,
+      "cls": 0,
+      "viewportWidth": 1280,
+      "horizontalOverflow": false,
+      "products": 46
+    }
+  ]
+}
