@@ -1,47 +1,47 @@
 ﻿id,sheet_no,name,sheet_category,pack_text_in_sheet,selling_price_inr,mrp_inr,confirmed_selling_unit (packet/box/piece),confirmed_pack_quantity,what_to_confirm
-dc-001,1,POP-UP,Pop- gol size,,10.0,13.0,,,Sheet gives no unit or pack quantity.
-dc-002,2,POP-UP,Pop- long size,,20.0,26.0,,,Sheet gives no unit or pack quantity.
-dc-003,3,TILLI,Tilli bomb,,20.0,26.0,,,Sheet gives no unit or pack quantity.
-dc-004,4,15cm Ronak,Phuljadi - Small,,20.0,26.0,,,Sheet gives no unit or pack quantity.
-dc-005,5,18cm Pogo,Phuljadi,,40.0,52.0,,,Sheet gives no unit or pack quantity.
-dc-006,6,18cm Kuber colored,Phuljadi -Color,,80.0,104.0,,,Sheet gives no unit or pack quantity.
-dc-007,7,35cm Pogo,Phuljadi - Medium,,70.0,91.0,,,Sheet gives no unit or pack quantity.
-dc-008,8,40cm Sikha,Phuljadi - Big Size,,150.0,195.0,,,Sheet gives no unit or pack quantity.
-dc-009,9,50cm Pogo,Phuljadi - Big Size,,200.0,260.0,,,Sheet gives no unit or pack quantity.
-dc-010,10,G.C. Ashoka KS,Ground Chakkar - Small,,150.0,195.0,,,Sheet gives no unit or pack quantity.
-dc-011,11,G.C. Special MR,Chakkari -Small,,180.0,234.0,,,Sheet gives no unit or pack quantity.
-dc-012,12,G.C. DLX Dukans,Ground Chakkar - Medium,,200.0,260.0,,,Sheet gives no unit or pack quantity.
-dc-013,13,G.C. DLX HD,Ground Chakkar - Medium,,300.0,390.0,,,Sheet gives no unit or pack quantity.
-dc-014,14,45cm CK G.C.,Ground Chakkar - Big Size,,400.0,520.0,,,Sheet gives no unit or pack quantity.
-dc-015,15,Bullet small RK,Bullet Bomb - Small,,60.0,78.0,,,Sheet gives no unit or pack quantity.
-dc-016,16,Bullet Flash RL,Bullet Bomb,,120.0,156.0,,,Sheet gives no unit or pack quantity.
-dc-017,17,Dholak 777 RL,Bomb - Big,,250.0,325.0,,,Sheet gives no unit or pack quantity.
-dc-018,18,Hydro Foil CK,Bomb - Sutli,,250.0,325.0,,,Sheet gives no unit or pack quantity.
-dc-019,19,22 chorsa Turkey,Murga chaap,,20.0,26.0,,,Sheet gives no unit or pack quantity.
-dc-020,20,2 Sound Cracker KS,Bomb,,80.0,104.0,,,Sheet gives no unit or pack quantity.
-dc-021,21,Loose 100 piece MR,Bijli Bomb,,80.0,104.0,,,Sheet gives no unit or pack quantity.
-dc-022,22,Loose 50 piece Rathna,Bijli Bomb,,50.0,65.0,,,Sheet gives no unit or pack quantity.
-dc-023,23,1000 laddi RL,laddi,,500.0,650.0,,,Sheet gives no unit or pack quantity.
-dc-024,24,2000 Laddi RL,laddi,,800.0,1040.0,,,Sheet gives no unit or pack quantity.
-dc-025,25,F.P. Special Malty,Anar - Small,,150.0,195.0,,,Sheet gives no unit or pack quantity.
-dc-026,26,F.P. Nano RL,Anar - Medium,,250.0,325.0,,,Sheet gives no unit or pack quantity.
-dc-027,27,F.P. Ashoka CORO,Anar - Medium,,350.0,455.0,,,Sheet gives no unit or pack quantity.
-dc-028,28,Color Koti DLX MR,ANAR - Big size,,600.0,780.0,,,Sheet gives no unit or pack quantity.
-dc-029,29,Bunty-Bubly RL,Anar Bomb - 5 piece,5 piece,180.0,234.0,,,"Sheet says ""5 piece"" - confirm whether the listed price is per box/packet of 5 piece or per single piece."
-dc-030,30,Ganga Jamana RL,Anar Bomb - 5 piece,5 piece,200.0,260.0,,,"Sheet says ""5 piece"" - confirm whether the listed price is per box/packet of 5 piece or per single piece."
-dc-031,31,Mighty RL /ANTI Banti,Anar bomb - 10 piece,10 piece,300.0,390.0,,,"Sheet says ""10 piece"" - confirm whether the listed price is per box/packet of 10 piece or per single piece."
-dc-032,32,Rocket Bomb KS,Rockets - Small,,650.0,845.0,,,Sheet gives no unit or pack quantity.
-dc-033,33,2 Sound Rocket KS,Rockets,,700.0,910.0,,,Sheet gives no unit or pack quantity.
-dc-034,34,Lunik Ex. Coro,Rockets,,200.0,260.0,,,Sheet gives no unit or pack quantity.
-dc-035,35,Zitiwala Rocket Coro,Rockets,,350.0,455.0,,,Sheet gives no unit or pack quantity.
-dc-036,36,Penta Missile AZ,Single shot - 5 Piece,5 Piece,450.0,585.0,,,"Sheet says ""5 Piece"" - confirm whether the listed price is per box/packet of 5 Piece or per single piece."
-dc-037,37,3 piece Shower SRL,Fountain Rocket - 3 Piece,3 Piece,550.0,715.0,,,"Sheet says ""3 Piece"" - confirm whether the listed price is per box/packet of 3 Piece or per single piece."
-dc-038,38,3 piece Shower NSV,Single shot Rocket Flower - 3 Piece,3 Piece,350.0,455.0,,,"Sheet says ""3 Piece"" - confirm whether the listed price is per box/packet of 3 Piece or per single piece."
-dc-039,39,7 Shot Special,Sky shot,,350.0,455.0,,,Sheet gives no unit or pack quantity.
-dc-040,40,12 shot 105 cdo AZ,Sky shot,,750.0,975.0,,,Sheet gives no unit or pack quantity.
-dc-041,41,12 shot honey moon AZ,Sky shot,,800.0,1040.0,,,Sheet gives no unit or pack quantity.
-dc-042,42,16 shot AZ,Sky shot,,800.0,1040.0,,,Sheet gives no unit or pack quantity.
-dc-043,43,15 shot RL/ Teenager choice,Sky shot,,750.0,975.0,,,Sheet gives no unit or pack quantity.
-dc-044,44,AK 47 MR,Anar - Handhandle,,550.0,715.0,,,Sheet gives no unit or pack quantity.
-dc-045,45,60 Shot,Sky shot,,1500.0,1950.0,,,Sheet gives no unit or pack quantity.
-dc-046,46,100 Shot,Sky shot,,2200.0,2860.0,,,Sheet gives no unit or pack quantity.
+dc-001,1,POP-UP,Pop- gol size,,10.0,14.0,,,Sheet gives no unit or pack quantity.
+dc-002,2,POP-UP,Pop- long size,,20.0,28.0,,,Sheet gives no unit or pack quantity.
+dc-003,3,TILLI,Tilli bomb,,20.0,28.0,,,Sheet gives no unit or pack quantity.
+dc-004,4,15cm Ronak,Phuljadi - Small,,20.0,28.0,,,Sheet gives no unit or pack quantity.
+dc-005,5,18cm Pogo,Phuljadi,,40.0,56.0,,,Sheet gives no unit or pack quantity.
+dc-006,6,18cm Kuber colored,Phuljadi -Color,,80.0,112.0,,,Sheet gives no unit or pack quantity.
+dc-007,7,35cm Pogo,Phuljadi - Medium,,70.0,98.0,,,Sheet gives no unit or pack quantity.
+dc-008,8,40cm Sikha,Phuljadi - Big Size,,150.0,210.0,,,Sheet gives no unit or pack quantity.
+dc-009,9,50cm Pogo,Phuljadi - Big Size,,200.0,280.0,,,Sheet gives no unit or pack quantity.
+dc-010,10,G.C. Ashoka KS,Ground Chakkar - Small,,150.0,210.0,,,Sheet gives no unit or pack quantity.
+dc-011,11,G.C. Special MR,Chakkari -Small,,180.0,252.0,,,Sheet gives no unit or pack quantity.
+dc-012,12,G.C. DLX Dukans,Ground Chakkar - Medium,,200.0,280.0,,,Sheet gives no unit or pack quantity.
+dc-013,13,G.C. DLX HD,Ground Chakkar - Medium,,300.0,420.0,,,Sheet gives no unit or pack quantity.
+dc-014,14,45cm CK G.C.,Ground Chakkar - Big Size,,400.0,560.0,,,Sheet gives no unit or pack quantity.
+dc-015,15,Bullet small RK,Bullet Bomb - Small,,60.0,84.0,,,Sheet gives no unit or pack quantity.
+dc-016,16,Bullet Flash RL,Bullet Bomb,,120.0,168.0,,,Sheet gives no unit or pack quantity.
+dc-017,17,Dholak 777 RL,Bomb - Big,,250.0,350.0,,,Sheet gives no unit or pack quantity.
+dc-018,18,Hydro Foil CK,Bomb - Sutli,,250.0,350.0,,,Sheet gives no unit or pack quantity.
+dc-019,19,22 chorsa Turkey,Murga chaap,,20.0,28.0,,,Sheet gives no unit or pack quantity.
+dc-020,20,2 Sound Cracker KS,Bomb,,80.0,112.0,,,Sheet gives no unit or pack quantity.
+dc-021,21,Loose 100 piece MR,Bijli Bomb,,80.0,112.0,,,Sheet gives no unit or pack quantity.
+dc-022,22,Loose 50 piece Rathna,Bijli Bomb,,50.0,70.0,,,Sheet gives no unit or pack quantity.
+dc-023,23,1000 laddi RL,laddi,,500.0,700.0,,,Sheet gives no unit or pack quantity.
+dc-024,24,2000 Laddi RL,laddi,,800.0,1120.0,,,Sheet gives no unit or pack quantity.
+dc-025,25,F.P. Special Malty,Anar - Small,,150.0,210.0,,,Sheet gives no unit or pack quantity.
+dc-026,26,F.P. Nano RL,Anar - Medium,,250.0,350.0,,,Sheet gives no unit or pack quantity.
+dc-027,27,F.P. Ashoka CORO,Anar - Medium,,350.0,490.0,,,Sheet gives no unit or pack quantity.
+dc-028,28,Color Koti DLX MR,ANAR - Big size,,600.0,840.0,,,Sheet gives no unit or pack quantity.
+dc-029,29,Bunty-Bubly RL,Anar Bomb - 5 piece,5 piece,180.0,252.0,,,"Sheet says ""5 piece"" - confirm whether the listed price is per box/packet of 5 piece or per single piece."
+dc-030,30,Ganga Jamana RL,Anar Bomb - 5 piece,5 piece,200.0,280.0,,,"Sheet says ""5 piece"" - confirm whether the listed price is per box/packet of 5 piece or per single piece."
+dc-031,31,Mighty RL /ANTI Banti,Anar bomb - 10 piece,10 piece,300.0,420.0,,,"Sheet says ""10 piece"" - confirm whether the listed price is per box/packet of 10 piece or per single piece."
+dc-032,32,Rocket Bomb KS,Rockets - Small,,650.0,910.0,,,Sheet gives no unit or pack quantity.
+dc-033,33,2 Sound Rocket KS,Rockets,,700.0,980.0,,,Sheet gives no unit or pack quantity.
+dc-034,34,Lunik Ex. Coro,Rockets,,200.0,280.0,,,Sheet gives no unit or pack quantity.
+dc-035,35,Zitiwala Rocket Coro,Rockets,,350.0,490.0,,,Sheet gives no unit or pack quantity.
+dc-036,36,Penta Missile AZ,Single shot - 5 Piece,5 Piece,450.0,630.0,,,"Sheet says ""5 Piece"" - confirm whether the listed price is per box/packet of 5 Piece or per single piece."
+dc-037,37,3 piece Shower SRL,Fountain Rocket - 3 Piece,3 Piece,550.0,770.0,,,"Sheet says ""3 Piece"" - confirm whether the listed price is per box/packet of 3 Piece or per single piece."
+dc-038,38,3 piece Shower NSV,Single shot Rocket Flower - 3 Piece,3 Piece,350.0,490.0,,,"Sheet says ""3 Piece"" - confirm whether the listed price is per box/packet of 3 Piece or per single piece."
+dc-039,39,7 Shot Special,Sky shot,,350.0,490.0,,,Sheet gives no unit or pack quantity.
+dc-040,40,12 shot 105 cdo AZ,Sky shot,,750.0,1050.0,,,Sheet gives no unit or pack quantity.
+dc-041,41,12 shot honey moon AZ,Sky shot,,800.0,1120.0,,,Sheet gives no unit or pack quantity.
+dc-042,42,16 shot AZ,Sky shot,,800.0,1120.0,,,Sheet gives no unit or pack quantity.
+dc-043,43,15 shot RL/ Teenager choice,Sky shot,,750.0,1050.0,,,Sheet gives no unit or pack quantity.
+dc-044,44,AK 47 MR,Anar - Handhandle,,550.0,770.0,,,Sheet gives no unit or pack quantity.
+dc-045,45,60 Shot,Sky shot,,1500.0,2100.0,,,Sheet gives no unit or pack quantity.
+dc-046,46,100 Shot,Sky shot,,2200.0,3080.0,,,Sheet gives no unit or pack quantity.

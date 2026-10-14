@@ -1,16 +1,19 @@
 import { test, expect } from "@playwright/test";
+import data from "../../src/products.json" with { type: "json" };
 test("catalogue has all products, combined search, details, and disabled ordering", async ({
   page,
 }) => {
   await page.goto("/");
   await expect(page.locator(".product-card")).toHaveCount(46);
   await expect(page.locator(".product-card .price-row del")).toHaveCount(46);
+  // Read from the synced Sheet data: the MRP column is edited by the owner.
+  const { pricePaise, mrpPaise } = data.products[0];
   await expect(
     page.locator(".product-card").first().locator("del"),
-  ).toContainText("₹13");
+  ).toContainText(`₹${mrpPaise / 100}`);
   await expect(
     page.locator(".product-card").first().locator(".save"),
-  ).toHaveText("23% off");
+  ).toHaveText(`${Math.round(100 - (pricePaise * 100) / mrpPaise)}% off`);
   await expect(page.getByRole("button", { name: /Open cart/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(
     0,

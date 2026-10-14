@@ -1,6 +1,6 @@
 # Spreadsheet import audit
 
-Google Sheet: 46 rows; version 6bdcfee5910c. Blank Order cells are ignored; no inventory inferred. Seller contact: 9992230740. Source: https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617. Fetched: 2026-10-14T12:22:50.745104+00:00.
+Google Sheet: 46 rows; version 4a91b4c436e1. Blank Order cells are ignored; no inventory inferred. Seller contact: 9992230740. Source: https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617. Fetched: 2026-10-14T12:28:58.847698+00:00.
 
 - dc-001 | Google Sheet row 4 | POP-UP | Pop- gol size → Pop-ups | ₹10: Selling unit unconfirmed
 - dc-002 | Google Sheet row 5 | POP-UP | Pop- long size → Pop-ups | ₹20: Selling unit unconfirmed
