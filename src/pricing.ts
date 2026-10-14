@@ -79,16 +79,26 @@ export function totals(
   );
   const units = lines.reduce((sum, l) => sum + l.qty, 0);
   const delivery = method?.chargePaise ?? null;
+  const tier = c.offers?.tiers.find(
+    (t) => t.maxSubtotalPaise === null || subtotal <= t.maxSubtotalPaise,
+  );
+  const discountBasisPoints = subtotal > 0 ? (tier?.basisPoints ?? 0) : 0;
+  const discount = Math.round((subtotal * discountBasisPoints) / 10000);
+  const afterDiscount = subtotal - discount;
   const tax = c.tax?.verified
-    ? Math.round((subtotal * c.tax.basisPoints) / 10000)
+    ? Math.round((afterDiscount * c.tax.basisPoints) / 10000)
     : null;
-  const amount = subtotal + (delivery ?? 0) + (tax ?? 0);
+  const amount = afterDiscount + (delivery ?? 0) + (tax ?? 0);
   if (!Number.isSafeInteger(amount))
     throw Error("Amount exceeds calculation limit");
   const allChargesKnown =
     delivery !== null && c.verification.taxTreatment === true;
   return {
     subtotal,
+    discount,
+    discountBasisPoints,
+    couponCode: subtotal > 0 ? (tier?.couponCode ?? null) : null,
+    afterDiscount,
     units,
     delivery,
     tax,

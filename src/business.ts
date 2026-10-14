@@ -9,6 +9,7 @@ export const business: Business = {
   address: null,
   hours: null,
   catalogueVersion: source.version,
+  offers: source.offers,
   orderingEnabled: false,
   publicCatalogueVerified: false,
   verification: {
@@ -89,3 +90,4 @@ export const categories = [
   { id: "pop", label: "Pop-ups" },
   { id: "review", label: "Other / Needs Review" },
 ];
+export const catalogueSource = source.source;

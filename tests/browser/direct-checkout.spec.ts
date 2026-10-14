@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import data from "../../src/products.json" with { type: "json" };
 
-test("mobile cart and complete four-product WhatsApp request work at 320, 360 and 390px", async ({
+test("single-step mobile checkout applies Sheet offers and includes every selected item", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -25,60 +25,60 @@ test("mobile cart and complete four-product WhatsApp request work at 320, 360 an
   for (const width of [320, 360, 390]) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto("http://127.0.0.1:5174");
+    await expect(
+      page.getByText("Coupon code - CRACK10 - 10% off upto 2000"),
+    ).toBeVisible();
     const bar = page.getByRole("region", { name: "Cart summary" });
-    await expect(bar).toBeVisible();
-    await expect(bar).toContainText("₹140");
-    const button = bar.getByRole("button", { name: "Review cart, 8 units" });
-    expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await button.click();
-    expect(
-      await page
-        .getByRole("dialog")
-        .evaluate((element) => element.scrollWidth <= element.clientWidth),
-    ).toBe(true);
+    await expect(bar).toContainText("₹126");
+    await bar.getByRole("button").click();
     await page
       .getByRole("button", { name: "Proceed to buyer details" })
       .click();
-    expect(
-      await page
-        .getByLabel("Full name *")
-        .evaluate((element) => getComputedStyle(element).fontSize),
-    ).toBe("16px");
     await page.getByLabel("Full name *").fill("Test Buyer");
-    await page.getByLabel("Mobile number *").fill("+91 99922 30740");
+    await page.getByLabel("Mobile number *").fill("9992230740");
     await page.getByLabel("Order notes").fill("₹ & + # % 🎆");
     await page.getByRole("checkbox").check();
-    await page.getByRole("button", { name: "Review complete request" }).click();
-    await expect(page.locator(".handoff-preparation")).toHaveCount(0);
-    const message = await page.locator(".request-preview").textContent();
-    expect(message).toContain("4. 15cm Ronak");
-    expect(message).toContain("Product subtotal: ₹140");
-    await page
-      .getByRole("button", { name: "Continue to WhatsApp", exact: true })
-      .scrollIntoViewIfNeeded();
+    await expect(page.getByLabel("Fulfilment method *")).toHaveCount(0);
+    await expect(
+      page.getByRole("dialog").getByText(/Local test fixture/),
+    ).toHaveCount(0);
+    await expect(page.locator(".price-summary")).toContainText("₹140");
+    await expect(page.locator(".price-summary")).toContainText("₹126");
     await page.screenshot({
-      path: `reports/screenshots/mobile-review-${width}.png`,
+      path: `reports/screenshots/simple-checkout-${width}.png`,
     });
     await page
       .getByRole("button", { name: "Continue to WhatsApp", exact: true })
       .click();
     const url = await page.evaluate(() => (window as any).__whatsapp);
-    expect(new URL(url).searchParams.get("text")).toBe(message);
+    const message = new URL(url).searchParams.get("text")!;
     expect(new URL(url).pathname).toBe("/919992230740");
+    expect(message).toContain("4. 15cm Ronak");
+    expect(message).toContain("Offer (10% off): −₹14");
+    expect(message).toContain("Coupon: CRACK10");
+    expect(message).toContain("Total: ₹126");
+    expect(message).not.toContain("Catalogue version");
+    expect(message).not.toContain("Demo");
+    await expect(page.locator(".request-preview")).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Checkout", exact: true }),
+    ).toBeVisible();
     expect(
       await page
         .getByRole("dialog")
         .evaluate((element) => element.scrollWidth <= element.clientWidth),
     ).toBe(true);
+    await expect(
+      page.getByRole("button", { name: "Open WhatsApp again" }),
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Open WhatsApp again" }).click();
+    expect(await page.evaluate(() => (window as any).__whatsapp)).toBe(url);
     await page.getByRole("button", { name: "Close dialog" }).click();
     await expect(bar).toContainText("8 units selected");
-    await page.screenshot({
-      path: `reports/screenshots/mobile-cart-${width}.png`,
-    });
   }
 });
 
-test("a long request must be copied in full and re-prepared after changing the cart", async ({
+test("long orders prepare complete details inline and cart edits invalidate the copied order", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -115,17 +115,19 @@ test("a long request must be copied in full and re-prepared after changing the c
   await page.getByLabel("Full name *").fill("Test Buyer");
   await page.getByLabel("Mobile number *").fill("9992230740");
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Review complete request" }).click();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
   ).toBeDisabled();
-  const complete = await page.locator(".request-preview").textContent();
-  await page.getByRole("button", { name: "Copy Complete Request" }).click();
-  expect(await page.evaluate(() => (window as any).__copied)).toBe(complete);
-  expect(complete).toContain("46. 100 Shot");
   await expect(
-    page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
-  ).toBeEnabled();
+    page.getByRole("heading", { name: "Checkout", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Copy Complete Order" }).click();
+  expect(await page.evaluate(() => (window as any).__copied)).toContain(
+    "46. 100 Shot",
+  );
   await page
     .getByRole("button", { name: "Continue to WhatsApp", exact: true })
     .click();
@@ -138,11 +140,14 @@ test("a long request must be copied in full and re-prepared after changing the c
     .getByRole("button", { name: "Increase POP-UP dc-001 quantity" })
     .click();
   await page.getByRole("button", { name: "Proceed to buyer details" }).click();
-  await page.getByRole("button", { name: "Review complete request" }).click();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
   ).toBeDisabled();
-  await expect(page.locator(".request-preview")).toContainText(
+  await page.getByRole("button", { name: "Copy Complete Order" }).click();
+  expect(await page.evaluate(() => (window as any).__copied)).toContain(
     "Total units: 47",
   );
 });

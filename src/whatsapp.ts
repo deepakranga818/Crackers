@@ -60,23 +60,17 @@ export function makeRequest(
       timeZone: "Asia/Kolkata",
     }).format(new Date()) + " (Asia/Kolkata)";
   const lines = [
-    "DIWALI CRACKERS — ORDER REQUEST",
-    `Request reference: ${reference}`,
-    `Catalogue version: ${c.catalogueVersion}`,
-    `Created: ${created}`,
+    "Hi! I'd like to order these crackers:",
     "",
-    "BUYER",
     `Name: ${clean.name}`,
     `Mobile: ${normalizeMobile(buyer.mobile)}`,
     "",
-    "FULFILMENT",
-    `Method: ${safeField(method.label)}`,
   ];
   if (method.type === "delivery")
     lines.push(
       `Address: ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
     );
-  else
+  else if (!method.id.startsWith("demo-"))
     lines.push(
       `Pickup location: ${safeField(method.address || c.address || "")}`,
     );
@@ -84,28 +78,37 @@ export function makeRequest(
   lines.push("", "ITEMS");
   Object.entries(cart).forEach(([id, qty], i) => {
     const p = products.find((p) => p.id === id)!;
-    lines.push(`${i + 1}. ${safeField(p.name)} [${p.id}]`);
-    if (p.variantLabel) lines.push(`   Variant: ${safeField(p.variantLabel)}`);
     lines.push(
-      `   Unit: ${safeField(p.sellingUnit!)}`,
-      `   Qty: ${qty}`,
-      `   Unit price: ${rupees(p.pricePaise!)}`,
-      `   Line amount: ${rupees(p.pricePaise! * qty)}`,
+      `${i + 1}. ${safeField(p.name)} (${safeField(p.originalCategory)})`,
+    );
+    if (p.sellingUnit && !p.sellingUnit.startsWith("Demo unit"))
+      lines.push(`Unit: ${safeField(p.sellingUnit)}`);
+    lines.push(
+      `Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}`,
       "",
     );
   });
   lines.push(
     `Total units: ${calculated.units}`,
     `Product subtotal: ${rupees(calculated.subtotal)}`,
-    `Delivery / fulfilment: ${calculated.delivery === null ? "seller to confirm" : rupees(calculated.delivery)}`,
   );
+  if (calculated.discount > 0)
+    lines.push(
+      `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
+      `After offer: ${rupees(calculated.afterDiscount)}`,
+    );
+  if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
+  if (calculated.delivery === null)
+    lines.push("Fulfilment charge: please confirm");
+  else if (calculated.delivery > 0)
+    lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
   if (calculated.tax !== null)
     lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
   lines.push(`${calculated.label}: ${calculated.text}`);
   if (clean.notes) lines.push("", `Notes: ${clean.notes}`);
   lines.push(
     "",
-    "Please confirm availability, fulfilment, applicable charges, and the final payable amount.",
+    "Please confirm availability, collection/delivery and the final amount. Thank you!",
   );
   const message = lines.join("\n");
   const full = `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(message)}`;

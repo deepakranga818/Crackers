@@ -1,51 +1,28 @@
 # Verification — 14 October 2026
 
-## Passed locally
+## Current local results
 
-- `npm run build`: reimports all 46 rows, zero import errors, TypeScript passes, Vite production bundle succeeds. Product version `5ff3a6d829d3`. 51 local WebP images represent 44 products; the two source products without image links retain placeholders.
-- `npm test`: **31 tests pass**, covering source count, explicit mapping, duplicate names, source image handling, aliases/filtering/sorting, integer-paise arithmetic, malformed quantities, launch gates, current-price restoration, removed/disabled/unavailable products, buyer validation, Indian scripts, service area versus PIN syntax, pickup without residential address, unknown charges, tax verification, recipient/encoding, user-field normalization, stable references and long-message retention. A transport-configuration change rebuilds an old short-reference URL. Audio regression tests verify that scheduling waits for context resume, mute cancels a pending resume, and a context that remains suspended is reported as blocked.
-- `python -m unittest discover -s tests -p test_import.py`: **2 tests pass**. Every imported name/category/price is compared to the actual XLSX cell. A temporary corrupted workbook confirms invalid rows remain represented, disabled, reported and fail the import. Seller contact G1 matches 9992230740.
-- `npm run test:browser`: **11 browser tests pass**, Playwright Chromium 156 on Windows. JSON evidence is in `browser-results.json`.
-- `npm audit --omit=dev --audit-level=high`: zero runtime dependency vulnerabilities reported. This is a dependency advisory check, not a complete security audit.
-- `node scripts/check-publication.mjs`: deliberately exits nonzero with the public-deployment blocker. Public catalogue and host/legal approval remain unresolved.
-- `git diff --cached --check`: no whitespace errors.
+- `npm run build`: fetched the latest authoritative Google Sheet, imported 46 products with zero errors, passed TypeScript and produced the Vite production bundle. Catalogue version: `a42f190206db`.
+- `npm test`: 38 tests passed, including subtotal-tier boundaries at ₹2,000 and ₹5,000, paise rounding, matching automatic coupon codes, WhatsApp encoding, cart restoration, buyer validation and sound scheduling.
+- `python -m unittest discover -s tests -p test_import.py`: 3 tests passed. Generated names/categories/prices match the source CSV; invalid names, prices, image URLs and MRP remain represented, disabled and fail import; source offers, coupon codes and contact are validated.
+- `npm run test:browser`: 11 Chromium tests passed on Windows. Exact decoded WhatsApp text, all selected items and discounts were checked with navigation intercepted. No message was sent.
+- Source sync reused 51 local images for 44 products. The two products without supplied image links retain placeholders. Images and the multi-image gallery pass browser checks.
+- Sound requires a click; browser checks detect a nonzero audio signal, verify mute/unmute and prevent autoplay after reload. Physical speaker audibility was not measured.
 
-The current user-facing localhost preview on port 5173 runs in demo mode so Add to cart, buyer details, request review and WhatsApp controls are visible. Production still builds catalogue-only. Category labels are bold (700), with source variants emphasized (600). Browser test servers use separate ports 5175 (catalogue) and 5174 (demo); mode-specific Vite caches and a single test worker prevent local preview/test startup contention. All 11 browser tests pass, including the complete WhatsApp URL flow with navigation intercepted.
+## Checkout and mobile evidence
 
-## Browser scenarios
+Cart → buyer details → WhatsApp, without a separate review screen. Checkout and the message include the matching CRACK10/CRACK15/CRACK20 coupon, subtotal, savings and discounted total. Dummy fixture units/pickup and internal catalogue metadata are omitted from the message.
 
-Production catalogue: all 46 cards, combined search/category filters, zero-results recovery, details and Escape, visible unknown selling units, no ordering/cart controls.
+At 320, 360 and 390 CSS pixels, four-product requests include every item, Unicode notes, ₹140 subtotal, ₹14 savings and ₹126 total. The checkout dialog has no horizontal overflow; screenshots in `screenshots/simple-checkout-*.png` show the simplified form and large controls. The 320px screenshot was visually inspected for this change.
 
-Local demo fixture: add two separate POP-UP products, quantity buttons and direct numeric entry, subtotal, removal and undo, persistence across refresh, buyer errors with focus, Indian-script buyer name and punctuation/emoji notes, pickup without address, complete request review, intercepted WhatsApp URL and exact decoded message, correct number, no automatic cart clearing, disabled audio handling and reduced motion.
+A 46-product order uses inline copy/download preparation when its encoded link exceeds the configured 4,000-character limit. Clipboard and downloaded text retain every item. Quantity changes invalidate the previous preparation. Browser checks cover clipboard failure, selectable-text fallback, blocked popups, offline retry and retained carts. Actual WhatsApp mobile/Web interoperability remains unverified.
 
-Additional scenarios: corrupt/blocked storage, cross-tab synchronization with no writeback loops, explicit clear-cart confirmation and cancellation, details quantity adds the selected amount, dialog focus restoration, long request preserving all 46 items, short-reference link, failed clipboard selectable-text fallback, downloaded text equality, blocked popup and offline retry.
+Other browser checks cover all 46 catalogue cards, search/filter recovery, dialog focus, removal/undo, saved carts, cross-tab synchronization, corrupted storage, reduced motion, layouts from 320 to 1280px and automated text/zoom approximations. Real Android/iPhone devices and screen readers were not used.
 
-WhatsApp/mobile regression: the prior 1,800-character cutoff triggered reference-only links too readily. The configured threshold is now 4,000 characters; a four-product request was decoded from the intercepted URL and matched the complete reviewed text exactly at 320, 360 and 390px, including Unicode notes, all item lines and ₹140 subtotal. A 46-product request cannot open WhatsApp until the complete text is copied, or the buyer acknowledges manual copying/download for attachment. Clipboard contents include item 46 and match the full request; changing quantity invalidates this preparation. Nothing is silently truncated. Real WhatsApp interoperability at the new threshold still needs target-device testing.
+## Data updates and deployment
 
-Mobile usability: fixed cart/subtotal bar with a 48px View cart control, safe-area/content spacing, full-height dialogs, 16px buyer inputs, stacked copy/download controls and a single-column grid below 340px. New browser checks confirm no horizontal overflow inside checkout dialogs at 320, 360 and 390px. Screenshots of the mobile cart and review were visually inspected.
+The owner's Google Sheet is the authoritative source. Start/build fetch it; `npm run sync` refreshes a running local preview. Static hosted sites require rebuilding and redeploying after Sheet edits. Unsupported offers, changed seller contact, or inaccessible data stop sync rather than silently substituting old prices. Blank MRP values are retained as unknown, without an invented crossed-out price.
 
-Media fixes: product photos load with nonzero natural dimensions, the supplied second image displays in the gallery, and source rows without photos keep the fallback. A native Web Audio browser test verifies no context is created before a click, detects a nonzero audio signal after enabling sound, verifies running/suspended states when unmuting/muting, and verifies no autoplay after reload. The in-app preview was refreshed and its first product images confirmed loaded; its sound control successfully changed to On. Physical speaker audibility and device mute/volume settings cannot be measured by these tests.
+The localhost preview on port 5173 runs in demo mode. The production configuration retains its existing verification gates. No public deployment or remote CI execution was performed. GitHub push remains pending authentication.
 
-Layout: 320, 360, 390, 430, 768 and 1280 CSS-pixel widths, no document horizontal overflow. Screenshots were visually inspected at mobile and desktop sizes. Browser checks include 200% root text scaling and a 640px CSS viewport representing a 1280px display at 200% browser zoom. These are automated approximations; native OS/browser zoom and screen-reader testing remain manual checks. Actual Android/iPhone devices were not used.
-
-## Local production performance
-
-`node scripts/measure-preview.mjs`, production `vite preview` on localhost, headless Chromium, Windows, no network/CPU throttling, one measured navigation per width:
-
-- 360px: observed LCP **432ms**, observed CLS **0**.
-- 1280px: observed LCP **180ms**, observed CLS **0**.
-- Both show all 46 products and no horizontal overflow.
-- Current production assets: JavaScript **286.61kB / 85.10kB gzip**; CSS **18.01kB / 4.84kB gzip**; HTML **0.66kB / 0.40kB gzip**. The 51 local optimized product images total approximately 5.44MB and are lazy-loaded.
-
-Raw results: `local-performance.json`. These timing measurements precede the latest mobile checkout styles. They are a local synthetic sample with imported product photos, not a Core Web Vitals pass, field percentile or ordinary-phone benchmark. INP was not measured. Remeasure in the approved hosted environment.
-
-## Still unverified
-
-- Seller location, licences, current applicable legal restrictions, product certification/permitted types, public catalogue permission and hosting category approval.
-- All 46 selling units and actual availability. All 51 linked photos have been imported locally, but publication reuse rights remain unverified. Original photos for 60 Shot and 100 Shot are still missing. Multi-photo gallery and fallback behaviour are now browser-tested.
-- Actual pickup/delivery, service areas, charges, tax treatment, business hours, brand, policies and preferred languages.
-- Real device WhatsApp installation, Web login, browser popup/navigation behaviour and long-URL interoperability. Automated tests intercept the link and never send a message.
-- Screen-reader audit, native 200% zoom, real translated copy and representative low-end Android performance.
-- Remote GitHub Actions execution is distinct from these local results; CI is provided, with no automatic deployment.
-
-Source/README/deployment guide are supplied. No public site was deployed and no online payment or automatic message sending was introduced.
+Current build assets: JavaScript 287.56 kB (85.44 kB gzip), CSS 18.61 kB (4.94 kB gzip), HTML 0.66 kB (0.40 kB gzip). Earlier `local-performance.json` measurements precede this checkout change and are not current performance validation.

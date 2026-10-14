@@ -1,9 +1,78 @@
 {
-  "version": "5ff3a6d829d3",
+  "version": "a42f190206db",
+  "source": {
+    "headerRow": 3,
+    "contact": "9992230740",
+    "offers": {
+      "labels": [
+        "Coupon code - CRACK10 - 10% off upto 2000",
+        "Coupon code - CRACK15 - 15% off upto 5000",
+        "Coupon code - CRACK20 - 20% off above 5000"
+      ],
+      "tiers": [
+        {
+          "maxSubtotalPaise": 200000,
+          "basisPoints": 1000,
+          "couponCode": "CRACK10",
+          "sourceLabel": "Coupon code - CRACK10 - 10% off upto 2000",
+          "sourceBoundaryPaise": 200000
+        },
+        {
+          "maxSubtotalPaise": 500000,
+          "basisPoints": 1500,
+          "couponCode": "CRACK15",
+          "sourceLabel": "Coupon code - CRACK15 - 15% off upto 5000",
+          "sourceBoundaryPaise": 500000
+        },
+        {
+          "maxSubtotalPaise": null,
+          "basisPoints": 2000,
+          "couponCode": "CRACK20",
+          "sourceLabel": "Coupon code - CRACK20 - 20% off above 5000",
+          "sourceBoundaryPaise": 500000
+        }
+      ]
+    },
+    "rowCount": 46,
+    "url": "https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617",
+    "gid": "1949134617",
+    "sha256": "d25d214584b6451f3d9e1c14a9fba09f879dcb9288c3febeb61da90c91a62a78",
+    "fetchedAt": "2026-10-14T11:45:39.465615+00:00"
+  },
+  "offers": {
+    "labels": [
+      "Coupon code - CRACK10 - 10% off upto 2000",
+      "Coupon code - CRACK15 - 15% off upto 5000",
+      "Coupon code - CRACK20 - 20% off above 5000"
+    ],
+    "tiers": [
+      {
+        "maxSubtotalPaise": 200000,
+        "basisPoints": 1000,
+        "couponCode": "CRACK10",
+        "sourceLabel": "Coupon code - CRACK10 - 10% off upto 2000",
+        "sourceBoundaryPaise": 200000
+      },
+      {
+        "maxSubtotalPaise": 500000,
+        "basisPoints": 1500,
+        "couponCode": "CRACK15",
+        "sourceLabel": "Coupon code - CRACK15 - 15% off upto 5000",
+        "sourceBoundaryPaise": 500000
+      },
+      {
+        "maxSubtotalPaise": null,
+        "basisPoints": 2000,
+        "couponCode": "CRACK20",
+        "sourceLabel": "Coupon code - CRACK20 - 20% off above 5000",
+        "sourceBoundaryPaise": 500000
+      }
+    ]
+  },
   "products": [
     {
       "id": "dc-001",
-      "sourceRowNumber": 2,
+      "sourceRowNumber": 4,
       "sourceNumber": 1.0,
       "name": "POP-UP",
       "originalCategory": "Pop- gol size",
@@ -26,12 +95,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 2,
-      "importIssues": []
+      "displayOrder": 4,
+      "importIssues": [],
+      "mrpPaise": 1300
     },
     {
       "id": "dc-002",
-      "sourceRowNumber": 3,
+      "sourceRowNumber": 5,
       "sourceNumber": 2.0,
       "name": "POP-UP",
       "originalCategory": "Pop- long size",
@@ -54,12 +124,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 3,
-      "importIssues": []
+      "displayOrder": 5,
+      "importIssues": [],
+      "mrpPaise": 2600
     },
     {
       "id": "dc-003",
-      "sourceRowNumber": 4,
+      "sourceRowNumber": 6,
       "sourceNumber": 3.0,
       "name": "TILLI",
       "originalCategory": "Tilli bomb",
@@ -82,12 +153,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 4,
-      "importIssues": []
+      "displayOrder": 6,
+      "importIssues": [],
+      "mrpPaise": 2600
     },
     {
       "id": "dc-004",
-      "sourceRowNumber": 5,
+      "sourceRowNumber": 7,
       "sourceNumber": 4.0,
       "name": "15cm Ronak",
       "originalCategory": "Phuljadi - Small",
@@ -112,12 +184,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 5,
-      "importIssues": []
+      "displayOrder": 7,
+      "importIssues": [],
+      "mrpPaise": 2600
     },
     {
       "id": "dc-005",
-      "sourceRowNumber": 6,
+      "sourceRowNumber": 8,
       "sourceNumber": 5.0,
       "name": "18cm Pogo",
       "originalCategory": "Phuljadi",
@@ -142,12 +215,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 6,
-      "importIssues": []
+      "displayOrder": 8,
+      "importIssues": [],
+      "mrpPaise": 5200
     },
     {
       "id": "dc-006",
-      "sourceRowNumber": 7,
+      "sourceRowNumber": 9,
       "sourceNumber": 6.0,
       "name": "18cm Kuber colored",
       "originalCategory": "Phuljadi -Color",
@@ -170,12 +244,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 7,
-      "importIssues": []
+      "displayOrder": 9,
+      "importIssues": [],
+      "mrpPaise": 10400
     },
     {
       "id": "dc-007",
-      "sourceRowNumber": 8,
+      "sourceRowNumber": 10,
       "sourceNumber": 7.0,
       "name": "35cm Pogo",
       "originalCategory": "Phuljadi - Medium",
@@ -198,12 +273,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 8,
-      "importIssues": []
+      "displayOrder": 10,
+      "importIssues": [],
+      "mrpPaise": 9100
     },
     {
       "id": "dc-008",
-      "sourceRowNumber": 9,
+      "sourceRowNumber": 11,
       "sourceNumber": 8.0,
       "name": "40cm Sikha",
       "originalCategory": "Phuljadi - Big Size",
@@ -226,12 +302,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 9,
-      "importIssues": []
+      "displayOrder": 11,
+      "importIssues": [],
+      "mrpPaise": 19500
     },
     {
       "id": "dc-009",
-      "sourceRowNumber": 10,
+      "sourceRowNumber": 12,
       "sourceNumber": 9.0,
       "name": "50cm Pogo",
       "originalCategory": "Phuljadi - Big Size",
@@ -254,12 +331,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 10,
-      "importIssues": []
+      "displayOrder": 12,
+      "importIssues": [],
+      "mrpPaise": 26000
     },
     {
       "id": "dc-010",
-      "sourceRowNumber": 11,
+      "sourceRowNumber": 13,
       "sourceNumber": 10.0,
       "name": "G.C. Ashoka KS",
       "originalCategory": "Ground Chakkar - Small",
@@ -284,12 +362,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 11,
-      "importIssues": []
+      "displayOrder": 13,
+      "importIssues": [],
+      "mrpPaise": 19500
     },
     {
       "id": "dc-011",
-      "sourceRowNumber": 12,
+      "sourceRowNumber": 14,
       "sourceNumber": 11.0,
       "name": "G.C. Special MR",
       "originalCategory": "Chakkari -Small",
@@ -312,12 +391,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 12,
-      "importIssues": []
+      "displayOrder": 14,
+      "importIssues": [],
+      "mrpPaise": 23400
     },
     {
       "id": "dc-012",
-      "sourceRowNumber": 13,
+      "sourceRowNumber": 15,
       "sourceNumber": 12.0,
       "name": "G.C. DLX Dukans",
       "originalCategory": "Ground Chakkar - Medium",
@@ -340,12 +420,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 13,
-      "importIssues": []
+      "displayOrder": 15,
+      "importIssues": [],
+      "mrpPaise": 26000
     },
     {
       "id": "dc-013",
-      "sourceRowNumber": 14,
+      "sourceRowNumber": 16,
       "sourceNumber": 13.0,
       "name": "G.C. DLX HD",
       "originalCategory": "Ground Chakkar - Medium",
@@ -368,12 +449,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 14,
-      "importIssues": []
+      "displayOrder": 16,
+      "importIssues": [],
+      "mrpPaise": 39000
     },
     {
       "id": "dc-014",
-      "sourceRowNumber": 15,
+      "sourceRowNumber": 17,
       "sourceNumber": 14.0,
       "name": "45cm CK G.C.",
       "originalCategory": "Ground Chakkar - Big Size",
@@ -396,12 +478,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 15,
-      "importIssues": []
+      "displayOrder": 17,
+      "importIssues": [],
+      "mrpPaise": 52000
     },
     {
       "id": "dc-015",
-      "sourceRowNumber": 16,
+      "sourceRowNumber": 18,
       "sourceNumber": 15.0,
       "name": "Bullet small RK",
       "originalCategory": "Bullet Bomb - Small",
@@ -424,12 +507,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 16,
-      "importIssues": []
+      "displayOrder": 18,
+      "importIssues": [],
+      "mrpPaise": 7800
     },
     {
       "id": "dc-016",
-      "sourceRowNumber": 17,
+      "sourceRowNumber": 19,
       "sourceNumber": 16.0,
       "name": "Bullet Flash RL",
       "originalCategory": "Bullet Bomb",
@@ -452,12 +536,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 17,
-      "importIssues": []
+      "displayOrder": 19,
+      "importIssues": [],
+      "mrpPaise": 15600
     },
     {
       "id": "dc-017",
-      "sourceRowNumber": 18,
+      "sourceRowNumber": 20,
       "sourceNumber": 17.0,
       "name": "Dholak 777 RL",
       "originalCategory": "Bomb - Big",
@@ -480,12 +565,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 18,
-      "importIssues": []
+      "displayOrder": 20,
+      "importIssues": [],
+      "mrpPaise": 32500
     },
     {
       "id": "dc-018",
-      "sourceRowNumber": 19,
+      "sourceRowNumber": 21,
       "sourceNumber": 18.0,
       "name": "Hydro Foil CK",
       "originalCategory": "Bomb - Sutli",
@@ -508,12 +594,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 19,
-      "importIssues": []
+      "displayOrder": 21,
+      "importIssues": [],
+      "mrpPaise": 32500
     },
     {
       "id": "dc-019",
-      "sourceRowNumber": 20,
+      "sourceRowNumber": 22,
       "sourceNumber": 19.0,
       "name": "22 chorsa Turkey",
       "originalCategory": "Murga chaap",
@@ -536,12 +623,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 20,
-      "importIssues": []
+      "displayOrder": 22,
+      "importIssues": [],
+      "mrpPaise": 2600
     },
     {
       "id": "dc-020",
-      "sourceRowNumber": 21,
+      "sourceRowNumber": 23,
       "sourceNumber": 20.0,
       "name": "2 Sound Cracker KS",
       "originalCategory": "Bomb",
@@ -564,12 +652,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 21,
-      "importIssues": []
+      "displayOrder": 23,
+      "importIssues": [],
+      "mrpPaise": 10400
     },
     {
       "id": "dc-021",
-      "sourceRowNumber": 22,
+      "sourceRowNumber": 24,
       "sourceNumber": 21.0,
       "name": "Loose 100 piece MR",
       "originalCategory": "Bijli Bomb",
@@ -594,12 +683,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 22,
-      "importIssues": []
+      "displayOrder": 24,
+      "importIssues": [],
+      "mrpPaise": 10400
     },
     {
       "id": "dc-022",
-      "sourceRowNumber": 23,
+      "sourceRowNumber": 25,
       "sourceNumber": 22.0,
       "name": "Loose 50 piece Rathna",
       "originalCategory": "Bijli Bomb",
@@ -624,12 +714,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 23,
-      "importIssues": []
+      "displayOrder": 25,
+      "importIssues": [],
+      "mrpPaise": 6500
     },
     {
       "id": "dc-023",
-      "sourceRowNumber": 24,
+      "sourceRowNumber": 26,
       "sourceNumber": 23.0,
       "name": "1000 laddi RL",
       "originalCategory": "laddi",
@@ -652,12 +743,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 24,
-      "importIssues": []
+      "displayOrder": 26,
+      "importIssues": [],
+      "mrpPaise": 65000
     },
     {
       "id": "dc-024",
-      "sourceRowNumber": 25,
+      "sourceRowNumber": 27,
       "sourceNumber": 24.0,
       "name": "2000 Laddi RL",
       "originalCategory": "laddi",
@@ -680,12 +772,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 25,
-      "importIssues": []
+      "displayOrder": 27,
+      "importIssues": [],
+      "mrpPaise": 104000
     },
     {
       "id": "dc-025",
-      "sourceRowNumber": 26,
+      "sourceRowNumber": 28,
       "sourceNumber": 25.0,
       "name": "F.P. Special Malty",
       "originalCategory": "Anar - Small",
@@ -708,12 +801,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 26,
-      "importIssues": []
+      "displayOrder": 28,
+      "importIssues": [],
+      "mrpPaise": 19500
     },
     {
       "id": "dc-026",
-      "sourceRowNumber": 27,
+      "sourceRowNumber": 29,
       "sourceNumber": 26.0,
       "name": "F.P. Nano RL",
       "originalCategory": "Anar - Medium",
@@ -736,12 +830,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 27,
-      "importIssues": []
+      "displayOrder": 29,
+      "importIssues": [],
+      "mrpPaise": 32500
     },
     {
       "id": "dc-027",
-      "sourceRowNumber": 28,
+      "sourceRowNumber": 30,
       "sourceNumber": 27.0,
       "name": "F.P. Ashoka CORO",
       "originalCategory": "Anar - Medium",
@@ -766,12 +861,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 28,
-      "importIssues": []
+      "displayOrder": 30,
+      "importIssues": [],
+      "mrpPaise": 45500
     },
     {
       "id": "dc-028",
-      "sourceRowNumber": 29,
+      "sourceRowNumber": 31,
       "sourceNumber": 28.0,
       "name": "Color Koti DLX MR",
       "originalCategory": "ANAR - Big size",
@@ -794,12 +890,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 29,
-      "importIssues": []
+      "displayOrder": 31,
+      "importIssues": [],
+      "mrpPaise": 78000
     },
     {
       "id": "dc-029",
-      "sourceRowNumber": 30,
+      "sourceRowNumber": 32,
       "sourceNumber": 29.0,
       "name": "Bunty-Bubly RL",
       "originalCategory": "Anar Bomb - 5 piece",
@@ -822,12 +919,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 30,
-      "importIssues": []
+      "displayOrder": 32,
+      "importIssues": [],
+      "mrpPaise": 23400
     },
     {
       "id": "dc-030",
-      "sourceRowNumber": 31,
+      "sourceRowNumber": 33,
       "sourceNumber": 30.0,
       "name": "Ganga Jamana RL",
       "originalCategory": "Anar Bomb - 5 piece",
@@ -850,12 +948,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 31,
-      "importIssues": []
+      "displayOrder": 33,
+      "importIssues": [],
+      "mrpPaise": 26000
     },
     {
       "id": "dc-031",
-      "sourceRowNumber": 32,
+      "sourceRowNumber": 34,
       "sourceNumber": 31.0,
       "name": "Mighty RL /ANTI Banti",
       "originalCategory": "Anar bomb - 10 piece",
@@ -878,12 +977,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 32,
-      "importIssues": []
+      "displayOrder": 34,
+      "importIssues": [],
+      "mrpPaise": 39000
     },
     {
       "id": "dc-032",
-      "sourceRowNumber": 33,
+      "sourceRowNumber": 35,
       "sourceNumber": 32.0,
       "name": "Rocket Bomb KS",
       "originalCategory": "Rockets - Small",
@@ -906,12 +1006,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 33,
-      "importIssues": []
+      "displayOrder": 35,
+      "importIssues": [],
+      "mrpPaise": 84500
     },
     {
       "id": "dc-033",
-      "sourceRowNumber": 34,
+      "sourceRowNumber": 36,
       "sourceNumber": 33.0,
       "name": "2 Sound Rocket KS",
       "originalCategory": "Rockets",
@@ -934,12 +1035,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 34,
-      "importIssues": []
+      "displayOrder": 36,
+      "importIssues": [],
+      "mrpPaise": 91000
     },
     {
       "id": "dc-034",
-      "sourceRowNumber": 35,
+      "sourceRowNumber": 37,
       "sourceNumber": 34.0,
       "name": "Lunik Ex. Coro",
       "originalCategory": "Rockets",
@@ -962,12 +1064,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 35,
-      "importIssues": []
+      "displayOrder": 37,
+      "importIssues": [],
+      "mrpPaise": 26000
     },
     {
       "id": "dc-035",
-      "sourceRowNumber": 36,
+      "sourceRowNumber": 38,
       "sourceNumber": 35.0,
       "name": "Zitiwala Rocket Coro",
       "originalCategory": "Rockets",
@@ -990,12 +1093,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 36,
-      "importIssues": []
+      "displayOrder": 38,
+      "importIssues": [],
+      "mrpPaise": 45500
     },
     {
       "id": "dc-036",
-      "sourceRowNumber": 37,
+      "sourceRowNumber": 39,
       "sourceNumber": 36.0,
       "name": "Penta Missile AZ",
       "originalCategory": "Single shot - 5 Piece",
@@ -1018,12 +1122,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 37,
-      "importIssues": []
+      "displayOrder": 39,
+      "importIssues": [],
+      "mrpPaise": 58500
     },
     {
       "id": "dc-037",
-      "sourceRowNumber": 38,
+      "sourceRowNumber": 40,
       "sourceNumber": 37.0,
       "name": "3 piece Shower SRL",
       "originalCategory": "Fountain Rocket - 3 Piece",
@@ -1046,12 +1151,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 38,
-      "importIssues": []
+      "displayOrder": 40,
+      "importIssues": [],
+      "mrpPaise": 71500
     },
     {
       "id": "dc-038",
-      "sourceRowNumber": 39,
+      "sourceRowNumber": 41,
       "sourceNumber": 38.0,
       "name": "3 piece Shower NSV",
       "originalCategory": "Single shot Rocket Flower - 3 Piece",
@@ -1074,12 +1180,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 39,
-      "importIssues": []
+      "displayOrder": 41,
+      "importIssues": [],
+      "mrpPaise": 45500
     },
     {
       "id": "dc-039",
-      "sourceRowNumber": 40,
+      "sourceRowNumber": 42,
       "sourceNumber": 39.0,
       "name": "7 Shot Special",
       "originalCategory": "Sky shot",
@@ -1102,12 +1209,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 40,
-      "importIssues": []
+      "displayOrder": 42,
+      "importIssues": [],
+      "mrpPaise": 45500
     },
     {
       "id": "dc-040",
-      "sourceRowNumber": 41,
+      "sourceRowNumber": 43,
       "sourceNumber": 40.0,
       "name": "12 shot 105 cdo AZ",
       "originalCategory": "Sky shot",
@@ -1132,12 +1240,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 41,
-      "importIssues": []
+      "displayOrder": 43,
+      "importIssues": [],
+      "mrpPaise": 97500
     },
     {
       "id": "dc-041",
-      "sourceRowNumber": 42,
+      "sourceRowNumber": 44,
       "sourceNumber": 41.0,
       "name": "12 shot honey moon AZ",
       "originalCategory": "Sky shot",
@@ -1160,12 +1269,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 42,
-      "importIssues": []
+      "displayOrder": 44,
+      "importIssues": [],
+      "mrpPaise": 104000
     },
     {
       "id": "dc-042",
-      "sourceRowNumber": 43,
+      "sourceRowNumber": 45,
       "sourceNumber": 42.0,
       "name": "16 shot AZ",
       "originalCategory": "Sky shot",
@@ -1188,12 +1298,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 43,
-      "importIssues": []
+      "displayOrder": 45,
+      "importIssues": [],
+      "mrpPaise": 104000
     },
     {
       "id": "dc-043",
-      "sourceRowNumber": 44,
+      "sourceRowNumber": 46,
       "sourceNumber": 43.0,
       "name": "15 shot RL/ Teenager choice",
       "originalCategory": "Sky shot",
@@ -1216,12 +1327,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 44,
-      "importIssues": []
+      "displayOrder": 46,
+      "importIssues": [],
+      "mrpPaise": 97500
     },
     {
       "id": "dc-044",
-      "sourceRowNumber": 45,
+      "sourceRowNumber": 47,
       "sourceNumber": 44.0,
       "name": "AK 47 MR",
       "originalCategory": "Anar - Handhandle",
@@ -1244,12 +1356,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": false,
-      "displayOrder": 45,
-      "importIssues": []
+      "displayOrder": 47,
+      "importIssues": [],
+      "mrpPaise": 71500
     },
     {
       "id": "dc-045",
-      "sourceRowNumber": 46,
+      "sourceRowNumber": 48,
       "sourceNumber": 45.0,
       "name": "60 Shot",
       "originalCategory": "Sky shot",
@@ -1268,12 +1381,13 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 46,
-      "importIssues": []
+      "displayOrder": 48,
+      "importIssues": [],
+      "mrpPaise": 195000
     },
     {
       "id": "dc-046",
-      "sourceRowNumber": 47,
+      "sourceRowNumber": 49,
       "sourceNumber": 46.0,
       "name": "100 Shot",
       "originalCategory": "Sky shot",
@@ -1292,8 +1406,9 @@
       "certificationDetails": null,
       "enabled": true,
       "categoryReviewed": true,
-      "displayOrder": 47,
-      "importIssues": []
+      "displayOrder": 49,
+      "importIssues": [],
+      "mrpPaise": 286000
     }
   ]
 }

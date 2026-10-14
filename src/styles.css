@@ -1329,6 +1329,52 @@ summary {
   color: #235e40;
   font-weight: 600;
 }
+.offer-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  margin: 0 0 20px;
+  background: #f6e8cc;
+  border: 1px solid #d9bb86;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.offer-banner > div {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.offer-banner span {
+  font-weight: 600;
+}
+.offer-banner a {
+  font-size: 12px;
+}
+.offer-saving {
+  color: #235e40;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .offer-banner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .offer-banner > div {
+    gap: 8px 14px;
+  }
+  .offer-banner a {
+    min-height: 28px;
+  }
+  .mobile-cart-space {
+    height: calc(130px + env(safe-area-inset-bottom));
+  }
+  .mobile-cart-bar ~ .toast {
+    bottom: 130px;
+  }
+}
 .mobile-cart-bar,
 .mobile-cart-space {
   display: none;

@@ -206,6 +206,45 @@ describe("cart and launch gates", () => {
   });
 });
 describe("buyer and WhatsApp", () => {
+  it.each([
+    [10000, 1000, 1000, 9000],
+    [200000, 1000, 20000, 180000],
+    [200001, 1500, 30000, 170001],
+    [500000, 1500, 75000, 425000],
+    [500001, 2000, 100000, 400001],
+    [1000000, 2000, 200000, 800000],
+  ])(
+    "applies the approved whole-subtotal tier at %i paise",
+    (subtotal, basisPoints, discount, afterDiscount) => {
+      const c = { ...config, offers: data.offers };
+      const result = totals(
+        { "dc-001": 1 },
+        [{ ...ready[0], pricePaise: subtotal }],
+        c,
+        c.fulfilment[0],
+      );
+      expect(result).toMatchObject({
+        subtotal,
+        discountBasisPoints: basisPoints,
+        couponCode: `CRACK${basisPoints / 100}`,
+        discount,
+        afterDiscount,
+        amount: afterDiscount,
+      });
+    },
+  );
+  it("uses the same Sheet offer in the WhatsApp order", () => {
+    const draft = makeRequest(
+      { "dc-001": 1 },
+      [{ ...ready[0], pricePaise: 500000 }],
+      buyer,
+      { ...config, offers: data.offers, urlThreshold: 100000 },
+    );
+    expect(draft.message).toContain("Offer (15% off): −₹750");
+    expect(draft.message).toContain("Coupon: CRACK15");
+    expect(draft.message).toContain("Estimated amount: ₹4,250");
+    expect(draft.message).not.toContain("Catalogue version");
+  });
   it("accepts Indian scripts, normalizes mobile and checks service areas separately", () => {
     expect(validateBuyer(buyer, config)).toEqual({});
     expect(normalizeMobile("+91 99922-30740")).toBe("9992230740");

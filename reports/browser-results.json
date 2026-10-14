@@ -90,6 +90,82 @@
   },
   "suites": [
     {
+      "title": "direct-checkout.spec.ts",
+      "file": "direct-checkout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "single-step mobile checkout applies Sheet offers and includes every selected item",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7916,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-14T11:45:47.127Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "efd665a5a6ca2b0b6d14-6c4e678c919f2dccc793",
+          "file": "direct-checkout.spec.ts",
+          "line": 4,
+          "column": 1
+        },
+        {
+          "title": "long orders prepare complete details inline and cart edits invalidate the copied order",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2428,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-14T11:45:56.363Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "efd665a5a6ca2b0b6d14-39f9607af077c4fe2b63",
+          "file": "direct-checkout.spec.ts",
+          "line": 76,
+          "column": 1
+        }
+      ]
+    },
+    {
       "title": "fallbacks.spec.ts",
       "file": "fallbacks.spec.ts",
       "column": 0,
@@ -111,12 +187,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1852,
+                  "duration": 1331,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:14.226Z",
+                  "startTime": "2026-10-14T11:45:58.827Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -130,7 +206,7 @@
           "column": 1
         },
         {
-          "title": "long message, failed clipboard, blocked popup, download and offline retry retain complete request",
+          "title": "long order supports manual copying, download, popup and offline fallback without a review screen",
           "ok": true,
           "tags": [],
           "tests": [
@@ -145,12 +221,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3487,
+                  "duration": 3407,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:16.994Z",
+                  "startTime": "2026-10-14T11:46:00.174Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -158,7 +234,7 @@
               "status": "expected"
             }
           ],
-          "id": "823e5510e2ed762314f8-a0dbf384a2a5cc7807f9",
+          "id": "823e5510e2ed762314f8-4a4baf0cc1979466a086",
           "file": "fallbacks.spec.ts",
           "line": 32,
           "column": 1
@@ -179,12 +255,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 875,
+                  "duration": 811,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:20.497Z",
+                  "startTime": "2026-10-14T11:46:03.591Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -194,7 +270,7 @@
           ],
           "id": "823e5510e2ed762314f8-a1c4e107e47e6d98f465",
           "file": "fallbacks.spec.ts",
-          "line": 93,
+          "line": 98,
           "column": 1
         }
       ]
@@ -221,12 +297,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 845,
+                  "duration": 713,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:21.399Z",
+                  "startTime": "2026-10-14T11:46:04.433Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -255,12 +331,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1130,
+                  "duration": 1139,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:22.259Z",
+                  "startTime": "2026-10-14T11:46:05.156Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -271,82 +347,6 @@
           "id": "66eff6f10bb92964d9d6-beb034533ee771e48828",
           "file": "media.spec.ts",
           "line": 32,
-          "column": 1
-        }
-      ]
-    },
-    {
-      "title": "mobile-checkout.spec.ts",
-      "file": "mobile-checkout.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [
-        {
-          "title": "mobile cart and complete four-product WhatsApp request work at 320, 360 and 390px",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 2878,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-14T11:11:23.417Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "7838c6abe721b19c2eeb-d2ffb48680df2e949bf7",
-          "file": "mobile-checkout.spec.ts",
-          "line": 4,
-          "column": 1
-        },
-        {
-          "title": "a long request must be copied in full and re-prepared after changing the cart",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 1200,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-14T11:11:26.307Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "7838c6abe721b19c2eeb-9954123c81f9cf36a04e",
-          "file": "mobile-checkout.spec.ts",
-          "line": 81,
           "column": 1
         }
       ]
@@ -373,12 +373,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 793,
+                  "duration": 1012,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:27.539Z",
+                  "startTime": "2026-10-14T11:46:06.385Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -392,7 +392,7 @@
           "column": 1
         },
         {
-          "title": "cart, restoration, Unicode buyer, exact request and retained handoff on 360px mobile",
+          "title": "mobile cart restores and opens a concise discounted WhatsApp order directly",
           "ok": true,
           "tags": [],
           "tests": [
@@ -407,12 +407,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1884,
+                  "duration": 1798,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:28.343Z",
+                  "startTime": "2026-10-14T11:46:07.406Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -420,7 +420,7 @@
               "status": "expected"
             }
           ],
-          "id": "5c02723ad68c2a0d50c5-ef3b73e9d8a789ec04b0",
+          "id": "5c02723ad68c2a0d50c5-0ec9fc478e4bf405ddb4",
           "file": "site.spec.ts",
           "line": 26,
           "column": 1
@@ -441,12 +441,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1070,
+                  "duration": 979,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:30.238Z",
+                  "startTime": "2026-10-14T11:46:09.212Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -456,7 +456,7 @@
           ],
           "id": "5c02723ad68c2a0d50c5-9fbdf6cc86e022b53f88",
           "file": "site.spec.ts",
-          "line": 107,
+          "line": 112,
           "column": 1
         },
         {
@@ -475,12 +475,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3090,
+                  "duration": 2505,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-14T11:11:31.320Z",
+                  "startTime": "2026-10-14T11:46:10.201Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -490,7 +490,7 @@
           ],
           "id": "5c02723ad68c2a0d50c5-80af7b89adb00c8a7ce0",
           "file": "site.spec.ts",
-          "line": 136,
+          "line": 141,
           "column": 1
         }
       ]
@@ -498,8 +498,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-14T11:11:09.002Z",
-    "duration": 27197.052,
+    "startTime": "2026-10-14T11:45:27.137Z",
+    "duration": 47052.175,
     "expected": 11,
     "skipped": 0,
     "unexpected": 0,

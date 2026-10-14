@@ -33,6 +33,14 @@ export type Fulfilment = {
   servicePins: string[];
 };
 export type Business = {
+  offers?: {
+    labels: string[];
+    tiers: {
+      maxSubtotalPaise: number | null;
+      basisPoints: number;
+      couponCode?: string | null;
+    }[];
+  };
   brand: string;
   whatsapp: string;
   phoneDisplay: string;

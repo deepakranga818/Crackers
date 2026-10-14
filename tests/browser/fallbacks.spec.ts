@@ -29,7 +29,7 @@ test("cross-tab updates synchronize units without writeback loops", async ({
   ).toBeVisible();
 });
 
-test("long message, failed clipboard, blocked popup, download and offline retry retain complete request", async ({
+test("long order supports manual copying, download, popup and offline fallback without a review screen", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -55,32 +55,38 @@ test("long message, failed clipboard, blocked popup, download and offline retry 
   await page.getByLabel("Full name *").fill("Test Buyer");
   await page.getByLabel("Mobile number *").fill("9992230740");
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Review complete request" }).click();
-  await expect(page.getByText(/This request is too long/)).toBeVisible();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
   ).toBeDisabled();
-  await expect(page.locator(".request-preview")).toContainText("46. 100 Shot");
-  await page.getByRole("button", { name: "Copy Complete Request" }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Select and copy the complete request" }),
-  ).toHaveValue((await page.locator(".request-preview").textContent()) || "");
-  const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download Request" }).click();
-  const download = await downloadPromise;
-  const path = await download.path();
-  expect(await readFile(path!, "utf8")).toBe(
-    await page.locator(".request-preview").textContent(),
-  );
+  await expect(page.locator(".request-preview")).toHaveCount(0);
+  await page.getByRole("button", { name: "Copy Complete Order" }).click();
+  const text = page.getByRole("textbox", {
+    name: "Select and copy the complete order",
+  });
+  const message = await text.inputValue();
+  expect(message).toContain("46. 100 Shot");
+  expect(message).not.toContain("Catalogue version");
+  const downloading = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download Order" }).click();
+  const download = await downloading;
+  expect(await readFile(await download.path(), "utf8")).toBe(message);
   await page
-    .getByRole("checkbox", { name: /I have copied the complete request/ })
+    .getByRole("checkbox", { name: /I have copied the full order/ })
     .check();
   await page
     .getByRole("button", { name: "Continue to WhatsApp", exact: true })
     .click();
   await expect(page.getByText(/WhatsApp could not open/)).toBeVisible();
   await page.context().setOffline(true);
-  await page.getByRole("button", { name: "Open WhatsApp again" }).click();
+  await expect(
+    page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
+  ).toBeEnabled();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
   await expect(
     page.getByText(/You are offline. Copy or download/),
   ).toBeVisible();
@@ -89,7 +95,6 @@ test("long message, failed clipboard, blocked popup, download and offline retry 
     page.getByRole("button", { name: /Open cart, 46 units/ }),
   ).toBeVisible();
 });
-
 test("details quantity selection adds exact amount and focus returns after Escape", async ({
   page,
 }) => {

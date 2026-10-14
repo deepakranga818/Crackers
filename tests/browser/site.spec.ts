@@ -23,15 +23,15 @@ test("catalogue has all products, combined search, details, and disabled orderin
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
-test("cart, restoration, Unicode buyer, exact request and retained handoff on 360px mobile", async ({
+test("mobile cart restores and opens a concise discounted WhatsApp order directly", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
-    window.open = (url?: string | URL) => {
-      (window as any).__whatsapp = String(url);
-      return { opener: null } as any;
+    window.open = (url) => {
+      window.__whatsapp = String(url);
+      return { opener: null };
     };
     Object.defineProperty(window, "AudioContext", {
       value: class {
@@ -46,8 +46,8 @@ test("cart, restoration, Unicode buyer, exact request and retained handoff on 36
   await expect(
     page.getByText("Sound is unavailable. Shopping still works."),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Add to cart" }).nth(0).click();
-  await page.getByRole("button", { name: "Add to cart" }).nth(0).click();
+  await page.getByRole("button", { name: "Add to cart" }).first().click();
+  await page.getByRole("button", { name: "Add to cart" }).first().click();
   await page.getByRole("button", { name: /Open cart, 2 units/ }).click();
   await page
     .getByRole("dialog")
@@ -62,6 +62,7 @@ test("cart, restoration, Unicode buyer, exact request and retained handoff on 36
     .getByRole("textbox", { name: "POP-UP dc-002 quantity", exact: true })
     .press("Tab");
   await expect(page.locator(".price-summary")).toContainText("₹60");
+  await expect(page.locator(".price-summary")).toContainText("₹54");
   await page
     .getByRole("button", { name: "Remove POP-UP, dc-002", exact: true })
     .click();
@@ -70,17 +71,14 @@ test("cart, restoration, Unicode buyer, exact request and retained handoff on 36
   await page.reload();
   await page.getByRole("button", { name: /Open cart, 4 units/ }).click();
   await page.getByRole("button", { name: "Proceed to buyer details" }).click();
-  await page.getByRole("button", { name: "Review complete request" }).click();
+  await page
+    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
+    .click();
   await expect(page.locator("#buyer-name")).toBeFocused();
   await page.getByLabel("Full name *").fill("दीपक रांगा");
   await page.getByLabel("Mobile number *").fill("+91 99922-30740");
   await page.getByLabel("Order notes").fill("₹ & + # % 🎆");
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Review complete request" }).click();
-  await expect(page.locator(".request-preview")).toContainText(
-    "Product subtotal: ₹60",
-  );
-  await expect(page.locator(".request-preview")).toContainText("दीपक रांगा");
   await page
     .getByRole("button", { name: "Continue to WhatsApp", exact: true })
     .click();
@@ -89,11 +87,18 @@ test("cart, restoration, Unicode buyer, exact request and retained handoff on 36
       "WhatsApp opened. If you sent the request, wait for the seller’s confirmation.",
     ),
   ).toBeVisible();
-  const url = await page.evaluate(() => (window as any).__whatsapp);
+  const url = await page.evaluate(() => window.__whatsapp);
+  const message = new URL(url).searchParams.get("text");
   expect(new URL(url).pathname).toBe("/919992230740");
-  expect(new URL(url).searchParams.get("text")).toBe(
-    await page.locator(".request-preview").textContent(),
-  );
+  expect(message).toContain("दीपक रांगा");
+  expect(message).toContain("Product subtotal: ₹60");
+  expect(message).toContain("Offer (10% off): −₹6");
+  expect(message).toContain("Total: ₹54");
+  expect(message).not.toContain("Catalogue version");
+  await expect(page.locator(".request-preview")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Checkout", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await expect(
     page.getByRole("button", { name: /Open cart, 4 units/ }),

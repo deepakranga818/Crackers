@@ -44,4 +44,4 @@ Git Credential Manager may require owner sign-in. Do not put tokens in commands,
 
 ## Updates and rollback
 
-Edit Excel/config, reimport, inspect reports and diff, run tests/build, commit and push. GitHub triggers the configured host build. Roll back via the provider’s previous approved deployment and revert the offending Git commit. For an urgent ordering pause, set orderingEnabled false, build/test and redeploy. Cached already-open clients can remain stale: seller must always reconfirm prices and availability. There is no service worker or offline checkout.
+Edit the authoritative Google Sheet/config, run npm run sync, inspect reports and diff, run tests/build, commit and push. Existing static deployments require redeployment after Sheet changes. GitHub triggers the configured host build. Roll back via the provider’s previous approved deployment and revert the offending Git commit. For an urgent ordering pause, set orderingEnabled false, build/test and redeploy. Cached already-open clients can remain stale: seller must always reconfirm prices and availability. There is no service worker or offline checkout.

@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { categories, config, isLocalDemo, products } from "./business";
+import {
+  catalogueSource,
+  categories,
+  config,
+  isLocalDemo,
+  products,
+} from "./business";
 import { filterProducts, matches } from "./catalogue";
 import { useCart } from "./cart";
 import {
@@ -21,7 +27,7 @@ export default function App() {
     [sort, setSort] = useState("source");
   const [detail, setDetail] = useState<Product | null>(null),
     [cartOpen, setCartOpen] = useState(false),
-    [stage, setStage] = useState<"cart" | "buyer" | "review">("cart");
+    [stage, setStage] = useState<"cart" | "buyer">("cart");
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [toast, setToast] = useState(""),
     [undo, setUndo] = useState<{ p: Product; qty: number } | null>(null);
@@ -51,6 +57,11 @@ export default function App() {
   const selected = products.filter((p) => p.id in cart);
   const visible = filterProducts(products, query, category, sort);
   const searchProducts = products.filter((p) => matches(p, query));
+  useEffect(() => {
+    setDraft(undefined);
+    setHandoff("");
+    setPreparedFingerprint(null);
+  }, [cart]);
   const cartReady =
     canOrder &&
     selected.length > 0 &&
@@ -59,16 +70,10 @@ export default function App() {
     if (detail) setDetailQuantity(cart[detail.id] || 1);
   }, [detail]);
   useEffect(() => {
-    if (cartOpen && stage !== "cart")
-      requestAnimationFrame(() => {
-        if (stage === "buyer") document.getElementById("buyer-name")?.focus();
-        else
-          document
-            .querySelector<HTMLElement>(
-              ".handoff-preparation, .request-preview",
-            )
-            ?.focus();
-      });
+    if (cartOpen && stage === "buyer")
+      requestAnimationFrame(() =>
+        document.getElementById("buyer-name")?.focus(),
+      );
   }, [cartOpen, stage]);
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -139,7 +144,7 @@ export default function App() {
     setCartOpen(true);
     setStage("cart");
   }
-  function review() {
+  function checkout() {
     const next = validateBuyer(buyer, config);
     setErrors(next);
     if (Object.keys(next).length) {
@@ -149,26 +154,20 @@ export default function App() {
       return;
     }
     try {
-      setDraft(makeRequest(cart, products, buyer, config, draft));
-      setStage("review");
-      setHandoff("");
+      const current = makeRequest(cart, products, buyer, config, draft);
+      setDraft(current);
       setManualCopy(false);
       setDownloadRequested(false);
-    } catch (e) {
-      announce((e as Error).message);
+      handoffRequest(current);
+    } catch (error) {
+      announce((error as Error).message);
     }
   }
-  function handoffRequest() {
+  function handoffRequest(provided?: RequestDraft) {
     if (Date.now() - tapGuard.current < 1000) return;
     try {
-      const current = makeRequest(cart, products, buyer, config, draft);
-      if (current.fingerprint !== draft?.fingerprint) {
-        setDraft(current);
-        setHandoff(
-          "Your request changed. Review the updated details before continuing.",
-        );
-        return;
-      }
+      const current =
+        provided ?? makeRequest(cart, products, buyer, config, draft);
       if (!navigator.onLine) {
         setHandoff(
           "You are offline. Copy or download your request, then retry when connected.",
@@ -259,7 +258,12 @@ export default function App() {
           }
           aria-invalid={!!errors[key]}
           aria-describedby={errors[key] ? `error-${key}` : undefined}
-          onChange={(e) => setBuyer({ ...buyer, [key]: e.target.value })}
+          onChange={(e) => {
+            setBuyer({ ...buyer, [key]: e.target.value });
+            setDraft(undefined);
+            setHandoff("");
+            setPreparedFingerprint(null);
+          }}
         />
         {errors[key] && (
           <span className="error" id={`error-${key}`}>
@@ -342,8 +346,8 @@ export default function App() {
               festival of lights.
             </h1>
             <p>
-              Explore the collection, find your favourites, and compare prices
-              at your own pace.
+              Pick your crackers, check the offers, and share your selection on
+              WhatsApp.
             </p>
             <div className="hero-actions">
               <a className="button gold" href="#catalogue">
@@ -425,6 +429,26 @@ export default function App() {
               Availability and selling units require confirmation.
             </p>
           </div>
+          {config.offers && config.offers.labels.length > 0 && (
+            <div
+              className="offer-banner"
+              aria-label="Offers from the shared price list"
+            >
+              <strong>Current offers</strong>
+              <div>
+                {config.offers.labels.map((label) => (
+                  <span key={label}>{label}</span>
+                ))}
+              </div>
+              <a
+                href={catalogueSource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Shared price list
+              </a>
+            </div>
+          )}
           <div className="search-bar">
             <label className="search">
               <span aria-hidden="true">⌕</span>
@@ -676,6 +700,11 @@ export default function App() {
                 {amount.units} {amount.units === 1 ? "unit" : "units"} selected
               </strong>
               <span>Product subtotal {rupees(amount.subtotal)}</span>
+              {amount.discount > 0 && (
+                <span className="offer-saving">
+                  After offer {rupees(amount.afterDiscount)}
+                </span>
+              )}
             </div>
             <button
               className="button primary"
@@ -795,13 +824,7 @@ export default function App() {
       {cartOpen && (
         <Modal
           drawer
-          title={
-            stage === "buyer"
-              ? "Buyer details"
-              : stage === "review"
-                ? "Review your request"
-                : "Your selection"
-          }
+          title={stage === "buyer" ? "Checkout" : "Your selection"}
           onClose={() => setCartOpen(false)}
         >
           {toast && (
@@ -908,39 +931,41 @@ export default function App() {
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
-                review();
+                checkout();
               }}
             >
               <p>
-                Only verified fulfilment options are shown. Details remain in
-                this tab until you choose to share them.
+                Your details and selected items will be included in WhatsApp.
+                Tap Send there to share your order.
               </p>
               {field("name", "Full name", true, 100)}
               {field("mobile", "Mobile number", true, 30)}
-              <label className="field" htmlFor="buyer-method">
-                Fulfilment method *
-                <select
-                  id="buyer-method"
-                  value={buyer.method}
-                  onChange={(e) =>
-                    setBuyer({ ...buyer, method: e.target.value })
-                  }
-                  aria-invalid={!!errors.method}
-                >
-                  <option value="">Choose an option</option>
-                  {config.fulfilment
-                    .filter((f) => f.verified)
-                    .map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.label}
-                      </option>
-                    ))}
-                </select>
-                {errors.method && (
-                  <span className="error">{errors.method}</span>
-                )}
-              </label>
-              {method?.type === "pickup" && (
+              {config.fulfilment.filter((f) => f.verified).length > 1 && (
+                <label className="field" htmlFor="buyer-method">
+                  Fulfilment method *
+                  <select
+                    id="buyer-method"
+                    value={buyer.method}
+                    onChange={(e) =>
+                      setBuyer({ ...buyer, method: e.target.value })
+                    }
+                    aria-invalid={!!errors.method}
+                  >
+                    <option value="">Choose an option</option>
+                    {config.fulfilment
+                      .filter((f) => f.verified)
+                      .map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label}
+                        </option>
+                      ))}
+                  </select>
+                  {errors.method && (
+                    <span className="error">{errors.method}</span>
+                  )}
+                </label>
+              )}
+              {method?.type === "pickup" && !isLocalDemo && (
                 <p className="callout">
                   Pickup location: {method.address || config.address}
                 </p>
@@ -976,9 +1001,104 @@ export default function App() {
                 <p className="error">{errors.acknowledged}</p>
               )}
               <PriceSummary amount={amount} />
-              <button className="button primary full" type="submit">
-                Review complete request
+              {draft?.long && (
+                <section
+                  className="handoff-preparation"
+                  aria-label="Complete order transfer"
+                >
+                  <h3>Copy your full order first</h3>
+                  <p>
+                    Your order is too long for a chat link. Copy it, then open
+                    WhatsApp, paste and tap Send. Or download it and attach the
+                    file.
+                  </p>
+                  <div className="copy-actions">
+                    <button
+                      type="button"
+                      className="primary"
+                      onClick={() => void copy()}
+                    >
+                      Copy Complete Order
+                    </button>
+                    <button type="button" onClick={download}>
+                      Download Order
+                    </button>
+                  </div>
+                  {manualCopy && (
+                    <label className="field">
+                      Select and copy the complete order
+                      <textarea
+                        readOnly
+                        rows={6}
+                        value={draft.message}
+                        onFocus={(event) => event.target.select()}
+                      />
+                    </label>
+                  )}
+                  {(manualCopy || downloadRequested) && (
+                    <label className="ack">
+                      <input
+                        type="checkbox"
+                        checked={requestPrepared}
+                        onChange={(event) =>
+                          setPreparedFingerprint(
+                            event.target.checked ? draft.fingerprint : null,
+                          )
+                        }
+                      />
+                      I have copied the full order, or will attach the
+                      downloaded file.
+                    </label>
+                  )}
+                  {requestPrepared && (
+                    <p className="prepared-status" role="status">
+                      Full order ready to paste or attach.
+                    </p>
+                  )}
+                </section>
+              )}
+              <button
+                className="button whatsapp full"
+                type="submit"
+                disabled={busy || (!!draft?.long && !requestPrepared)}
+              >
+                {handoff && !draft?.long
+                  ? "Open WhatsApp again"
+                  : "Continue to WhatsApp"}
               </button>
+              {handoff && (
+                <p className="callout" role="status">
+                  {handoff}
+                </p>
+              )}
+              {draft && !draft.long && (
+                <details className="order-backup">
+                  <summary>Copy or save this order</summary>
+                  <div className="copy-actions">
+                    <button type="button" onClick={() => void copy()}>
+                      Copy Complete Order
+                    </button>
+                    <button type="button" onClick={download}>
+                      Download Order
+                    </button>
+                  </div>
+                  {manualCopy && (
+                    <label className="field">
+                      Select and copy the complete order
+                      <textarea
+                        readOnly
+                        rows={6}
+                        value={draft.message}
+                        onFocus={(event) => event.target.select()}
+                      />
+                    </label>
+                  )}
+                </details>
+              )}
+              <p className="muted">
+                Availability and collection/delivery are confirmed by the
+                seller. Your cart stays saved.
+              </p>
               <button
                 type="button"
                 className="button secondary full"
@@ -997,146 +1117,6 @@ export default function App() {
                 Reset buyer details
               </button>
             </form>
-          )}
-          {stage === "review" && draft && (
-            <div className="review-content">
-              <p className="callout">
-                {draft.long
-                  ? "For this long request, copy the full details below and paste them in WhatsApp, or attach the downloaded request file. "
-                  : "WhatsApp will open with your complete request. "}
-                Review it and tap Send. Your order is confirmed only after the
-                seller replies.
-              </p>
-              {draft.long && (
-                <section
-                  className="handoff-preparation"
-                  aria-label="Prepare complete WhatsApp request"
-                  tabIndex={-1}
-                >
-                  <h3>Send every item in your request</h3>
-                  <p>
-                    This request is too long for our configured chat-link limit.
-                    The chat link carries a reference, so you must paste the
-                    complete details or attach the file before sending.
-                  </p>
-                  <ol>
-                    <li>Copy Complete Request, or download the file.</li>
-                    <li>Continue to WhatsApp.</li>
-                    <li>
-                      Paste the details or attach the file, then tap Send.
-                    </li>
-                  </ol>
-                  <div className="copy-actions">
-                    <button className="primary" onClick={() => void copy()}>
-                      Copy Complete Request
-                    </button>
-                    <button onClick={download}>Download Request</button>
-                  </div>
-                  {manualCopy && (
-                    <label className="field">
-                      Select and copy the complete request
-                      <textarea
-                        readOnly
-                        rows={8}
-                        value={draft.message}
-                        onFocus={(event) => event.target.select()}
-                      />
-                    </label>
-                  )}
-                  {requestPrepared && (
-                    <p className="prepared-status" role="status">
-                      Complete request prepared. Paste it or attach the file in
-                      WhatsApp before tapping Send.
-                    </p>
-                  )}
-                  {(manualCopy || downloadRequested) && (
-                    <label className="ack">
-                      <input
-                        type="checkbox"
-                        checked={requestPrepared}
-                        onChange={(event) =>
-                          setPreparedFingerprint(
-                            event.target.checked ? draft.fingerprint : null,
-                          )
-                        }
-                      />
-                      I have copied the complete request, or downloaded it and
-                      will attach it in WhatsApp.
-                    </label>
-                  )}
-                </section>
-              )}
-              <pre
-                className="request-preview"
-                tabIndex={0}
-                aria-label="Complete order request"
-              >
-                {draft.message}
-              </pre>
-              <button
-                className="button whatsapp full"
-                disabled={busy || !requestPrepared}
-                onClick={handoffRequest}
-              >
-                {handoff ? "Open WhatsApp again" : "Continue to WhatsApp"}
-              </button>
-              {handoff && (
-                <p className="callout" role="status">
-                  {handoff}
-                </p>
-              )}
-              <p>
-                Contact:{" "}
-                <a href={`tel:+${config.whatsapp}`}>{config.phoneDisplay}</a>.
-                WhatsApp may require installation or a Web login. If it fails,
-                use the number and copy/download options.
-              </p>
-              {!draft.long && (
-                <div className="copy-actions">
-                  <button onClick={() => void copy()}>
-                    Copy Complete Request
-                  </button>
-                  <button onClick={download}>Download Request</button>
-                </div>
-              )}
-              {manualCopy && !draft.long && (
-                <label className="field">
-                  Select and copy the complete request
-                  <textarea
-                    readOnly
-                    rows={12}
-                    value={draft.message}
-                    onFocus={(e) => e.target.select()}
-                  />
-                </label>
-              )}
-              <button
-                className="button secondary full"
-                onClick={() => setStage("buyer")}
-              >
-                Edit buyer details
-              </button>
-              <button className="text-button" onClick={() => setStage("cart")}>
-                Edit cart
-              </button>
-              <button
-                className="text-button"
-                onClick={() => setCartOpen(false)}
-              >
-                Continue shopping
-              </button>
-              <button
-                className="text-button"
-                onClick={() => setClearConfirm(true)}
-              >
-                Clear cart
-              </button>
-              <p className="muted">
-                Your cart is retained after opening WhatsApp. This website does
-                not track sending, confirmation or purchases. Prices and
-                availability must be independently confirmed by the seller.
-              </p>
-            </div>
           )}
           {clearConfirm && (
             <div
@@ -1176,6 +1156,15 @@ function PriceSummary({ amount }: { amount: ReturnType<typeof totals> }) {
         <span>Product subtotal</span>
         <strong>{rupees(amount.subtotal)}</strong>
       </p>
+      {amount.discount > 0 && (
+        <p className="offer-saving">
+          <span>
+            {amount.discountBasisPoints / 100}% offer
+            {amount.couponCode ? ` (${amount.couponCode})` : ""}
+          </span>
+          <strong>−{rupees(amount.discount)}</strong>
+        </p>
+      )}
       <p>
         <span>Delivery / fulfilment charge</span>
         <span>
