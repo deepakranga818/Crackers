@@ -67,10 +67,11 @@ test("private list takes an order end to end and never claims it was sent", asyn
   const first = data.products[0];
   expect(new URL(url).pathname).toBe("/919992230740");
   expect(message).toContain(
-    `1. *${first.name} (${first.originalCategory})* — Qty: 1 × ₹${first.pricePaise / 100} = ₹${first.pricePaise / 100} (Unit: to be confirmed)`,
+    `1. *${first.name} (${first.originalCategory})* — Qty: 1 × ₹${first.pricePaise / 100} = ₹${first.pricePaise / 100}`,
   );
-  expect(message).toContain("👤 *Buyer:* Deepak");
-  expect(message).toContain("Estimated amount:");
+  expect(message).toContain("*Buyer:* Deepak");
+  expect(message).toContain("*Amount before delivery charge:");
+  expect(message).not.toMatch(/unit|fulfilment|to be confirmed/i);
   await expect(page.locator("body")).not.toContainText(
     /order (sent|confirmed|placed)/i,
   );

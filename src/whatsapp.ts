@@ -59,63 +59,55 @@ export function makeRequest(
       timeStyle: "long",
       timeZone: "Asia/Kolkata",
     }).format(new Date()) + " (Asia/Kolkata)";
-  // WhatsApp bold is a single asterisk, so *text* renders like the owner's template.
-  const lines = [
-    "🎆 *DIWALI CRACKERS ORDER* 🪔",
-    "",
-    "Hello! 👋",
-    "",
-    "I would like to order the following crackers:",
-    "",
-    "*🛍️ Order Details*",
-    "",
-  ];
+  // WhatsApp bold is a single asterisk. No emoji: they showed up as replacement characters on the seller's WhatsApp.
+  const lines = ["*DIWALI CRACKERS ORDER*", ""];
   Object.entries(cart).forEach(([id, qty], i) => {
     const p = products.find((p) => p.id === id)!;
-    const unit = p.sellingUnit?.startsWith("Demo unit")
-      ? ""
-      : ` (Unit: ${p.sellingUnit ? safeField(p.sellingUnit) : "to be confirmed"})`;
+    // Only a seller-confirmed unit is shown; unknown and local-demo units never reach the message.
+    const unit =
+      p.sellingUnit && !p.sellingUnit.startsWith("Demo unit")
+        ? ` (${safeField(p.sellingUnit)})`
+        : "";
     lines.push(
       `${i + 1}. *${safeField(p.name)} (${safeField(p.originalCategory)})* — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}${unit}`,
     );
   });
-  lines.push("");
-  lines.push(`Product subtotal: ${rupees(calculated.subtotal)}`);
+  lines.push("", `Product subtotal: ${rupees(calculated.subtotal)}`);
   if (calculated.discount > 0)
     lines.push(
       `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
     );
   if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
-  if (calculated.delivery === null)
-    lines.push("Fulfilment charge: to be confirmed on WhatsApp");
-  else if (calculated.delivery > 0)
+  if (calculated.delivery)
     lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
   if (calculated.tax !== null)
     lines.push(`${c.tax!.label}: ${rupees(calculated.tax)}`);
-  lines.push("");
-  lines.push(`💰 *${calculated.label}: ${calculated.text}*`, "");
+  // Only a fully known amount is called Total; otherwise the label says what is left out.
+  const amountLabel =
+    calculated.label === "Total"
+      ? "Total"
+      : calculated.delivery === null
+        ? "Amount before delivery charge"
+        : "Estimated amount";
   lines.push(
-    `👤 *Buyer:* ${clean.name}`,
-    `📞 *Mobile:* ${normalizeMobile(buyer.mobile)}`,
+    "",
+    `*${amountLabel}: ${rupees(calculated.amount)}*`,
+    "",
+    `*Buyer:* ${clean.name}`,
+    `*Mobile:* ${normalizeMobile(buyer.mobile)}`,
   );
-  // Undecided arrangements (or the local demo fixture) must not claim a method or place.
+  // Fulfilment appears only when it is a real choice; undecided or demo arrangements stay out.
   const pickupAddress = !method.id.startsWith("demo-") && method.address;
-  lines.push(
-    `🚚 *Fulfilment:* ${
-      method.type === "delivery"
-        ? "Delivery"
-        : pickupAddress
-          ? `Pickup — ${safeField(pickupAddress)}`
-          : "to be confirmed on WhatsApp"
-    }`,
-  );
   if (method.type === "delivery")
     lines.push(
-      `📍 *Address:* ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
+      "*Fulfilment:* Delivery",
+      `*Address:* ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
     );
-  if (clean.landmark) lines.push(`📌 *Landmark:* ${clean.landmark}`);
-  if (clean.notes) lines.push(`📝 *Notes:* ${clean.notes}`);
-  lines.push("", "Wishing you and your family a very Happy Diwali! 🪔✨🎇");
+  else if (pickupAddress)
+    lines.push(`*Fulfilment:* Pickup — ${safeField(pickupAddress)}`);
+  if (clean.landmark) lines.push(`*Landmark:* ${clean.landmark}`);
+  if (clean.notes) lines.push(`*Notes:* ${clean.notes}`);
+  lines.push("", "Wishing you and your family a very Happy Diwali!");
   const message = lines.join("\n");
   const full = `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(message)}`;
   const long = full.length > c.urlThreshold;

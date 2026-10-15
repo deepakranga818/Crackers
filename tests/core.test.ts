@@ -11,6 +11,7 @@ import data from "../src/products.json";
 import mapping from "../source/category-map.json";
 import {
   quantity,
+  rupees,
   totals,
   blockedReason,
   orderingAllowed,
@@ -250,10 +251,10 @@ describe("buyer and WhatsApp", () => {
     );
     expect(draft.message).toContain("Offer (15% off): −₹750");
     expect(draft.message).toContain("Coupon: CRACK15");
-    expect(draft.message).toContain("Estimated amount: ₹4,250");
+    expect(draft.message).toContain("Amount before delivery charge: ₹4,250");
     expect(draft.message).not.toContain("Catalogue version");
   });
-  it("formats the order like the owner's WhatsApp template", () => {
+  it("formats the order concisely with no placeholders or test data", () => {
     const draft = makeRequest(
       { "dc-001": 3, "dc-002": 1 },
       ready.map((p) => ({ ...p, sellingUnit: "Demo unit" })),
@@ -274,26 +275,19 @@ describe("buyer and WhatsApp", () => {
     );
     expect(draft.message).toBe(
       [
-        "🎆 *DIWALI CRACKERS ORDER* 🪔",
-        "",
-        "Hello! 👋",
-        "",
-        "I would like to order the following crackers:",
-        "",
-        "*🛍️ Order Details*",
+        "*DIWALI CRACKERS ORDER*",
         "",
         "1. *POP-UP (Pop- gol size)* — Qty: 3 × ₹10 = ₹30",
         "2. *POP-UP (Pop- long size)* — Qty: 1 × ₹20 = ₹20",
         "",
         "Product subtotal: ₹50",
         "",
-        "💰 *Total: ₹50*",
+        "*Total: ₹50*",
         "",
-        "👤 *Buyer:* Deepak",
-        "📞 *Mobile:* 9992230740",
-        "🚚 *Fulfilment:* to be confirmed on WhatsApp",
+        "*Buyer:* Deepak",
+        "*Mobile:* 9992230740",
         "",
-        "Wishing you and your family a very Happy Diwali! 🪔✨🎇",
+        "Wishing you and your family a very Happy Diwali!",
       ].join("\n"),
     );
   });
@@ -336,10 +330,8 @@ describe("buyer and WhatsApp", () => {
     );
     expect(draft.url.startsWith("https://wa.me/919992230740?text=")).toBe(true);
     expect(new URL(draft.url).searchParams.get("text")).toBe(draft.message);
-    expect(draft.message).toContain(
-      "💰 *Estimated amount: ₹70 + applicable fulfilment charge*",
-    );
-    expect(draft.message).toContain("📝 *Notes:* ₹ & + # % 🎆 ITEMS Total: ₹0");
+    expect(draft.message).toContain("*Amount before delivery charge: ₹70*");
+    expect(draft.message).toContain("*Notes:* ₹ & + # % 🎆 ITEMS Total: ₹0");
     expect(draft.message).toContain("दीपक");
     expect(
       makeRequest(
@@ -397,13 +389,13 @@ describe("units, fulfilment and message contents", () => {
   const c = { ...config, urlThreshold: 100000 };
   it("keeps confirmed units, buyer details and fulfilment in the message", () => {
     const { message } = makeRequest({ "dc-001": 2 }, ready, buyer, c);
-    expect(message).toContain("Qty: 2 × ₹10 = ₹20 (Unit: Test unit)");
+    expect(message).toContain("Qty: 2 × ₹10 = ₹20 (Test unit)");
     expect(message).toContain("Product subtotal: ₹20");
-    expect(message).toContain("📞 *Mobile:* 9992230740");
-    expect(message).toContain("🚚 *Fulfilment:* Delivery");
-    expect(message).toContain("📍 *Address:* 12 Test Road, Test area, Delhi");
-    expect(message).toContain("Fulfilment charge: to be confirmed on WhatsApp");
-    expect(message).toContain("Estimated amount:");
+    expect(message).toContain("*Mobile:* 9992230740");
+    expect(message).toContain("*Fulfilment:* Delivery");
+    expect(message).toContain("*Address:* 12 Test Road, Test area, Delhi");
+    expect(message).not.toContain("Fulfilment charge");
+    expect(message).toContain("*Amount before delivery charge:");
     const pickup = makeRequest(
       { "dc-001": 1 },
       ready,
@@ -421,7 +413,7 @@ describe("units, fulfilment and message contents", () => {
         ],
       },
     );
-    expect(pickup.message).toContain("🚚 *Fulfilment:* Pickup — 1 Shop Road");
+    expect(pickup.message).toContain("*Fulfilment:* Pickup — 1 Shop Road");
   });
   it("refuses a request containing a product with an unresolved unit", () => {
     const unresolved = ready.map((p) =>
@@ -538,10 +530,8 @@ describe("launch verification", () => {
       { ...business, urlThreshold: 100000 },
     );
     expect(new URL(url).pathname).toBe("/919992230740");
-    expect(message).toContain("(Unit: to be confirmed)");
-    expect(message).toContain("🚚 *Fulfilment:* to be confirmed on WhatsApp");
-    expect(message).toContain("Fulfilment charge: to be confirmed on WhatsApp");
-    expect(message).toContain("Estimated amount:");
+    expect(message).not.toMatch(/unit|fulfilment|to be confirmed/i);
+    expect(message).toContain("*Amount before delivery charge:");
   });
   it("keeps page title, description and Open Graph metadata equal to the config", () => {
     const html = readFileSync("index.html", "utf8");
@@ -555,5 +545,98 @@ describe("launch verification", () => {
     expect(meta("property", "og:title")).toBe(business.seo.title);
     expect(meta("property", "og:description")).toBe(business.seo.description);
     expect(html).toContain('content="noindex,nofollow"');
+  });
+});
+describe("final WhatsApp message hygiene", () => {
+  const demoLike = ready.map((p) => ({
+    ...p,
+    sellingUnit: "Demo unit (not seller confirmed)",
+  }));
+  const privateConfig = { ...business, urlThreshold: 100000 };
+  const whatsappBuyer = {
+    ...emptyBuyer,
+    name: "Deepak",
+    mobile: "9992230740",
+    method: "whatsapp",
+    acknowledged: true,
+  };
+  const rupeeValue = (message: string, label: RegExp) => {
+    const match = label.exec(message);
+    return match ? Number(match[1].replace(/,/g, "")) : null;
+  };
+  const cases = [
+    { name: "small order, 10% tier", cart: { "dc-001": 1 } },
+    {
+      name: "mixed order, 10% tier",
+      cart: { "dc-001": 1, "dc-002": 4, "dc-004": 3 },
+    },
+    { name: "15% tier", cart: { "dc-045": 1, "dc-046": 1 } },
+    { name: "20% tier", cart: { "dc-046": 3 } },
+  ];
+  it.each(cases)(
+    "has no placeholders, demo or test data and correct maths: $name",
+    ({ cart }) => {
+      const { message, url } = makeRequest(
+        cart,
+        products,
+        whatsappBuyer,
+        privateConfig,
+      );
+      expect(message).not.toMatch(
+        /\b(demo|test)\b|to be confirmed|unit:|fulfilment charge|undefined|null|NaN/i,
+      );
+      expect(message).not.toMatch(/\p{Extended_Pictographic}|�/u);
+      expect(message).not.toContain("I would like to order");
+      expect(decodeURIComponent(new URL(url).search.slice(6))).toBe(message);
+      const expected = totals(cart, products, privateConfig);
+      const subtotal = rupeeValue(message, /Product subtotal: ₹([\d,]+)/);
+      const discount = rupeeValue(message, /Offer \([\d.]+% off\): −₹([\d,]+)/);
+      const amount = rupeeValue(message, /\*[^:*]+: ₹([\d,]+)\*/);
+      expect(subtotal).toBe(expected.subtotal / 100);
+      expect(discount).toBe(expected.discount / 100);
+      expect(amount).toBe(expected.amount / 100);
+      expect(subtotal! - (discount ?? 0)).toBe(amount);
+      expect(message.includes("Coupon: " + expected.couponCode)).toBe(
+        expected.discount > 0,
+      );
+      expect(message).toContain("*Amount before delivery charge:");
+      expect(message).not.toContain("*Total:");
+    },
+  );
+  it("calls the amount Total only when every charge is known, and shows a real charge", () => {
+    const known = {
+      ...config,
+      urlThreshold: 100000,
+      fulfilment: [{ ...config.fulfilment[0], chargePaise: 4000 }],
+    };
+    const cart = { "dc-045": 1 };
+    const { message } = makeRequest(cart, ready, buyer, known);
+    const expected = totals(cart, ready, known, known.fulfilment[0]);
+    expect(message).toContain(`Fulfilment charge: ${rupees(4000)}`);
+    expect(message).toContain(`*Total: ${rupees(expected.amount)}*`);
+    expect(expected.amount).toBe(expected.afterDiscount + 4000);
+  });
+  it("never leaks local demo units or fixtures", () => {
+    const { message } = makeRequest(
+      { "dc-001": 2 },
+      demoLike,
+      { ...whatsappBuyer, method: "demo-pickup" },
+      {
+        ...privateConfig,
+        fulfilment: [
+          {
+            id: "demo-pickup",
+            label: "Demo pickup (test only)",
+            type: "pickup",
+            verified: true,
+            address: "Local test fixture — no real pickup location",
+            chargePaise: 0,
+            servicePins: [],
+          },
+        ],
+      },
+    );
+    expect(message).not.toMatch(/demo|test|fixture|unit|fulfilment/i);
+    expect(message).toContain("Qty: 2 × ₹10 = ₹20");
   });
 });
