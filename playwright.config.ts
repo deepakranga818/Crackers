@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, type ReporterDescription } from "@playwright/test";
 // UI tests run against the committed src/products.json snapshot: no Sheet sync and no network.
 // Live Sheet verification is separate (`npm run test:live`).
 const server = (port: number, mode?: string, prepare = "") => ({
@@ -6,6 +6,12 @@ const server = (port: number, mode?: string, prepare = "") => ({
   url: `http://127.0.0.1:${port}`,
   reuseExistingServer: true,
 });
+const reporter: ReporterDescription[] = [
+  ["list"],
+  ["json", { outputFile: "reports/browser-results.json" }],
+];
+// In CI, failures also become annotations on the workflow run.
+if (process.env.CI) reporter.push(["github"]);
 export default defineConfig({
   testDir: "tests/browser",
   fullyParallel: false,
@@ -22,8 +28,5 @@ export default defineConfig({
     server(5180, "checkout-demo", "node demo/make-demo-data.mjs && "),
   ],
   globalTeardown: "./scripts/merge-layout.mjs",
-  reporter: [
-    ["list"],
-    ["json", { outputFile: "reports/browser-results.json" }],
-  ],
+  reporter,
 });
