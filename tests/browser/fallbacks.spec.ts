@@ -61,7 +61,9 @@ test("long order supports manual copying, download, popup and offline fallback w
   await expect(
     page.getByRole("button", { name: "Continue to WhatsApp", exact: true }),
   ).toBeDisabled();
-  await expect(page.locator(".request-preview")).toHaveCount(0);
+  // A long order keeps its inline copy/download section and a collapsed full message.
+  await expect(page.locator(".review-lines li")).toHaveCount(46);
+  await expect(page.locator(".complete-message")).not.toHaveAttribute("open", "");
   await page.getByRole("button", { name: "Copy Complete Order" }).click();
   const text = page.getByRole("textbox", {
     name: "Select and copy the complete order",

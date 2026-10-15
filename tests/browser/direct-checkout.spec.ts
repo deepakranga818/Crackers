@@ -25,8 +25,16 @@ test("single-step mobile checkout applies Sheet offers and includes every select
   for (const width of [320, 360, 390]) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto("http://127.0.0.1:5174");
+    // Offers are one line that opens to the exact thresholds, in words with no gap.
+    await page.getByText("View terms").click();
     await expect(
-      page.getByText("Coupon code - CRACK10 - 10% off upto 2000"),
+      page.getByText("10% off when your product total is ₹2,000 or less"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("15% off when it is above ₹2,000 and up to ₹5,000"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("20% off when it is above ₹5,000"),
     ).toBeVisible();
     const bar = page.getByRole("region", { name: "Cart summary" });
     await expect(bar).toContainText("₹126");
@@ -65,7 +73,19 @@ test("single-step mobile checkout applies Sheet offers and includes every select
     );
     expect(message).not.toContain("Catalogue version");
     expect(message).not.toContain("Demo");
-    await expect(page.locator(".request-preview")).toHaveCount(0);
+    // Review before handoff: every line, the offer and the totals are on screen, and the
+    // complete message is collapsed but identical to what WhatsApp was opened with.
+    const review = page.locator(".review-summary");
+    await expect(review.locator(".review-lines li")).toHaveCount(4);
+    await expect(review).toContainText("15cm Ronak");
+    await expect(review).toContainText("2 × ₹20");
+    await expect(review).toContainText("Test Buyer");
+    await expect(review).toContainText("10% offer (CRACK10)");
+    await expect(page.locator(".complete-message")).not.toHaveAttribute("open", "");
+    await page.getByText("View the complete WhatsApp message").click();
+    expect(await page.locator(".complete-message pre").textContent()).toBe(
+      message,
+    );
     await expect(
       page.getByRole("heading", { name: "Checkout", exact: true }),
     ).toBeVisible();

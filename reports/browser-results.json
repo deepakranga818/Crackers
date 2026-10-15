@@ -11,7 +11,7 @@
     "forbidOnly": false,
     "fullyParallel": false,
     "globalSetup": null,
-    "globalTeardown": null,
+    "globalTeardown": "D:\\MyProjects\\Diwali_Crackers\\scripts\\merge-layout.mjs",
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
@@ -90,6 +90,694 @@
   },
   "suites": [
     {
+      "title": "a11y.spec.ts",
+      "file": "a11y.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "catalogue data used by these checks is the committed snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:40.600Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "aa3ad05f8c0e05077efb-74fdfbd2bb9d257b67df",
+          "file": "a11y.spec.ts",
+          "line": 298,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "axe (WCAG 2.2 AA) at phone",
+          "file": "a11y.spec.ts",
+          "line": 39,
+          "column": 8,
+          "specs": [
+            {
+              "title": "catalogue",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2296,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:19.463Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-95baa41288819ecda15d",
+              "file": "a11y.spec.ts",
+              "line": 44,
+              "column": 5
+            },
+            {
+              "title": "catalogue with the offer terms open and a filter active",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1184,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:22.510Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-763eb4221f1bb5f825f4",
+              "file": "a11y.spec.ts",
+              "line": 49,
+              "column": 5
+            },
+            {
+              "title": "product details with an unconfirmed unit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1027,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:23.707Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-97343dd1a385137c6f05",
+              "file": "a11y.spec.ts",
+              "line": 57,
+              "column": 5
+            },
+            {
+              "title": "details with a gallery, quantity and add action",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1104,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:24.746Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-5d8d9f5f1aee55030a67",
+              "file": "a11y.spec.ts",
+              "line": 64,
+              "column": 5
+            },
+            {
+              "title": "cart, buyer details and the review block",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2009,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:25.863Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-7bcf9d15c50a64cd9c87",
+              "file": "a11y.spec.ts",
+              "line": 71,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "axe (WCAG 2.2 AA) at desktop",
+          "file": "a11y.spec.ts",
+          "line": 39,
+          "column": 8,
+          "specs": [
+            {
+              "title": "catalogue",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1999,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:27.888Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-a46c674891601f16faf6",
+              "file": "a11y.spec.ts",
+              "line": 44,
+              "column": 5
+            },
+            {
+              "title": "catalogue with the offer terms open and a filter active",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1345,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:29.898Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-da08cf7b183a0ce0ee3b",
+              "file": "a11y.spec.ts",
+              "line": 49,
+              "column": 5
+            },
+            {
+              "title": "product details with an unconfirmed unit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1039,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:31.256Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-cf213a0979c69e48bc94",
+              "file": "a11y.spec.ts",
+              "line": 57,
+              "column": 5
+            },
+            {
+              "title": "details with a gallery, quantity and add action",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1093,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:32.308Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-1096366b7f77142fb9e7",
+              "file": "a11y.spec.ts",
+              "line": 64,
+              "column": 5
+            },
+            {
+              "title": "cart, buyer details and the review block",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1931,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:33.413Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-879a5b65c6bfd79e98dc",
+              "file": "a11y.spec.ts",
+              "line": 71,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "keyboard",
+          "file": "a11y.spec.ts",
+          "line": 82,
+          "column": 6,
+          "specs": [
+            {
+              "title": "every category chip is reachable and never hidden under the sticky bar at phone",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 584,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:35.356Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-5ddb2ffcd3cec11d333f",
+              "file": "a11y.spec.ts",
+              "line": 84,
+              "column": 5
+            },
+            {
+              "title": "every category chip is reachable and never hidden under the sticky bar at desktop",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 627,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:35.949Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-d4aac0a2d0fad8e1ae9d",
+              "file": "a11y.spec.ts",
+              "line": 84,
+              "column": 5
+            },
+            {
+              "title": "each card has one obvious keyboard stop for details, and the image is not a second stop",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 480,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:36.585Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-110bbd5d68f44de15aa2",
+              "file": "a11y.spec.ts",
+              "line": 123,
+              "column": 3
+            },
+            {
+              "title": "gallery thumbnails and quantity controls work from the keyboard and are 44px targets",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 606,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:37.075Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-883d70c07b9c68000d13",
+              "file": "a11y.spec.ts",
+              "line": 150,
+              "column": 3
+            },
+            {
+              "title": "dialogs keep focus inside, restore it on Escape and leave the page inert behind them",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 574,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:37.690Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-98f9e663fa29eaeaf6da",
+              "file": "a11y.spec.ts",
+              "line": 185,
+              "column": 3
+            },
+            {
+              "title": "review actions: Edit details focuses the name field and Edit items returns to the cart",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1275,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:38.274Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-2d0c024823eb02ddabd4",
+              "file": "a11y.spec.ts",
+              "line": 222,
+              "column": 3
+            },
+            {
+              "title": "a focused control is never hidden by the sticky UI, including at 200% zoom",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 492,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:39.560Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-1acf4c81a8d1821cf017",
+              "file": "a11y.spec.ts",
+              "line": 240,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "touch targets",
+          "file": "a11y.spec.ts",
+          "line": 263,
+          "column": 6,
+          "specs": [
+            {
+              "title": "every control on the phone catalogue is at least 44 x 44 CSS px",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 526,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-15T06:05:40.062Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "aa3ad05f8c0e05077efb-7cc3c0fbda96fb46823d",
+              "file": "a11y.spec.ts",
+              "line": 264,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "direct-checkout.spec.ts",
       "file": "direct-checkout.spec.ts",
       "column": 0,
@@ -111,12 +799,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 7223,
+                  "duration": 7365,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:06.155Z",
+                  "startTime": "2026-10-15T06:05:40.619Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -145,12 +833,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2167,
+                  "duration": 2401,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:14.046Z",
+                  "startTime": "2026-10-15T06:05:47.997Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -160,7 +848,7 @@
           ],
           "id": "efd665a5a6ca2b0b6d14-39f9607af077c4fe2b63",
           "file": "direct-checkout.spec.ts",
-          "line": 87,
+          "line": 107,
           "column": 1
         }
       ]
@@ -187,12 +875,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1098,
+                  "duration": 1161,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:16.239Z",
+                  "startTime": "2026-10-15T06:05:50.418Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -221,12 +909,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3061,
+                  "duration": 3196,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:17.347Z",
+                  "startTime": "2026-10-15T06:05:51.589Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -255,12 +943,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 776,
+                  "duration": 843,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:20.417Z",
+                  "startTime": "2026-10-15T06:05:54.794Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -270,7 +958,269 @@
           ],
           "id": "823e5510e2ed762314f8-a1c4e107e47e6d98f465",
           "file": "fallbacks.spec.ts",
-          "line": 98,
+          "line": 100,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "layout.spec.ts",
+      "file": "layout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "layout at 360x800",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "need",
+                  "description": "347"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 736,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:55.656Z",
+                  "annotations": [
+                    {
+                      "type": "need",
+                      "description": "347"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-ee1e6f4d9decbe47359a",
+          "file": "layout.spec.ts",
+          "line": 86,
+          "column": 3
+        },
+        {
+          "title": "layout at 390x844",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "need",
+                  "description": "349"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 753,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:56.402Z",
+                  "annotations": [
+                    {
+                      "type": "need",
+                      "description": "349"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-687a70a906a87834566b",
+          "file": "layout.spec.ts",
+          "line": 86,
+          "column": 3
+        },
+        {
+          "title": "layout at 768x1024",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "need",
+                  "description": "365"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 819,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:57.167Z",
+                  "annotations": [
+                    {
+                      "type": "need",
+                      "description": "365"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-c1933ddf5f25db22e4da",
+          "file": "layout.spec.ts",
+          "line": 86,
+          "column": 3
+        },
+        {
+          "title": "layout at 1366x768",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "need",
+                  "description": "263"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 832,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:57.997Z",
+                  "annotations": [
+                    {
+                      "type": "need",
+                      "description": "263"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-b016075435dda7189f10",
+          "file": "layout.spec.ts",
+          "line": 86,
+          "column": 3
+        },
+        {
+          "title": "layout at 640x450",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "need",
+                  "description": "469"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 728,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:58.839Z",
+                  "annotations": [
+                    {
+                      "type": "need",
+                      "description": "469"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-91801eaa890165f9dde2",
+          "file": "layout.spec.ts",
+          "line": 86,
+          "column": 3
+        },
+        {
+          "title": "no horizontal page scroll at 320, 430 and 1024",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 713,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:05:59.579Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f98fd8c8d1538f5ebbb-efd7c74cf89b4fee05ad",
+          "file": "layout.spec.ts",
+          "line": 153,
           "column": 1
         }
       ]
@@ -297,12 +1247,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 704,
+                  "duration": 687,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:21.211Z",
+                  "startTime": "2026-10-15T06:06:00.313Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -331,12 +1281,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1046,
+                  "duration": 1077,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:21.923Z",
+                  "startTime": "2026-10-15T06:06:01.011Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -358,7 +1308,7 @@
       "line": 0,
       "specs": [
         {
-          "title": "catalogue has all products, combined search, details, and private-list ordering",
+          "title": "production catalogue: all products, reference prices hidden, no ordering without confirmed units",
           "ok": true,
           "tags": [],
           "tests": [
@@ -373,12 +1323,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1060,
+                  "duration": 767,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:23.002Z",
+                  "startTime": "2026-10-15T06:06:02.112Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -386,9 +1336,43 @@
               "status": "expected"
             }
           ],
-          "id": "5c02723ad68c2a0d50c5-f0a70965c3ac484c66ba",
+          "id": "5c02723ad68c2a0d50c5-133d7b6a536a5e92627b",
           "file": "site.spec.ts",
           "line": 3,
+          "column": 1
+        },
+        {
+          "title": "a restored cart cannot reach checkout while products have no confirmed unit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 475,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:06:02.889Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-c657be2bb468eabf8fe3",
+          "file": "site.spec.ts",
+          "line": 47,
           "column": 1
         },
         {
@@ -407,12 +1391,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 850,
+                  "duration": 859,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:24.071Z",
+                  "startTime": "2026-10-15T06:06:03.378Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -422,7 +1406,41 @@
           ],
           "id": "5c02723ad68c2a0d50c5-865203f6726cef14533b",
           "file": "site.spec.ts",
-          "line": 38,
+          "line": 71,
+          "column": 1
+        },
+        {
+          "title": "a restored cart holding a blocked product stays out of checkout until it is removed",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 601,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-15T06:06:04.250Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5c02723ad68c2a0d50c5-9d5b6124be3f40f39bcb",
+          "file": "site.spec.ts",
+          "line": 121,
           "column": 1
         },
         {
@@ -441,12 +1459,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1672,
+                  "duration": 1745,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:24.929Z",
+                  "startTime": "2026-10-15T06:06:04.861Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -456,7 +1474,7 @@
           ],
           "id": "5c02723ad68c2a0d50c5-0ec9fc478e4bf405ddb4",
           "file": "site.spec.ts",
-          "line": 79,
+          "line": 154,
           "column": 1
         },
         {
@@ -475,12 +1493,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 828,
+                  "duration": 877,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:26.610Z",
+                  "startTime": "2026-10-15T06:06:06.615Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -490,7 +1508,7 @@
           ],
           "id": "5c02723ad68c2a0d50c5-9fbdf6cc86e022b53f88",
           "file": "site.spec.ts",
-          "line": 165,
+          "line": 251,
           "column": 1
         },
         {
@@ -509,12 +1527,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2414,
+                  "duration": 2170,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-15T04:43:27.445Z",
+                  "startTime": "2026-10-15T06:06:07.501Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -524,7 +1542,7 @@
           ],
           "id": "5c02723ad68c2a0d50c5-80af7b89adb00c8a7ce0",
           "file": "site.spec.ts",
-          "line": 194,
+          "line": 280,
           "column": 1
         }
       ]
@@ -532,9 +1550,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-15T04:43:05.431Z",
-    "duration": 24779.165999999997,
-    "expected": 12,
+    "startTime": "2026-10-15T06:05:09.917Z",
+    "duration": 61270.435,
+    "expected": 39,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

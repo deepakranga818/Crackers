@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  actualCatalogueUrl,
   catalogueSource,
   categories,
   config,
+  isCheckoutDemo,
   isLocalDemo,
+  modeCopy,
   products,
 } from "./business";
 import { filterProducts, matches } from "./catalogue";
 import { useCart } from "./cart";
 import {
+  anyOrderable,
   blockedReason,
-  orderingAllowed,
+  offerSummary,
   quantity,
   rupees,
   totals,
@@ -19,7 +23,21 @@ import { emptyBuyer, type Buyer, type Product } from "./model";
 import { validateBuyer } from "./buyer";
 import { makeRequest, type RequestDraft } from "./whatsapp";
 import { useAudio } from "./audio";
-import { Modal, Price, ProductImage, Quantity } from "./components";
+import {
+  Modal,
+  OfferStrip,
+  Price,
+  ProductImage,
+  Quantity,
+  useStickyOffset,
+} from "./components";
+
+// Shopper wording for why a product can't be ordered. The unit is shown on its own line,
+// so a missing unit is not repeated here.
+const shopperReason: Record<string, string> = {
+  "Product type needs seller review":
+    "Product type is being reviewed · can’t be ordered yet",
+};
 
 export default function App() {
   const [query, setQuery] = useState(""),
@@ -35,6 +53,8 @@ export default function App() {
     [errors, setErrors] = useState<Partial<Record<keyof Buyer, string>>>({});
   const [draft, setDraft] = useState<RequestDraft>(),
     [handoff, setHandoff] = useState(""),
+    // Local checkout demo only: the request a real handoff would have opened.
+    [dryRun, setDryRun] = useState<RequestDraft | null>(null),
     [manualCopy, setManualCopy] = useState(false),
     [clearConfirm, setClearConfirm] = useState(false);
   const [busy, setBusy] = useState(false),
@@ -49,17 +69,40 @@ export default function App() {
   const announce = useCallback((s: string) => setToast(s), []);
   const { cart, save, update, notice } = useCart(products, config, announce);
   const audio = useAudio(config.soundVolume);
-  const canOrder = orderingAllowed(config);
+  useStickyOffset();
+  // Ordering is offered only when at least one product can really be ordered; a price
+  // without a confirmed unit is for browsing.
+  const canOrder = anyOrderable(products, config);
+  const mode = modeCopy(canOrder);
+  const offers = offerSummary(config.offers);
   const method = config.fulfilment.find(
     (f) => f.id === buyer.method && f.verified,
   );
   const amount = totals(cart, products, config, method);
   const selected = products.filter((p) => p.id in cart);
+  // The exact request WhatsApp would open, built only once the form is valid so the shopper can
+  // inspect it before continuing. Same builder and same draft as the handoff itself.
+  let preview: RequestDraft | undefined;
+  if (cartOpen && stage === "buyer") {
+    try {
+      preview = makeRequest(cart, products, buyer, config, draft);
+    } catch {
+      preview = undefined;
+    }
+  }
+  const fulfilmentText = !method
+    ? "Not chosen yet"
+    : method.type === "delivery"
+      ? `Delivery to ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].filter((v) => v.trim()).join(", ") || "an address you enter above"}`
+      : method.address && !method.id.startsWith("demo-")
+        ? `Pickup — ${method.address}`
+        : method.label;
   const visible = filterProducts(products, query, category, sort);
   const searchProducts = products.filter((p) => matches(p, query));
   useEffect(() => {
     setDraft(undefined);
     setHandoff("");
+    setDryRun(null);
     setPreparedFingerprint(null);
   }, [cart]);
   const cartReady =
@@ -190,6 +233,15 @@ export default function App() {
       tapGuard.current = Date.now();
       setBusy(true);
       window.setTimeout(() => setBusy(false), 1000);
+      if (isCheckoutDemo) {
+        // Dry run: show what would have been opened. WhatsApp is never contacted.
+        setDryRun(current);
+        setHandoff(
+          "Dry run only: WhatsApp was not opened and nothing was sent. The link and message that would have been used are shown below.",
+        );
+        audio.tone("handoff");
+        return;
+      }
       const opened = window.open(current.url, "_blank");
       if (opened) {
         opened.opener = null;
@@ -292,17 +344,22 @@ export default function App() {
       <a className="skip-link" href="#catalogue">
         Skip to catalogue
       </a>
+      {isCheckoutDemo && (
+        <div className="demo-label" data-sticky="demo" role="note">
+          Local checkout demo — test data
+        </div>
+      )}
       <div className="preview-banner">
-        {isLocalDemo
-          ? "Local demo · test units and pickup only · do not send a real request"
-          : canOrder
-            ? config.privateAudience
-              ? "Private list for friends and family · not a public shop · the seller confirms every order"
-              : "Requests require seller confirmation"
-            : "Catalogue preview · ordering is currently unavailable"}
+        {mode.banner}
+        {isCheckoutDemo && (
+          <>
+            {" · "}
+            <a href={actualCatalogueUrl()}>Switch to the actual catalogue</a>
+          </>
+        )}
       </div>
-      <header>
-        <a className="brand" href="#" aria-label={`${config.brand} home`}>
+      <header data-sticky="header">
+        <a className="brand" href="#">
           <svg viewBox="0 0 48 48" aria-hidden="true">
             <path d="M6 29h36Q37 43 24 43T6 29" fill="currentColor" />
             <path d="M24 4q-13 17 0 22Q34 21 24 4" fill="currentColor" />
@@ -326,8 +383,13 @@ export default function App() {
             aria-label={audio.label}
             aria-pressed={audio.isOn}
           >
-            ♪ <span>{audio.label}</span>
-            <small className="sound-state">{audio.isOn ? "On" : "Off"}</small>
+            <span className="sound-icon" aria-hidden="true">
+              ♪
+            </span>{" "}
+            <span className="sound-label">{audio.label}</span>
+            {/* Short visible label on narrow screens; the accessible name contains it. On/off
+                is shown by the filled button and the struck-through note, and by aria-pressed. */}
+            <span className="sound-short">Sound</span>
           </button>
           {canOrder && (
             <button
@@ -335,7 +397,8 @@ export default function App() {
               onClick={openCart}
               aria-label={`Open cart, ${amount.units} units`}
             >
-              <span aria-hidden="true">🛒</span> Cart{" "}
+              <span aria-hidden="true">🛒</span>{" "}
+              <span className="cart-label">Cart</span>{" "}
               <span className="badge" key={amount.units}>
                 {amount.units}
               </span>
@@ -346,41 +409,21 @@ export default function App() {
       <main>
         <section className="hero">
           <div className="hero-copy">
-            <p className="hero-intro">
-              A little sparkle. A beautiful celebration.
-            </p>
-            <h1>
-              Bring home the
-              <br />
-              festival of lights.
-            </h1>
-            <p>
-              Pick your crackers, check the offers, and share your selection on
-              WhatsApp.
-            </p>
+            <h1>Bring home the festival of lights.</h1>
+            <p>{mode.hero}</p>
             <div className="hero-actions">
               <a className="button gold" href="#catalogue">
-                Browse Crackers
+                Browse crackers
               </a>
               <a className="hero-secondary" href="#how-it-works">
-                How it works <span aria-hidden="true">↗</span>
+                How it works
               </a>
             </div>
-            <p className="hero-note">
-              {canOrder
-                ? "Choose, review, then send a request on WhatsApp."
-                : "46 source products · selling units awaiting confirmation"}
-            </p>
           </div>
           <div className="hero-art" aria-hidden="true">
             <div className="firework fw-one">
               {Array.from({ length: 16 }, (_, i) => (
                 <i key={i} style={{ transform: `rotate(${i * 22.5}deg)` }} />
-              ))}
-            </div>
-            <div className="firework fw-two">
-              {Array.from({ length: 12 }, (_, i) => (
-                <i key={i} style={{ transform: `rotate(${i * 30}deg)` }} />
               ))}
             </div>
             <svg className="diya" viewBox="0 0 400 220">
@@ -419,7 +462,6 @@ export default function App() {
             </svg>
             <span className="art-star star-a">✧</span>
             <span className="art-star star-b">✦</span>
-            <span className="art-star star-c">✧</span>
           </div>
         </section>
         <section
@@ -427,50 +469,91 @@ export default function App() {
           id="catalogue"
           aria-labelledby="catalogue-title"
         >
-          <div className="section-heading">
-            <div>
-              <p className="section-intro">Find your festive favourites</p>
-              <h2 id="catalogue-title">The crackers collection</h2>
+          <OfferStrip offers={offers} />
+          <div className="shop-bar" data-sticky="bar">
+            <div className="search-row">
+              <label className="search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  aria-label="Search crackers"
+                  type="search"
+                  placeholder="Search products, Phuljadi, Anar…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+                {query && (
+                  <button
+                    type="button"
+                    className="clear-search"
+                    aria-label="Clear search"
+                    onClick={() => setQuery("")}
+                  >
+                    ✕
+                  </button>
+                )}
+              </label>
             </div>
-            <p className="catalogue-note">
-              Prices from the supplied catalogue.
-              <br />
-              Availability and selling units require confirmation.
-            </p>
-          </div>
-          {config.offers && config.offers.labels.length > 0 && (
             <div
-              className="offer-banner"
-              aria-label="Offers from the shared price list"
+              className="categories"
+              role="group"
+              aria-label="Product categories. Counts follow your search."
+              title="Counts follow your search"
             >
-              <strong>Current offers</strong>
-              <div>
-                {config.offers.labels.map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </div>
-              <a
-                href={catalogueSource.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Shared price list
-              </a>
+              {categories.map((c) => {
+                const count =
+                  c.id === "all"
+                    ? searchProducts.length
+                    : searchProducts.filter((p) => p.categoryId === c.id)
+                        .length;
+                return (
+                  <button
+                    key={c.id}
+                    aria-pressed={category === c.id}
+                    className={
+                      (category === c.id ? "active" : "") +
+                      (count === 0 ? " none" : "")
+                    }
+                    onClick={() => setCategory(c.id)}
+                    // The browser leaves a half-visible chip half hidden; reveal it fully.
+                    onFocus={(e) =>
+                      e.currentTarget.scrollIntoView({
+                        block: "nearest",
+                        inline: "nearest",
+                      })
+                    }
+                  >
+                    {c.label} <span>{count}</span>
+                  </button>
+                );
+              })}
             </div>
-          )}
-          <div className="search-bar">
-            <label className="search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                aria-label="Search crackers"
-                type="search"
-                placeholder="Search products, Phuljadi, Anar…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </label>
+          </div>
+          <div className="results-bar">
+            <div className="results-title">
+              <h2 id="catalogue-title">Crackers</h2>
+              <p aria-live="polite">
+                <span className="lead-word">Showing </span>
+                <strong>{visible.length}</strong> of {products.length} products
+                {category !== "all"
+                  ? ` · ${categories.find((c) => c.id === category)?.label}`
+                  : ""}
+                {query ? ` · “${query}”` : ""}
+              </p>
+              {(query || category !== "all" || sort !== "source") && (
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setQuery("");
+                    setCategory("all");
+                    setSort("source");
+                  }}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
             <label className="sort">
-              Sort by
+              <span>Sort by</span>
               <select
                 aria-label="Sort products"
                 value={sort}
@@ -482,51 +565,6 @@ export default function App() {
                 <option value="name">Name</option>
               </select>
             </label>
-          </div>
-          <div
-            className="categories"
-            role="group"
-            aria-label="Product categories"
-          >
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                aria-pressed={category === c.id}
-                className={category === c.id ? "active" : ""}
-                onClick={() => setCategory(c.id)}
-              >
-                {c.label}
-                <span>
-                  {c.id === "all"
-                    ? searchProducts.length
-                    : searchProducts.filter((p) => p.categoryId === c.id)
-                        .length}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="results-bar">
-            <p aria-live="polite">
-              Showing <strong>{visible.length}</strong> of {products.length}{" "}
-              products
-              {category !== "all"
-                ? ` · ${categories.find((c) => c.id === category)?.label}`
-                : ""}
-              {query ? ` · “${query}”` : ""}
-            </p>
-            <small>Category counts match your search.</small>
-            {(query || category !== "all" || sort !== "source") && (
-              <button
-                className="text-button"
-                onClick={() => {
-                  setQuery("");
-                  setCategory("all");
-                  setSort("source");
-                }}
-              >
-                Clear filters
-              </button>
-            )}
           </div>
           {!visible.length ? (
             <div className="empty">
@@ -544,106 +582,92 @@ export default function App() {
             </div>
           ) : (
             <div className="product-grid">
-              {visible.map((p) => (
-                <article className="product-card" key={p.id}>
-                  <button
-                    className="image-button"
-                    onClick={() => setDetail(p)}
-                    aria-label={`View ${p.name}, ${p.originalCategory} details`}
-                  >
-                    <ProductImage product={p} />
-                  </button>
-                  <div className="product-info">
-                    <p className="category-label">{p.categoryLabel}</p>
-                    <h3>
-                      <button
-                        className="product-title"
-                        onClick={() => setDetail(p)}
-                      >
-                        {p.name}
-                      </button>
-                    </h3>
-                    <p className="variant">
-                      {p.variantLabel || p.originalCategory}
-                    </p>
-                    <div className="price-row">
-                      <Price product={p} />
-                      <button
-                        className="details-button"
-                        onClick={() => setDetail(p)}
-                        aria-label={`Details for ${p.name}, ${p.originalCategory}`}
-                      >
-                        Details <span aria-hidden="true">↗</span>
-                      </button>
-                    </div>
-                    <p className="unit-note">
-                      {p.sellingUnit || "Selling unit: to be confirmed"}
-                    </p>
-                    {p.availability === "unavailable" && (
-                      <p>Currently unavailable</p>
-                    )}
-                    {p.importIssues.length > 0 && (
-                      <p className="error">Product data needs correction</p>
-                    )}
-                    {canOrder &&
-                      (blockedReason(p, config) ? (
-                        <p className="blocked">{blockedReason(p, config)}</p>
-                      ) : cart[p.id] ? (
-                        <Quantity
-                          value={cart[p.id]}
-                          max={Math.min(
-                            config.maxQuantity,
-                            p.maxQuantityPerRequest,
-                          )}
-                          name={`${p.name} ${p.id}`}
-                          onChange={(v) => change(p, v)}
+              {visible.map((p) => {
+                const reason = blockedReason(p, config);
+                const unitKnown = !!p.sellingUnit?.trim();
+                return (
+                  <article className="product-card" key={p.id}>
+                    <button
+                      className="image-button"
+                      tabIndex={-1}
+                      onClick={() => setDetail(p)}
+                      aria-label={`View ${p.name}, ${p.originalCategory} details${p.images.length > 1 ? `, ${p.images.length} photos` : ""}${p.images.length ? "" : ", Product image coming soon"}`}
+                    >
+                      <ProductImage product={p} />
+                    </button>
+                    <div className="product-info">
+                      <p className="category-label">{p.categoryLabel}</p>
+                      <h3>{p.name}</h3>
+                      <p className="variant">
+                        {p.variantLabel || p.originalCategory}
+                      </p>
+                      <div className="price-row">
+                        <Price
+                          product={p}
+                          reference={config.showReferencePrices}
                         />
-                      ) : (
-                        <button className="add-button" onClick={() => add(p)}>
-                          Add to cart <span aria-hidden="true">+</span>
+                      </div>
+                      <p className={unitKnown ? "unit-note" : "unit-note pending"}>
+                        {unitKnown
+                          ? `Unit: ${p.sellingUnit}`
+                          : "Unit not confirmed · can’t be ordered yet"}
+                      </p>
+                      {p.availability === "unavailable" && (
+                        <p className="blocked">Currently unavailable</p>
+                      )}
+                      {p.importIssues.length > 0 && (
+                        <p className="error">Product data needs correction</p>
+                      )}
+                      {reason && shopperReason[reason] && (
+                        <p className="blocked">{shopperReason[reason]}</p>
+                      )}
+                      <div className="card-actions">
+                        {!reason &&
+                          (cart[p.id] ? (
+                            <Quantity
+                              value={cart[p.id]}
+                              max={Math.min(
+                                config.maxQuantity,
+                                p.maxQuantityPerRequest,
+                              )}
+                              name={`${p.name} ${p.id}`}
+                              onChange={(v) => change(p, v)}
+                            />
+                          ) : (
+                            <button
+                              className="add-button"
+                              onClick={() => add(p)}
+                            >
+                              Add to cart <span aria-hidden="true">+</span>
+                            </button>
+                          ))}
+                        <button
+                          className="details-button"
+                          onClick={() => setDetail(p)}
+                          aria-label={`Details for ${p.name}, ${p.originalCategory}`}
+                        >
+                          Details
                         </button>
-                      ))}
-                  </div>
-                </article>
-              ))}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
         <section id="how-it-works" className="how">
           <div>
-            <p className="section-intro">
-              A personal touch, from start to finish
-            </p>
-            <h2>
-              {canOrder
-                ? "Your selection. Seller confirmation."
-                : "Browse now. Confirm the details."}
-            </h2>
-            <p>
-              {canOrder
-                ? "No online payment or account required. A request becomes an order only after the seller confirms it."
-                : "Ordering is unavailable while business permissions, selling units, and fulfilment details are being verified."}
-            </p>
+            <h2>{mode.howTitle}</h2>
+            <p>{mode.howIntro}</p>
           </div>
           <ol>
-            <li>
-              <strong>Choose your favourites</strong>
-              <span>Browse categories and compare catalogue prices.</span>
-            </li>
-            <li>
-              <strong>Review quantities and amount</strong>
-              <span>
-                Once ordering is enabled, check your selection and enter buyer
-                details.
-              </span>
-            </li>
-            <li>
-              <strong>Review and send on WhatsApp</strong>
-              <span>
-                Open WhatsApp, review the request and tap Send. The seller
-                confirms availability, fulfilment and the final payable amount.
-              </span>
-            </li>
+            {mode.steps.map(([title, text]) => (
+              <li key={title}>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </li>
+            ))}
           </ol>
         </section>
       </main>
@@ -651,14 +675,13 @@ export default function App() {
         <div className="footer-brand">
           <h2>{config.brand}</h2>
           <p>A catalogue for the festival of lights.</p>
-          <small>Development brand · final shop name pending</small>
         </div>
         <div>
           <h3>Contact the seller</h3>
           <a href={`tel:+${config.whatsapp}`}>{config.phoneDisplay}</a>
-          <p>{config.address || "Shop address awaiting verification"}</p>
+          {config.address && <p>{config.address}</p>}
           {config.hours && <p>{config.hours}</p>}
-          {canOrder && (
+          {canOrder && !isCheckoutDemo && (
             <a
               href={`https://wa.me/${config.whatsapp}`}
               target="_blank"
@@ -692,7 +715,17 @@ export default function App() {
           </details>
         </div>
         <div className="footer-bottom">
-          Catalogue information requires seller confirmation.{" "}
+          <p>
+            Prices come from the seller’s{" "}
+            <a
+              href={catalogueSource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              shared price list
+            </a>
+            ; the seller confirms every detail.
+          </p>
           <span>Made for a thoughtful celebration ✧</span>
         </div>
       </footer>
@@ -745,30 +778,45 @@ export default function App() {
         </div>
       )}
       {detail && (
-        <Modal title={detail.name} onClose={() => setDetail(null)}>
+        <Modal
+          title={detail.name}
+          onClose={() => setDetail(null)}
+          describedBy="detail-summary"
+        >
           <ProductImage product={detail} large />
           <div className="detail-content">
             <p className="category-label">{detail.categoryLabel}</p>
-            <h3>
-              <Price product={detail} />
-            </h3>
+            <p className="variant">
+              {detail.variantLabel || detail.originalCategory}
+            </p>
+            <div id="detail-summary">
+              <p className="detail-price">
+                <Price product={detail} reference={config.showReferencePrices} />
+              </p>
+              <p
+                className={
+                  detail.sellingUnit?.trim() ? "unit-note" : "unit-note pending"
+                }
+              >
+                {detail.sellingUnit?.trim()
+                  ? `Unit: ${detail.sellingUnit}`
+                  : "Unit not confirmed · can’t be ordered yet"}
+              </p>
+            </div>
             <dl>
-              <dt>Original category</dt>
+              <dt>Type</dt>
               <dd>{detail.originalCategory}</dd>
-              <dt>Selling unit</dt>
-              <dd>
-                {detail.sellingUnit ||
-                  (config.privateAudience
-                    ? "To be confirmed with the seller"
-                    : "Needs seller confirmation — ordering blocked")}
-              </dd>
               {detail.packDetails && (
                 <>
-                  <dt>Source pack text</dt>
-                  <dd>{detail.packDetails} (selling unit unconfirmed)</dd>
+                  <dt>Pack information</dt>
+                  <dd>
+                    {detail.packDetails}
+                    {!detail.sellingUnit?.trim() &&
+                      " (describes the pack, not the selling unit)"}
+                  </dd>
                 </>
               )}
-              <dt>Product reference</dt>
+              <dt>Reference</dt>
               <dd>{detail.id}</dd>
             </dl>
             {detail.verifiedSpecifications.map((s) => (
@@ -778,54 +826,54 @@ export default function App() {
               <p>{detail.certificationDetails}</p>
             )}
             {config.policies.safety && <p>{config.policies.safety}</p>}
+            {!detail.sellingUnit?.trim() && (
+              <p className="callout">
+                This product can’t be ordered until the seller confirms its
+                selling unit.
+              </p>
+            )}
             {!detail.categoryReviewed && (
               <p className="callout">
                 This product’s category requires seller review.
               </p>
             )}
-            {canOrder &&
-              (blockedReason(detail, config) ? (
-                <p>{blockedReason(detail, config)}</p>
-              ) : (
-                <>
-                  <Quantity
-                    value={detailQuantity}
-                    max={Math.min(
-                      config.maxQuantity,
-                      detail.maxQuantityPerRequest,
-                    )}
-                    name={detail.name}
-                    onChange={(v) => {
-                      const n = quantity(
-                        v,
-                        Math.min(
-                          config.maxQuantity,
-                          detail.maxQuantityPerRequest,
-                        ),
-                      );
-                      if (n === null) {
-                        announce("Enter a valid whole quantity.");
-                        return false;
-                      }
-                      setDetailQuantity(n);
-                      return true;
-                    }}
-                  />
-                  <button
-                    className="button primary"
-                    onClick={() => {
-                      if (update(detail, detailQuantity)) {
-                        audio.tone("add");
-                        setDetail(null);
-                        setStage("cart");
-                        setHandoff("");
-                      }
-                    }}
-                  >
-                    {cart[detail.id] ? "Update cart" : "Add to cart"}
-                  </button>
-                </>
-              ))}
+            {detail.availability === "unavailable" && (
+              <p className="callout">Currently unavailable.</p>
+            )}
+            {!blockedReason(detail, config) && (
+              <div className="detail-actions">
+                <Quantity
+                  value={detailQuantity}
+                  max={Math.min(config.maxQuantity, detail.maxQuantityPerRequest)}
+                  name={detail.name}
+                  onChange={(v) => {
+                    const n = quantity(
+                      v,
+                      Math.min(config.maxQuantity, detail.maxQuantityPerRequest),
+                    );
+                    if (n === null) {
+                      announce("Enter a valid whole quantity.");
+                      return false;
+                    }
+                    setDetailQuantity(n);
+                    return true;
+                  }}
+                />
+                <button
+                  className="button primary"
+                  onClick={() => {
+                    if (update(detail, detailQuantity)) {
+                      audio.tone("add");
+                      setDetail(null);
+                      setStage("cart");
+                      setHandoff("");
+                    }
+                  }}
+                >
+                  {cart[detail.id] ? "Update cart" : "Add to cart"}
+                </button>
+              </div>
+            )}
           </div>
         </Modal>
       )}
@@ -943,8 +991,8 @@ export default function App() {
               }}
             >
               <p>
-                Your details and selected items will be included in WhatsApp.
-                Tap Send there to share your order.
+                Enter your name and mobile number, then review your request
+                below.
               </p>
               {field("name", "Full name", true, 100)}
               {field("mobile", "Mobile number", true, 30)}
@@ -1010,7 +1058,70 @@ export default function App() {
               {errors.acknowledged && (
                 <p className="error">{errors.acknowledged}</p>
               )}
-              <PriceSummary amount={amount} />
+              <section className="review-summary" aria-labelledby="review-title">
+                <h3 id="review-title">Review your request</h3>
+                <ul className="review-lines">
+                  {selected.map((p) => (
+                    <li key={p.id}>
+                      <div className="review-item">
+                        <strong>{p.name}</strong>
+                        <span>{p.variantLabel || p.originalCategory}</span>
+                        {p.sellingUnit && <small>Unit: {p.sellingUnit}</small>}
+                      </div>
+                      <div className="review-amount">
+                        <span>
+                          {cart[p.id]} × {rupees(p.pricePaise!)}
+                        </span>
+                        <strong>{rupees(p.pricePaise! * cart[p.id])}</strong>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <PriceSummary amount={amount} />
+                <dl className="review-buyer">
+                  <dt>Name</dt>
+                  <dd>{buyer.name.trim() || "Not entered yet"}</dd>
+                  <dt>Mobile</dt>
+                  <dd>{buyer.mobile.trim() || "Not entered yet"}</dd>
+                  <dt>Fulfilment</dt>
+                  <dd>{fulfilmentText}</dd>
+                  {buyer.notes.trim() && (
+                    <>
+                      <dt>Notes</dt>
+                      <dd>{buyer.notes.trim()}</dd>
+                    </>
+                  )}
+                </dl>
+                <div className="review-actions">
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => setStage("cart")}
+                  >
+                    Edit items
+                  </button>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => document.getElementById("buyer-name")?.focus()}
+                  >
+                    Edit details
+                  </button>
+                </div>
+                <details className="complete-message">
+                  <summary>View the complete WhatsApp message</summary>
+                  {preview ? (
+                    <pre tabIndex={0} aria-label="Complete WhatsApp message">
+                      {preview.message}
+                    </pre>
+                  ) : (
+                    <p className="muted">
+                      Enter your name and mobile number and tick the
+                      acknowledgement above to see the complete message.
+                    </p>
+                  )}
+                </details>
+              </section>
               {draft?.long && (
                 <section
                   className="handoff-preparation"
@@ -1067,20 +1178,34 @@ export default function App() {
                   )}
                 </section>
               )}
+              {isCheckoutDemo && (
+                <p className="callout">
+                  <strong>Dry run.</strong> Continue to WhatsApp shows the link
+                  and message here instead. It does not open WhatsApp or send
+                  anything.
+                </p>
+              )}
               <button
                 className="button whatsapp full"
                 type="submit"
                 disabled={busy || (!!draft?.long && !requestPrepared)}
               >
                 {handoff && !draft?.long
-                  ? "Open WhatsApp again"
+                  ? isCheckoutDemo
+                    ? "Run the dry run again"
+                    : "Open WhatsApp again"
                   : "Continue to WhatsApp"}
               </button>
+              <p className="muted">
+                WhatsApp will open with your request. Review it and tap Send.
+                Your order is confirmed only after the seller replies.
+              </p>
               {handoff && (
                 <p className="callout" role="status">
                   {handoff}
                 </p>
               )}
+              {isCheckoutDemo && dryRun && <DryRunPanel draft={dryRun} />}
               {draft && !draft.long && (
                 <details className="order-backup">
                   <summary>Copy or save this order</summary>
@@ -1157,6 +1282,52 @@ export default function App() {
         </Modal>
       )}
     </>
+  );
+}
+// Local checkout demo only (see isCheckoutDemo): what "Continue to WhatsApp" would have opened.
+function DryRunPanel({ draft }: { draft: RequestDraft }) {
+  const url = new URL(draft.url);
+  return (
+    <section className="dry-run" aria-labelledby="dry-run-title">
+      <h3 id="dry-run-title">Dry run result: nothing was sent</h3>
+      <p>
+        On the live site this step would open WhatsApp with the link below.
+        The buyer would still have to tap Send, and the seller confirms the
+        order. Here, WhatsApp was not opened.
+      </p>
+      <dl>
+        <dt>Would open</dt>
+        <dd>
+          <code>{draft.url}</code>
+        </dd>
+        <dt>Recipient</dt>
+        <dd>
+          +{url.pathname.slice(1)} (the real seller number; this demo never
+          contacts it)
+        </dd>
+        <dt>Reference</dt>
+        <dd>{draft.reference}</dd>
+        <dt>Link length</dt>
+        <dd>
+          {draft.url.length} characters (limit {config.urlThreshold})
+          {draft.long
+            ? ". Too long for a chat link, so WhatsApp would open with a short note and the buyer pastes or attaches the complete request."
+            : ". Fits in the link."}
+        </dd>
+      </dl>
+      <h4>Message carried in the link</h4>
+      <pre tabIndex={0} aria-label="Message carried in the WhatsApp link">
+        {url.searchParams.get("text")}
+      </pre>
+      {draft.long && (
+        <>
+          <h4>Complete request (to paste or attach)</h4>
+          <pre tabIndex={0} aria-label="Complete request">
+            {draft.message}
+          </pre>
+        </>
+      )}
+    </section>
   );
 }
 function PriceSummary({ amount }: { amount: ReturnType<typeof totals> }) {

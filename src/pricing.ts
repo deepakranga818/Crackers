@@ -43,13 +43,39 @@ export function blockedReason(p: Product, c: Business): string | null {
   )
     return "Product data needs correction";
   if (p.availability === "unavailable") return "Currently unavailable";
-  // Private list: unknown unit, type or availability are shown as "to be confirmed" and settled on WhatsApp.
-  if (c.privateAudience) return null;
+  // Product data, not a launch formality: a private list does not waive the product type
+  // review or the selling unit. A price alone never says what is being sold.
   if (!p.categoryReviewed) return "Product type needs seller review";
   if (!p.sellingUnit?.trim()) return "Selling unit needs confirmation";
+  // Private list: the seller confirms stock on WhatsApp for every order. A public shop
+  // needs availability recorded.
+  if (c.privateAudience) return null;
   if (p.availability !== "available")
     return "Availability needs seller confirmation";
   return null;
+}
+// True when at least one product can actually be ordered; the UI offers ordering only then.
+export const anyOrderable = (products: Product[], c: Business) =>
+  products.some((p) => !blockedReason(p, c));
+// Shopper wording for the offer tiers, derived from the same tiers totals() applies:
+// a tier applies when the product subtotal is above the previous tier's limit and at or
+// below its own, so there is no gap between "₹2,000" and "₹2,001".
+export function offerSummary(offers: Business["offers"]) {
+  let above = 0;
+  return (offers?.tiers ?? []).map((t) => {
+    const percent = t.basisPoints / 100;
+    const off = `${percent}% off`;
+    const text =
+      t.maxSubtotalPaise === null
+        ? above
+          ? `${off} when it is above ${rupees(above)}`
+          : off
+        : above
+          ? `${off} when it is above ${rupees(above)} and up to ${rupees(t.maxSubtotalPaise)}`
+          : `${off} when your product total is ${rupees(t.maxSubtotalPaise)} or less`;
+    above = t.maxSubtotalPaise ?? above;
+    return { code: t.couponCode ?? null, percent, text };
+  });
 }
 export function quantity(value: unknown, max: number): number | null {
   if (typeof value === "string" && !/^\d+$/.test(value)) return null;

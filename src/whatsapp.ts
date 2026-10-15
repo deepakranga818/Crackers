@@ -52,7 +52,14 @@ export function makeRequest(
     c.tax,
   ]);
   if (previous?.fingerprint === fingerprint) return previous;
-  const reference = "REQ-" + crypto.randomUUID().slice(0, 8).toUpperCase();
+  // getRandomValues, unlike randomUUID, also exists on plain-HTTP pages (e.g. a LAN test URL).
+  const reference =
+    "REQ-" +
+    Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) =>
+      b.toString(16).padStart(2, "0"),
+    )
+      .join("")
+      .toUpperCase();
   const created =
     new Intl.DateTimeFormat("en-IN", {
       dateStyle: "medium",

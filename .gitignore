@@ -7,3 +7,7 @@ playwright-report/
 !.env.example
 __pycache__/
 reports/screenshots/
+tests/fixtures/products-with-units.json
+reports/layout/
+reports/lighthouse/
+demo/products-checkout-demo.json

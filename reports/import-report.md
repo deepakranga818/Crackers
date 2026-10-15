@@ -1,6 +1,6 @@
 # Spreadsheet import audit
 
-Google Sheet: 46 rows; version 4a91b4c436e1. Blank Order cells are ignored; no inventory inferred. Seller contact: 9992230740. Source: https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617. Fetched: 2026-10-14T12:43:09.058107+00:00.
+Google Sheet: 46 rows; version e5f47eed280e. Blank Order cells are ignored; no inventory inferred. Seller contact: 9992230740. Source: https://docs.google.com/spreadsheets/d/1T21rN-iyxcuJyIyYxU-ARjhnqwDrMSRVWH8Z_wWpI2E/edit?gid=1949134617. Fetched: 2026-10-14T12:43:09.058107+00:00.
 
 - dc-001 | Google Sheet row 4 | POP-UP | Pop- gol size → Pop-ups | ₹10: Selling unit unconfirmed
 - dc-002 | Google Sheet row 5 | POP-UP | Pop- long size → Pop-ups | ₹20: Selling unit unconfirmed
@@ -30,16 +30,16 @@ Google Sheet: 46 rows; version 4a91b4c436e1. Blank Order cells are ignored; no i
 - dc-026 | Google Sheet row 29 | F.P. Nano RL | Anar - Medium → Flower Pots / Anar | ₹250: Selling unit unconfirmed
 - dc-027 | Google Sheet row 30 | F.P. Ashoka CORO | Anar - Medium → Flower Pots / Anar | ₹350: Selling unit unconfirmed
 - dc-028 | Google Sheet row 31 | Color Koti DLX MR | ANAR - Big size → Flower Pots / Anar | ₹600: Selling unit unconfirmed
-- dc-029 | Google Sheet row 32 | Bunty-Bubly RL | Anar Bomb - 5 piece → Other / Needs Review | ₹180: Category requires seller review; Selling unit unconfirmed
-- dc-030 | Google Sheet row 33 | Ganga Jamana RL | Anar Bomb - 5 piece → Other / Needs Review | ₹200: Category requires seller review; Selling unit unconfirmed
-- dc-031 | Google Sheet row 34 | Mighty RL /ANTI Banti | Anar bomb - 10 piece → Other / Needs Review | ₹300: Category requires seller review; Selling unit unconfirmed
+- dc-029 | Google Sheet row 32 | Bunty-Bubly RL | Anar Bomb - 5 piece → More products | ₹180: Category requires seller review; Selling unit unconfirmed
+- dc-030 | Google Sheet row 33 | Ganga Jamana RL | Anar Bomb - 5 piece → More products | ₹200: Category requires seller review; Selling unit unconfirmed
+- dc-031 | Google Sheet row 34 | Mighty RL /ANTI Banti | Anar bomb - 10 piece → More products | ₹300: Category requires seller review; Selling unit unconfirmed
 - dc-032 | Google Sheet row 35 | Rocket Bomb KS | Rockets - Small → Rockets | ₹650: Selling unit unconfirmed
 - dc-033 | Google Sheet row 36 | 2 Sound Rocket KS | Rockets → Rockets | ₹700: Selling unit unconfirmed
 - dc-034 | Google Sheet row 37 | Lunik Ex. Coro | Rockets → Rockets | ₹200: Selling unit unconfirmed
 - dc-035 | Google Sheet row 38 | Zitiwala Rocket Coro | Rockets → Rockets | ₹350: Selling unit unconfirmed
 - dc-036 | Google Sheet row 39 | Penta Missile AZ | Single shot - 5 Piece → Sky Shots | ₹450: Selling unit unconfirmed
-- dc-037 | Google Sheet row 40 | 3 piece Shower SRL | Fountain Rocket - 3 Piece → Other / Needs Review | ₹550: Category requires seller review; Selling unit unconfirmed
-- dc-038 | Google Sheet row 41 | 3 piece Shower NSV | Single shot Rocket Flower - 3 Piece → Other / Needs Review | ₹350: Category requires seller review; Selling unit unconfirmed
+- dc-037 | Google Sheet row 40 | 3 piece Shower SRL | Fountain Rocket - 3 Piece → More products | ₹550: Category requires seller review; Selling unit unconfirmed
+- dc-038 | Google Sheet row 41 | 3 piece Shower NSV | Single shot Rocket Flower - 3 Piece → More products | ₹350: Category requires seller review; Selling unit unconfirmed
 - dc-039 | Google Sheet row 42 | 7 Shot Special | Sky shot → Sky Shots | ₹350: Selling unit unconfirmed
 - dc-040 | Google Sheet row 43 | 12 shot 105 cdo AZ | Sky shot → Sky Shots | ₹750: Selling unit unconfirmed
 - dc-041 | Google Sheet row 44 | 12 shot honey moon AZ | Sky shot → Sky Shots | ₹800: Selling unit unconfirmed

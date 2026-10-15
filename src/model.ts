@@ -50,6 +50,9 @@ export type Business = {
   catalogueVersion: string;
   orderingEnabled: boolean;
   privateAudience?: boolean;
+  // Struck-through MRP, "% off" and savings are shown only when the owner has confirmed the
+  // Sheet's MRP column holds genuine reference prices (source/publication-approval.json).
+  showReferencePrices?: boolean;
   publicCatalogueVerified: boolean;
   verification: Record<string, boolean>;
   fulfilment: Fulfilment[];

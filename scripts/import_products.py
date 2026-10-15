@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def atomic_write(path,text):
     temporary=path.with_name(path.name+f'.{os.getpid()}.tmp')
     temporary.write_text(text,encoding='utf-8');temporary.replace(path)
-CATEGORIES = {'sparklers':'Sparklers / Phuljadi','spinners':'Ground Spinners / Chakkar','pots':'Flower Pots / Anar','rockets':'Rockets','shots':'Sky Shots','sound':'Sound Crackers / Bombs','strings':'Strings / Laddi','pop':'Pop-ups','review':'Other / Needs Review'}
+CATEGORIES = {'sparklers':'Sparklers / Phuljadi','spinners':'Ground Spinners / Chakkar','pots':'Flower Pots / Anar','rockets':'Rockets','shots':'Sky Shots','sound':'Sound Crackers / Bombs','strings':'Strings / Laddi','pop':'Pop-ups','review':'More products'}
 
 def extract(path):
     if Path(path).suffix=='.csv':

@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { describe, it, expect, vi } from "vitest";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import checklist from "../source/verification.json";
 import approval from "../source/publication-approval.json";
-import { business } from "../src/business";
+import { business, modeCopy } from "../src/business";
 import data from "../src/products.json";
 import mapping from "../source/category-map.json";
 import {
@@ -15,6 +15,8 @@ import {
   totals,
   blockedReason,
   orderingAllowed,
+  anyOrderable,
+  offerSummary,
   requiredVerifications,
 } from "../src/pricing";
 import { restore } from "../src/cart";
@@ -347,6 +349,18 @@ describe("buyer and WhatsApp", () => {
     ).not.toBe(draft.reference);
     expect(safeField("a\u202eb\nc")).toBe("a b c");
   });
+  it("builds a request without crypto.randomUUID, which plain-HTTP pages (a LAN test URL) lack", () => {
+    const real = globalThis.crypto;
+    vi.stubGlobal("crypto", {
+      getRandomValues: real.getRandomValues.bind(real),
+    });
+    try {
+      const draft = makeRequest({ "dc-001": 1 }, ready, buyer, config);
+      expect(draft.reference).toMatch(/^REQ-[0-9A-F]{8}$/);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
   it("keeps all items when link threshold is exceeded", () => {
     const cart = Object.fromEntries(ready.map((p) => [p.id, 1]));
     const draft = makeRequest(cart, ready, buyer, config);
@@ -505,21 +519,23 @@ describe("launch verification", () => {
     expect(business.privateAudience).toBe(true);
     expect(orderingAllowed(business)).toBe(true);
     expect(gate({ audience: "private-friends" })).toBe(0);
-    const unknown = {
+    // A confirmed unit is what the private list needs. Stock is confirmed by the seller on
+    // WhatsApp for every order, so unknown availability does not block.
+    const confirmed = {
       ...products[0],
       availability: "unknown",
-      sellingUnit: null,
+      sellingUnit: "Box of 10",
     };
-    expect(blockedReason(unknown, business)).toBeNull();
+    expect(blockedReason(confirmed, business)).toBeNull();
     expect(
-      blockedReason({ ...unknown, availability: "unavailable" }, business),
+      blockedReason({ ...confirmed, availability: "unavailable" }, business),
     ).toContain("unavailable");
     expect(
-      blockedReason(unknown, { ...business, privateAudience: false }),
+      blockedReason(confirmed, { ...business, privateAudience: false }),
     ).toContain("disabled");
     const { message, url } = makeRequest(
       { "dc-001": 2 },
-      products,
+      [confirmed, ...products.slice(1)],
       {
         ...emptyBuyer,
         name: "Deepak",
@@ -530,8 +546,27 @@ describe("launch verification", () => {
       { ...business, urlThreshold: 100000 },
     );
     expect(new URL(url).pathname).toBe("/919992230740");
-    expect(message).not.toMatch(/unit|fulfilment|to be confirmed/i);
+    expect(message).toContain("Qty: 2 × ₹10 = ₹20 (Box of 10)");
+    expect(message).not.toMatch(/fulfilment|to be confirmed/i);
     expect(message).toContain("*Amount before delivery charge:");
+  });
+  it("keeps reference prices hidden until the owner confirms them with a reference", () => {
+    expect(approval.referencePrices).toEqual({
+      confirmed: false,
+      reference: null,
+    });
+    expect(business.showReferencePrices).toBe(false);
+    const base = { audience: "private-friends" };
+    expect(gate({ ...base, referencePrices: { confirmed: true } })).toBe(1);
+    expect(
+      gate({ ...base, referencePrices: { confirmed: true, reference: " " } }),
+    ).toBe(1);
+    expect(
+      gate({
+        ...base,
+        referencePrices: { confirmed: true, reference: "owner message 2026-10-15" },
+      }),
+    ).toBe(0);
   });
   it("keeps page title, description and Open Graph metadata equal to the config", () => {
     const html = readFileSync("index.html", "utf8");
@@ -553,6 +588,11 @@ describe("final WhatsApp message hygiene", () => {
     sellingUnit: "Demo unit (not seller confirmed)",
   }));
   const privateConfig = { ...business, urlThreshold: 100000 };
+  // The private list orders only products with a confirmed unit; this is a stand-in for one.
+  const confirmedUnits = products.map((p) => ({
+    ...p,
+    sellingUnit: "Box of 10",
+  }));
   const whatsappBuyer = {
     ...emptyBuyer,
     name: "Deepak",
@@ -578,7 +618,7 @@ describe("final WhatsApp message hygiene", () => {
     ({ cart }) => {
       const { message, url } = makeRequest(
         cart,
-        products,
+        confirmedUnits,
         whatsappBuyer,
         privateConfig,
       );
@@ -588,7 +628,7 @@ describe("final WhatsApp message hygiene", () => {
       expect(message).not.toMatch(/\p{Extended_Pictographic}|�/u);
       expect(message).not.toContain("I would like to order");
       expect(decodeURIComponent(new URL(url).search.slice(6))).toBe(message);
-      const expected = totals(cart, products, privateConfig);
+      const expected = totals(cart, confirmedUnits, privateConfig);
       const subtotal = rupeeValue(message, /Product subtotal: ₹([\d,]+)/);
       const discount = rupeeValue(message, /Offer \([\d.]+% off\): −₹([\d,]+)/);
       const amount = rupeeValue(message, /\*[^:*]+: ₹([\d,]+)\*/);
@@ -639,4 +679,168 @@ describe("final WhatsApp message hygiene", () => {
     expect(message).not.toMatch(/demo|test|fixture|unit|fulfilment/i);
     expect(message).toContain("Qty: 2 × ₹10 = ₹20");
   });
+});
+describe("selling units gate ordering on every path, including the private list", () => {
+  const priv = { ...business, urlThreshold: 100000 };
+  const owner = {
+    ...emptyBuyer,
+    name: "Deepak",
+    mobile: "9992230740",
+    method: "whatsapp",
+    acknowledged: true,
+  };
+  const withUnit = (unit: string | null) =>
+    products.map((p) => ({ ...p, sellingUnit: unit }));
+  const cartLine = JSON.stringify({
+    schema: 1,
+    catalogueVersion: business.catalogueVersion,
+    items: { "dc-001": 1 },
+  });
+  it("makes no production product orderable until the owner confirms units", () => {
+    expect(products.every((p) => p.sellingUnit === null)).toBe(true);
+    expect(anyOrderable(products, business)).toBe(false);
+    expect(blockedReason(products[0], business)).toBe(
+      "Selling unit needs confirmation",
+    );
+    // Nothing assigns a universal unit as a shortcut.
+    expect(products.some((p) => /per item/i.test(p.sellingUnit ?? ""))).toBe(
+      false,
+    );
+  });
+  it("blocks adding: a unit-less product is blocked, a blank unit too, a confirmed one is not", () => {
+    for (const unit of [null, "", "   "])
+      expect(
+        blockedReason({ ...products[0], sellingUnit: unit }, priv),
+      ).toBe("Selling unit needs confirmation");
+    expect(
+      blockedReason({ ...products[0], sellingUnit: "Box of 10" }, priv),
+    ).toBeNull();
+    expect(anyOrderable(withUnit("Box of 10"), priv)).toBe(true);
+  });
+  it("still blocks an unreviewed product type even with a confirmed unit", () => {
+    const unreviewed = products.find((p) => !p.categoryReviewed)!;
+    expect(
+      blockedReason({ ...unreviewed, sellingUnit: "Box of 10" }, priv),
+    ).toBe("Product type needs seller review");
+  });
+  it("keeps a restored cart out of checkout while its product has no confirmed unit", () => {
+    const stuck = restore(cartLine, products, priv);
+    expect(stuck.cart).toEqual({ "dc-001": 1 });
+    expect(stuck.notices.join(" ")).toContain("review required");
+    // The cart's checkout gate is: every selected product must be orderable.
+    const ready = (list: Product[]) =>
+      Object.keys(stuck.cart).every(
+        (id) => !blockedReason(list.find((p) => p.id === id)!, priv),
+      );
+    expect(ready(products)).toBe(false);
+    expect(ready(withUnit("Box of 10"))).toBe(true);
+    expect(restore(cartLine, withUnit("Box of 10"), priv).notices).toEqual([]);
+  });
+  it("refuses a WhatsApp handoff for a unit-less product and allows a confirmed one", () => {
+    expect(() => makeRequest({ "dc-001": 1 }, products, owner, priv)).toThrow();
+    // One unit-less line is enough to refuse the whole request.
+    const mixed = withUnit("Box of 10").map((p) =>
+      p.id === "dc-002" ? { ...p, sellingUnit: null } : p,
+    );
+    expect(() =>
+      makeRequest({ "dc-001": 1, "dc-002": 1 }, mixed, owner, priv),
+    ).toThrow();
+    expect(() =>
+      makeRequest({ "dc-001": 1 }, withUnit("Box of 10"), owner, priv),
+    ).not.toThrow();
+  });
+});
+describe("offers: wording matches the thresholds that totals() applies", () => {
+  const offerConfig: Business = { ...config, offers: business.offers };
+  const product = (pricePaise: number): Product[] => [
+    { ...ready[0], pricePaise },
+  ];
+  const at = (subtotalPaise: number) =>
+    totals({ "dc-001": 1 }, product(subtotalPaise), offerConfig);
+  it("applies 10% through ₹2,000, 15% above it through ₹5,000, 20% above that — in paise", () => {
+    expect(at(1).discountBasisPoints).toBe(1000);
+    expect(at(200000).discountBasisPoints).toBe(1000);
+    expect(at(200001).discountBasisPoints).toBe(1500);
+    expect(at(500000).discountBasisPoints).toBe(1500);
+    expect(at(500001).discountBasisPoints).toBe(2000);
+    expect(at(200000).couponCode).toBe("CRACK10");
+    expect(at(200001).couponCode).toBe("CRACK15");
+    expect(at(500001).couponCode).toBe("CRACK20");
+  });
+  it("rounds the discount once, in paise, half up, on the product subtotal", () => {
+    // 10% of ₹10.05 is 100.5 paise → 101; the amount shows paise only when present.
+    const t = at(1005);
+    expect(t.discount).toBe(101);
+    expect(t.afterDiscount).toBe(904);
+    expect(rupees(t.afterDiscount)).toBe("₹9.04");
+    // The discount is on the product subtotal only: a delivery charge does not move the tier.
+    const withDelivery = totals(
+      { "dc-001": 1 },
+      product(200000),
+      offerConfig,
+      { ...config.fulfilment[0], chargePaise: 9999 },
+    );
+    expect(withDelivery.discountBasisPoints).toBe(1000);
+  });
+  it("words the tiers with no gap between ₹2,000 and ₹2,001", () => {
+    expect(offerSummary(business.offers)).toEqual([
+      {
+        code: "CRACK10",
+        percent: 10,
+        text: "10% off when your product total is ₹2,000 or less",
+      },
+      {
+        code: "CRACK15",
+        percent: 15,
+        text: "15% off when it is above ₹2,000 and up to ₹5,000",
+      },
+      {
+        code: "CRACK20",
+        percent: 20,
+        text: "20% off when it is above ₹5,000",
+      },
+    ]);
+    expect(offerSummary(undefined)).toEqual([]);
+  });
+});
+describe("mode copy follows what a visitor can actually do", () => {
+  it("promises ordering only when something is orderable, and never calls the list access-controlled", () => {
+    const ordering = modeCopy(true);
+    const browsing = modeCopy(false);
+    expect(ordering.banner).toBe(
+      "For friends and family · seller confirms orders",
+    );
+    expect(ordering.banner).not.toMatch(/private|restricted/i);
+    expect(ordering.hero).toMatch(/send your selection to the seller on WhatsApp/);
+    // Nothing orderable: browse wording, no promise of adding or sending.
+    expect(browsing.banner).toBe("Browsing only until selling units are confirmed");
+    expect(browsing.hero).not.toMatch(/send your selection|WhatsApp/);
+    expect(browsing.steps.flat().join(" ")).not.toMatch(/WhatsApp|cart|Send/i);
+    for (const copy of [ordering, browsing])
+      expect(JSON.stringify(copy)).not.toMatch(
+        /development|needs review|source products/i,
+      );
+  });
+});
+describe("test-only modes stay out of the production bundle", () => {
+  // Needs a build (CI runs build:offline before the tests); skipped when dist/ does not exist.
+  const dir = new URL("../dist/assets/", import.meta.url);
+  it.skipIf(!existsSync(dir))(
+    "contains no local checkout demo, dry run or fixture code",
+    () => {
+      const js = readdirSync(dir)
+        .filter((f) => f.endsWith(".js"))
+        .map((f) => readFileSync(new URL(f, dir), "utf8"))
+        .join("\n");
+      for (const marker of [
+        "Local checkout demo",
+        "checkout-demo",
+        "Dry run",
+        "sample-pickup",
+        "private-fixture",
+        "Test fixture",
+      ])
+        expect(js, marker).not.toContain(marker);
+    },
+  );
 });

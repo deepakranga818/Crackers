@@ -1,0 +1,129 @@
+{
+  "after": {
+    "1366x768": {
+      "phase": "after",
+      "width": 1366,
+      "height": 768,
+      "heroHeight": 120,
+      "firstCardTop": 446,
+      "scrollNeededToReachFirstCard": 263,
+      "scrollNeededAsShareOfViewport": 0.34,
+      "stickyStack": 175,
+      "stickyShareOfViewport": 0.23,
+      "visibleAtTop": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": false
+      },
+      "visibleAfterScroll": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "searchAndChipsVisibleAtTop": true,
+      "horizontalOverflow": false
+    },
+    "360x800": {
+      "phase": "after",
+      "width": 360,
+      "height": 800,
+      "heroHeight": 143.015625,
+      "firstCardTop": 474.15625,
+      "scrollNeededToReachFirstCard": 347,
+      "scrollNeededAsShareOfViewport": 0.43,
+      "stickyStack": 119,
+      "stickyShareOfViewport": 0.15,
+      "visibleAtTop": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": false
+      },
+      "visibleAfterScroll": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "searchAndChipsVisibleAtTop": true,
+      "horizontalOverflow": false
+    },
+    "390x844": {
+      "phase": "after",
+      "width": 390,
+      "height": 844,
+      "heroHeight": 145.28125,
+      "firstCardTop": 476.421875,
+      "scrollNeededToReachFirstCard": 349,
+      "scrollNeededAsShareOfViewport": 0.41,
+      "stickyStack": 119,
+      "stickyShareOfViewport": 0.14,
+      "visibleAtTop": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "visibleAfterScroll": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "searchAndChipsVisibleAtTop": true,
+      "horizontalOverflow": false
+    },
+    "640x450": {
+      "phase": "after",
+      "width": 640,
+      "height": 450,
+      "heroHeight": 145.578125,
+      "firstCardTop": 476.71875,
+      "scrollNeededToReachFirstCard": 469,
+      "scrollNeededAsShareOfViewport": 1.04,
+      "stickyStack": 0,
+      "stickyShareOfViewport": 0,
+      "visibleAtTop": {
+        "image": false,
+        "name": false,
+        "price": false,
+        "action": false
+      },
+      "visibleAfterScroll": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "searchAndChipsVisibleAtTop": true,
+      "horizontalOverflow": false
+    },
+    "768x1024": {
+      "phase": "after",
+      "width": 768,
+      "height": 1024,
+      "heroHeight": 221.578125,
+      "firstCardTop": 551.578125,
+      "scrollNeededToReachFirstCard": 365,
+      "scrollNeededAsShareOfViewport": 0.36,
+      "stickyStack": 179,
+      "stickyShareOfViewport": 0.17,
+      "visibleAtTop": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "visibleAfterScroll": {
+        "image": true,
+        "name": true,
+        "price": true,
+        "action": true
+      },
+      "searchAndChipsVisibleAtTop": true,
+      "horizontalOverflow": false
+    }
+  }
+}
