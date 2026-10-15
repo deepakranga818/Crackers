@@ -54,7 +54,7 @@ for (const [name, size] of Object.entries({ phone, desktop })) {
       page,
     }) => {
       await page.goto(PRODUCTION);
-      await page.getByText("View terms").click();
+      await page.getByText("View offers").click();
       await page.getByRole("searchbox").fill("phuljadi");
       await scan(page);
     });
@@ -76,6 +76,8 @@ for (const [name, size] of Object.entries({ phone, desktop })) {
     test("cart, buyer details and the review block", async ({ page }) => {
       await page.goto(FIXTURE);
       await openCheckout(page);
+      await page.getByText("View coupon codes").click();
+      await expect(page.getByRole("button", { name: /^Use code/ })).toBeVisible();
       await scan(page);
       await fillBuyer(page);
       await page.getByText("View the complete WhatsApp message").click();
@@ -279,7 +281,7 @@ test.describe("touch targets", () => {
     await page.setViewportSize(phone);
     await page.goto(FIXTURE);
     await page.locator(".product-card").first().waitFor();
-    await page.getByText("View terms").click();
+    await page.getByText("View offers").click();
     const small = await page.evaluate(() => {
       const found: string[] = [];
       const controls = document.querySelectorAll<HTMLElement>(

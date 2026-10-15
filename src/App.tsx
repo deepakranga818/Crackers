@@ -13,10 +13,12 @@ import { emptyBuyer, type Buyer, type Product, type Snapshot } from "./model";
 import { validateBuyer } from "./buyer";
 import { RECIPIENT_ERROR, makeRequest, type RequestDraft } from "./whatsapp";
 import { useAudio } from "./audio";
+import { useFireworks } from "./fireworks";
 import { ImageIndexContext, loadImageIndex, type ImageIndex } from "./images";
 import { useSheet } from "./sheet/useSheet";
 import type { SheetState, SheetStore } from "./sheet/store";
 import {
+  CouponList,
   Modal,
   OfferStrip,
   PhotoLinks,
@@ -172,6 +174,7 @@ function Shop({
   const { cart, coupon, setCoupon, seen, names, save, update, acknowledge, notice } =
     useCart(config, announce);
   const audio = useAudio(config.soundVolume);
+  const fireworks = useFireworks();
   useStickyOffset();
   const canOrder = orderingAllowed(config);
   const mode = modeCopy(canOrder);
@@ -301,6 +304,7 @@ function Shop({
   function add(p: Product) {
     if (update(p, (cart[p.id] || 0) + 1)) {
       audio.tone("add");
+      void fireworks.play();
       setStage("cart");
       setHandoff("");
     }
@@ -429,11 +433,13 @@ function Shop({
           "Dry run only: WhatsApp was not opened and nothing was sent. The link and message that would have been used are shown below.",
         );
         audio.tone("handoff");
+        void fireworks.play();
         return;
       }
       const opened = window.open(current.url, "_blank");
       if (opened) {
         opened.opener = null;
+        void fireworks.play();
         setHandoff(
           current.long
             ? "WhatsApp opened. Paste the complete request or attach your downloaded file, then tap Send. Wait for the seller’s confirmation."
@@ -992,6 +998,7 @@ function Shop({
           You are offline. Browsing works; WhatsApp requires a connection.
         </div>
       )}
+      {fireworks.node}
       {audio.status && (
         <p role="status" className="sound-status">
           {audio.status}
@@ -1071,6 +1078,7 @@ function Shop({
                   onClick={() => {
                     if (update(detail, detailQuantity)) {
                       audio.tone("add");
+                      void fireworks.play();
                       setDetail(null);
                       setStage("cart");
                       setHandoff("");
@@ -1209,6 +1217,7 @@ function Shop({
                       onChange={(e) => setCoupon(e.target.value)}
                     />
                   </label>
+                  <CouponList offers={offers} onPick={setCoupon} />
                   <p
                     id="coupon-message"
                     className={

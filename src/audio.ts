@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSoundPlayer, type SoundKind } from "./sound-player";
 
 export function useAudio(volume: number) {
+  // On unless the visitor has turned it off before: the crackers play when the page opens.
   const [enabled, setEnabled] = useState(() => {
     try {
-      return localStorage.getItem("diwali-sound") === "true";
+      return localStorage.getItem("diwali-sound") !== "false";
     } catch {
-      return false;
+      return true;
     }
   });
   const [activated, setActivated] = useState(false);
   const [status, setStatus] = useState("");
   const [player] = useState(() => createSoundPlayer(volume));
+  // Removes the "first tap" listener below once the toggle button has settled things itself.
+  const stopWaiting = useRef(() => {});
   const unavailable = () => {
     setActivated(false);
     setStatus(
@@ -30,6 +33,7 @@ export function useAudio(volume: number) {
     }
   }
   function toggle() {
+    stopWaiting.current();
     if (enabled && activated) {
       setEnabled(false);
       setActivated(false);
@@ -50,6 +54,36 @@ export function useAudio(volume: number) {
       })
       .catch(unavailable);
   }
+  // Crackers on load. Browsers refuse sound before the visitor has touched the page, so try
+  // once now (it works where the browser allows it) and otherwise on the first tap or key.
+  useEffect(() => {
+    if (!enabled) return;
+    const events = ["pointerup", "keydown"] as const;
+    const stop = () =>
+      events.forEach((e) => document.removeEventListener(e, onGesture, true));
+    stopWaiting.current = stop;
+    const start = (probe: boolean) =>
+      player.play("crackers", probe).then(
+        (played) => {
+          if (!played) return;
+          stop();
+          setActivated(true);
+        },
+        () => {
+          if (probe) return;
+          stop();
+          unavailable();
+        },
+      );
+    function onGesture(e: Event) {
+      // The sound button has its own click handler; starting here would make it mute.
+      if ((e.target as Element | null)?.closest?.(".sound")) return;
+      void start(false);
+    }
+    events.forEach((e) => document.addEventListener(e, onGesture, true));
+    void start(true);
+    return stop;
+  }, []);
   useEffect(() => {
     const hidden = () => {
       if (document.hidden) player.mute();

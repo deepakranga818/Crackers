@@ -85,7 +85,7 @@ export function OfferStrip({ offers }: { offers: Offer[] }) {
         <span>
           {active.length === 1 ? "1 offer available" : `${active.length} offers available`}
         </span>
-        <span className="offers-toggle">View terms</span>
+        <span className="offers-toggle">View offers</span>
       </summary>
       <ul>
         {active.map((o) => (
@@ -100,6 +100,39 @@ export function OfferStrip({ offers }: { offers: Offer[] }) {
         Only the single best offer applies to your product total, before any
         fulfilment charge. Offers are not combined.
       </p>
+    </details>
+  );
+}
+
+// The coupon codes a customer can type in the cart, one tap to fill the box.
+export function CouponList({
+  offers,
+  onPick,
+}: {
+  offers: Offer[];
+  onPick: (code: string) => void;
+}) {
+  const coupons = offers.filter((o) => o.enabled && o.mode === "coupon" && o.code);
+  if (!coupons.length) return null;
+  return (
+    <details className="coupons">
+      <summary>View coupon codes</summary>
+      <ul>
+        {coupons.map((o) => (
+          <li key={o.row}>
+            <span className="code">{o.code}</span>
+            <span>{describeOffer(o)}</span>
+            <button
+              type="button"
+              className="text-button"
+              aria-label={`Use code ${o.code}`}
+              onClick={() => onPick(o.code!)}
+            >
+              Use
+            </button>
+          </li>
+        ))}
+      </ul>
     </details>
   );
 }

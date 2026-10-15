@@ -42,7 +42,8 @@ Tick each at a phone width (~390px) and a desktop width (~1366px).
 9. **Changes before sending:** with the cart open, change a price in the sheet, then press Continue to WhatsApp: a "Your order changed" list appears and nothing is sent until you accept.
 10. **Review and dry run:** every item with ID, quantity, price, discount, charge, buyer and fulfilment is listed; "View the complete WhatsApp message" shows the full text; the demo shows "nothing was sent". For the long-order path add about 25 products: Copy or Download is required first.
 11. **Image fallbacks:** a product with no image link shows "Product image coming soon"; a screenshot link not yet saved shows a "View photo" link.
-12. **Sound and reduced motion:** the sound toggle needs a tap and is remembered; "reduce motion" stops the diya/firework animation.
+12. **Sound, fireworks and reduced motion:** the firecrackers play when the page opens (browsers that block that play them on your first tap); the header button mutes them and the choice is remembered. Add to cart and the WhatsApp step each play the fireworks over the page, including over the cart; "reduce motion" stops those and the diya animation.
+13. **Coupon list:** in the cart, "View coupon codes" lists the enabled codes under the Coupon code box; "Use" fills it. The offers strip link reads "View offers".
 
 ## Known limitations
 

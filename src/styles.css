@@ -1707,6 +1707,62 @@ html[data-sticky-off] .shop-bar {
 .coupon-field {
   margin-top: var(--s3);
 }
+.coupons {
+  margin: var(--s2) 0;
+  font-size: var(--fs-sm);
+}
+.coupons summary {
+  color: var(--saffron);
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.coupons ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s2);
+}
+.coupons li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s3);
+}
+.coupons .code {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--saffron);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px var(--s2);
+}
+/* Fireworks burst (Lottie). A manual popover, so it sits above the cart dialog; taps pass through. */
+.burst-layer {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
+}
+.burst-art {
+  width: 100%;
+  height: 100%;
+}
+@media (orientation: portrait) {
+  /* The animation is 16:9; scale it up so the bursts are not tiny on a phone. */
+  .burst-art {
+    transform: scale(1.7);
+  }
+}
 .callout.changes ul {
   margin: var(--s2) 0 var(--s3);
   padding-left: var(--s5);

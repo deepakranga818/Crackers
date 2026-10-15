@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { FakeSheet, realShape } from "./sheet-fixture";
 
 test.beforeEach(async ({ page }) => {
@@ -25,14 +25,32 @@ test("saved product images load, the multi-image gallery works, products without
   await expect(page.locator(".product-card img")).toHaveCount(0);
 });
 
-test("sound requires a click, produces a nonzero audio signal and can be muted", async ({ page }) => {
-  await page.addInitScript(() => {
+// Counts the firecracker buffers started, and routes every gain through an analyser so the test
+// can see a real, nonzero signal. `block` makes the context behave like a browser that refuses
+// sound until the visitor has touched the page (this test browser lets pages autoplay, and treats
+// every page it opens as already touched, so the "touch" is tracked here instead).
+async function watchAudio(page: Page, block = false) {
+  await page.addInitScript((block) => {
     const Native = window.AudioContext;
     (window as any).__audio = [];
+    (window as any).__crackers = 0;
+    let touched = false;
+    for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => (touched = true), true);
     window.AudioContext = class extends Native {
       constructor() {
         super();
         (window as any).__audio.push(this);
+      }
+      get state() {
+        return block && !touched ? "suspended" : super.state;
+      }
+      resume() {
+        // Blocked: the promise stays pending until the visitor has tapped, as in Chrome.
+        return block && !touched ? new Promise<void>(() => {}) : super.resume();
+      }
+      createBufferSource() {
+        (window as any).__crackers++;
+        return super.createBufferSource();
       }
       createGain() {
         const gain = super.createGain();
@@ -46,14 +64,19 @@ test("sound requires a click, produces a nonzero audio signal and can be muted",
         return gain;
       }
     };
-  });
+  }, block);
+}
+const soundOn = (page: Page) => page.getByRole("button", { name: "Sound on · mute", exact: true });
+const soundOff = (page: Page) => page.getByRole("button", { name: "Enable festive sound", exact: true });
+
+test("the firecrackers play when the page opens (where the browser allows it), give a nonzero signal, and muting is remembered", async ({ page }) => {
+  await watchAudio(page);
   await page.goto("/");
-  expect(await page.evaluate(() => (window as any).__audio.length)).toBe(0);
-  await page.getByRole("button", { name: "Enable festive sound", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Sound on · mute", exact: true })).toBeVisible();
+  await expect(soundOn(page)).toBeVisible();
+  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
   const peak = await page.evaluate(async () => {
     let peak = 0;
-    for (let n = 0; n < 25; n++) {
+    for (let n = 0; n < 40; n++) {
       for (const analyser of (window as any).__analysers || []) {
         const samples = new Float32Array(analyser.fftSize);
         analyser.getFloatTimeDomainData(samples);
@@ -65,9 +88,38 @@ test("sound requires a click, produces a nonzero audio signal and can be muted",
   });
   expect(peak).toBeGreaterThan(0.001);
   expect(await page.evaluate(() => (window as any).__audio[0].state)).toBe("running");
-  await page.getByRole("button", { name: "Sound on · mute", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Enable festive sound", exact: true })).toBeVisible();
+  await soundOn(page).click();
+  await expect(soundOff(page)).toBeVisible();
   expect(await page.evaluate(() => (window as any).__audio[0].state)).toBe("suspended");
+  // Muted stays muted: after a reload nothing is created, and tapping the page starts nothing.
   await page.reload();
+  await page.locator("h1").click();
   expect(await page.evaluate(() => (window as any).__audio.length)).toBe(0);
+  await expect(soundOff(page)).toBeVisible();
+});
+
+test("where the browser blocks autoplay, the first tap on the page starts the firecrackers, once", async ({ page }) => {
+  await watchAudio(page, true);
+  await page.goto("/");
+  await expect(soundOff(page)).toBeVisible();
+  await page.waitForTimeout(700); // longer than the load-time attempt waits
+  expect(await page.evaluate(() => (window as any).__crackers)).toBe(0);
+  await page.locator("h1").click();
+  await expect(soundOn(page)).toBeVisible();
+  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
+  await page.locator("h1").click();
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
+  await expect(soundOn(page)).toBeVisible();
+});
+
+test("where autoplay is blocked, tapping the sound button first turns sound on instead of starting and muting it", async ({ page }) => {
+  await watchAudio(page, true);
+  await page.goto("/");
+  await soundOff(page).click();
+  await expect(soundOn(page)).toBeVisible();
+  await page.locator("h1").click(); // a later tap must not replay the crackers or toggle anything
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => (window as any).__crackers)).toBe(0);
+  await expect(soundOn(page)).toBeVisible();
 });

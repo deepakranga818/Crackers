@@ -16,6 +16,9 @@ test("the production build works from a GitHub Pages project path", async ({ pag
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
   expect(await page.evaluate(() => performance.getEntriesByType("resource").map((e) => e.name).filter((n) => n.includes("/images/index.json")))).toHaveLength(1);
   expect(await page.locator('link[rel="icon"]').getAttribute("href")).toMatch(/favicon\.svg$/);
+  // The fireworks are a lazily loaded chunk: it must resolve under the project path too.
+  await page.getByRole("button", { name: "Add to cart" }).first().click();
+  await expect(page.locator(".burst-layer svg path").first()).toBeAttached();
   expect(failed).toEqual([]);
   // Everything the page loaded came from under /Crackers/ (or the mocked sheet), never the domain root.
   const outside = await page.evaluate(() =>
