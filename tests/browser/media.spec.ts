@@ -69,9 +69,13 @@ async function watchAudio(page: Page, block = false) {
 const soundOn = (page: Page) => page.getByRole("button", { name: "Sound on · mute", exact: true });
 const soundOff = (page: Page) => page.getByRole("button", { name: "Enable festive sound", exact: true });
 
-test("the firecrackers play when the page opens (where the browser allows it), give a nonzero signal, and muting is remembered", async ({ page }) => {
+test("the firecrackers play when the page opens (or on the first tap), give a nonzero signal, and muting is remembered", async ({ page }) => {
   await watchAudio(page);
   await page.goto("/");
+  // The page tries on load. Whether a browser (or a slow CI machine) lets that through is not
+  // guaranteed, so the promise tested is: playing by itself, or on the first tap.
+  await page.waitForTimeout(900);
+  if (!(await soundOn(page).isVisible())) await page.locator("h1").click();
   await expect(soundOn(page)).toBeVisible();
   expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
   const peak = await page.evaluate(async () => {
