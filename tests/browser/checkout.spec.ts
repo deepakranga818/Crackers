@@ -13,6 +13,11 @@ async function add(page: Page, name: string) {
 async function openCart(page: Page) {
   await page.getByRole("button", { name: /Open cart/ }).click();
 }
+// A code only counts once Apply is pressed.
+async function applyCoupon(page: Page, code: string) {
+  await cart(page).getByLabel("Coupon code").fill(code);
+  await cart(page).getByRole("button", { name: "Apply", exact: true }).click();
+}
 async function toForm(page: Page) {
   await openCart(page);
   await cart(page).getByRole("button", { name: "Proceed to buyer details" }).click();
@@ -45,21 +50,37 @@ test("the cart is saved by Product ID and quantity, restored after reload, and t
   await expect(page.getByRole("button", { name: "Open cart, 2 units" })).toBeVisible();
 });
 
-test("coupons: case-insensitive, trimmed, with clear messages for unknown and disabled codes", async ({ page }) => {
+test("coupons: applied with the Apply button, case-insensitive and trimmed; unknown and disabled codes are explained in a visible box and never saved", async ({ page }) => {
   await setup(page, { offers: [TEN, { ...TEN, name: "Off", code: "OFF", enabled: "NO" }] });
   await add(page, "Alpha");
   await openCart(page);
-  const code = cart(page).getByLabel("Coupon code");
   await expect(cart(page).locator(".price-summary")).not.toContainText("Ten percent");
-  await code.fill("  ten ");
+  // Typing alone applies nothing.
+  await cart(page).getByLabel("Coupon code").fill("  ten ");
+  await expect(cart(page).locator(".price-summary .offer-saving")).toHaveCount(0);
+  await cart(page).getByRole("button", { name: "Apply", exact: true }).click();
   await expect(cart(page).locator(".price-summary .offer-saving")).toContainText("−₹100");
   await expect(cart(page).locator(".price-summary")).toContainText("Ten percent (TEN)");
-  await code.fill("nope");
-  await expect(cart(page).locator("#coupon-message")).toContainText("not valid");
+  await expect(cart(page).locator(".coupon-applied")).toContainText("TEN applied");
+  await expect(cart(page).locator(".coupon-applied")).toContainText("you save ₹100");
+  expect((await savedCart(page)).coupon).toBe("ten");
+  // Remove brings the box back, empty, ready for another code.
+  await cart(page).getByRole("button", { name: "Remove coupon" }).click();
   await expect(cart(page).locator(".price-summary .offer-saving")).toHaveCount(0);
-  await code.fill("off");
-  await expect(cart(page).locator("#coupon-message")).toContainText("not active");
-  expect((await savedCart(page)).coupon).toBe("off");
+  await expect(cart(page).getByLabel("Coupon code")).toHaveValue("");
+  expect((await savedCart(page)).coupon).toBe("");
+  await applyCoupon(page, "nope");
+  const error = cart(page).locator("#coupon-error");
+  await expect(error).toBeVisible();
+  await expect(error).toHaveAttribute("role", "alert");
+  await expect(error).toContainText("Coupon not applied");
+  await expect(error).toContainText("not valid");
+  await expect(cart(page).locator(".price-summary .offer-saving")).toHaveCount(0);
+  await applyCoupon(page, "off");
+  await expect(error).toContainText("not active");
+  await applyCoupon(page, "");
+  await expect(error).toContainText("Enter a coupon code");
+  expect((await savedCart(page)).coupon).toBe(""); // none of the failed attempts were saved
 });
 
 test("order limits are inclusive in the UI; an automatic offer needs no code and a better one wins with an explanation", async ({ page }) => {
@@ -68,10 +89,10 @@ test("order limits are inclusive in the UI; an automatic offer needs no code and
   await setup(page, { offers: [ranged, auto] });
   await add(page, "Alpha");
   await openCart(page);
-  await cart(page).getByLabel("Coupon code").fill("range");
+  await applyCoupon(page, "range");
   await expect(cart(page).locator(".price-summary .offer-saving")).toContainText("−₹50"); // exactly at min and max
   await cart(page).getByRole("button", { name: "Increase Alpha PRD-0001 quantity" }).click(); // ₹2,000: coupon out of range, automatic in
-  await expect(cart(page).locator("#coupon-message")).toContainText("up to ₹1,000");
+  await expect(cart(page).locator(".coupon-applied.warn")).toContainText("up to ₹1,000");
   await expect(cart(page).locator(".price-summary")).toContainText("Festival 20");
   await expect(cart(page).locator(".price-summary .offer-saving")).toContainText("−₹400");
 });
@@ -106,7 +127,7 @@ test("the applied offer is carried into the message", async ({ page }) => {
   await setup(page);
   await add(page, "Alpha");
   await openCart(page);
-  await cart(page).getByLabel("Coupon code").fill("TEN");
+  await applyCoupon(page, "TEN");
   await cart(page).getByRole("button", { name: "Proceed to buyer details" }).click();
   await fillForm(page);
   await submit(page).click();
@@ -170,7 +191,7 @@ test("a changed coupon is reviewed even when the total stays the same", async ({
   const fake = await setup(page, { offers: [TEN, { name: "Hundred off", mode: "Coupon", code: "HUNDRED", type: "Fixed", value: "100", enabled: "YES" }] });
   await add(page, "Alpha");
   await openCart(page);
-  await cart(page).getByLabel("Coupon code").fill("TEN");
+  await applyCoupon(page, "TEN");
   await cart(page).getByRole("button", { name: "Proceed to buyer details" }).click();
   await fillForm(page);
   // The sheet swaps the offers: the same ₹100 saving, but a different offer.

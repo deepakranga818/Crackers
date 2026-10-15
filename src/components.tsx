@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Offer, Product } from "./model";
 import { resolveImages, useImageIndex } from "./images";
-import { describeOffer } from "./sheet/offers";
+import { bestOffer, describeOffer, type OfferResult } from "./sheet/offers";
 import { isCheckoutDemo } from "./business";
 import { rupees } from "./pricing";
 
@@ -104,36 +104,140 @@ export function OfferStrip({ offers }: { offers: Offer[] }) {
   );
 }
 
-// The coupon codes a customer can type in the cart, one tap to fill the box.
-export function CouponList({
+// The cart's coupon box. A code is only applied when the customer taps Apply (or Enter) and it
+// checks out against the current order; a code that does not is explained in a visible box and
+// never saved. Once applied, the box shows the result with Remove, so another can be tried.
+// `applied` is the saved code (empty when none); `result` is what the offer engine makes of it now.
+export function CouponBox({
   offers,
-  onPick,
+  subtotal,
+  applied,
+  result,
+  onApply,
 }: {
   offers: Offer[];
-  onPick: (code: string) => void;
+  subtotal: number;
+  applied: string;
+  result: OfferResult;
+  onApply: (code: string) => void;
 }) {
+  const [draft, setDraft] = useState("");
+  const [failure, setFailure] = useState<string | null>(null);
   const coupons = offers.filter((o) => o.enabled && o.mode === "coupon" && o.code);
-  if (!coupons.length) return null;
+  function apply(raw: string) {
+    const code = raw.trim();
+    if (!code) return setFailure("Enter a coupon code, or pick one from “View coupon codes”.");
+    const check = bestOffer(subtotal, offers, code);
+    if (check.status === "applied" || check.status === "beaten-by-automatic") {
+      onApply(code);
+      setDraft("");
+      return setFailure(null);
+    }
+    const coupon = offers.find((o) => o.mode === "coupon" && o.enabled && o.code!.toUpperCase() === code.toUpperCase());
+    const short =
+      coupon?.minPaise != null && subtotal < coupon.minPaise
+        ? ` Add ${rupees(coupon.minPaise - subtotal)} more to use it.`
+        : "";
+    setFailure(
+      check.status === "unknown"
+        ? `${check.message} Check the spelling, or pick one from “View coupon codes”.`
+        : `${check.message}${short}`,
+    );
+  }
+  const good = result.status === "applied";
   return (
-    <details className="coupons">
-      <summary>View coupon codes</summary>
-      <ul>
-        {coupons.map((o) => (
-          <li key={o.row}>
-            <span className="code">{o.code}</span>
-            <span>{describeOffer(o)}</span>
-            <button
-              type="button"
-              className="text-button"
-              aria-label={`Use code ${o.code}`}
-              onClick={() => onPick(o.code!)}
-            >
-              Use
-            </button>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <div className="coupon-box">
+      {applied ? (
+        <div className={good ? "coupon-applied" : "coupon-applied warn"} role="status">
+          <div>
+            <p className="coupon-title">
+              <span aria-hidden="true">{good ? "✓" : "!"}</span>{" "}
+              {result.offer?.code ?? applied.trim().toUpperCase()}{good ? " applied" : ""}
+            </p>
+            <p>
+              {good
+                ? `${result.offer!.name}: you save ${rupees(result.discountPaise)}.`
+                : (result.message ?? "This coupon is not giving a saving right now.")}
+            </p>
+          </div>
+          <button type="button" className="button secondary" onClick={() => onApply("")}>
+            Remove coupon
+          </button>
+        </div>
+      ) : (
+        <form
+          className="coupon-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            apply(draft);
+          }}
+        >
+          <div className="field coupon-field">
+            <label htmlFor="coupon-input">Coupon code</label>
+            <div className="coupon-row">
+              <input
+                id="coupon-input"
+                value={draft}
+                maxLength={40}
+                autoComplete="off"
+                autoCapitalize="characters"
+                aria-invalid={failure ? true : undefined}
+                aria-describedby={failure ? "coupon-error" : undefined}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  setFailure(null);
+                }}
+              />
+              <button type="submit" className="button primary">
+                Apply
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+      {failure && (
+        <div id="coupon-error" className="coupon-error" role="alert">
+          <span className="coupon-error-icon" aria-hidden="true">
+            !
+          </span>
+          <div>
+            <strong>Coupon not applied</strong>
+            <p>{failure}</p>
+          </div>
+        </div>
+      )}
+      {coupons.length > 0 && (
+        <details className="coupons">
+          <summary>View coupon codes</summary>
+          <ul>
+            {coupons.map((o) => {
+              const current = good && result.offer?.row === o.row;
+              return (
+                <li key={o.row}>
+                  <span className="code">{o.code}</span>
+                  <span>{describeOffer(o)}</span>
+                  {current ? (
+                    <span className="coupon-current">Applied</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-button"
+                      aria-label={`Apply code ${o.code}`}
+                      onClick={() => {
+                        setDraft(o.code!); // the box shows what was tried, next to any message about it
+                        apply(o.code!);
+                      }}
+                    >
+                      Apply
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+    </div>
   );
 }
 

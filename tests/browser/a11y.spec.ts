@@ -77,7 +77,7 @@ for (const [name, size] of Object.entries({ phone, desktop })) {
       await page.goto(FIXTURE);
       await openCheckout(page);
       await page.getByText("View coupon codes").click();
-      await expect(page.getByRole("button", { name: /^Use code/ })).toBeVisible();
+      await expect(page.getByRole("button", { name: /^Apply code/ })).toBeVisible();
       await scan(page);
       await fillBuyer(page);
       await page.getByText("View the complete WhatsApp message").click();

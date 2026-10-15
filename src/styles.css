@@ -1741,6 +1741,81 @@ html[data-sticky-off] .shop-bar {
   border-radius: 999px;
   padding: 2px var(--s2);
 }
+.coupon-row {
+  display: flex;
+  gap: var(--s2);
+}
+.coupon-row input {
+  flex: 1;
+  min-width: 0;
+}
+.coupon-row .button {
+  flex-shrink: 0;
+}
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s2);
+  padding: var(--s3) var(--s4);
+  background: #e9f4ed;
+  border: 1px solid #9fc8ad;
+  border-left: 4px solid var(--green);
+  border-radius: var(--r1);
+  font-size: var(--fs-sm);
+}
+.coupon-applied.warn {
+  background: #fdf3dc;
+  border-color: #dcb870;
+  border-left-color: #b8863f;
+}
+.coupon-applied p {
+  margin: 0;
+}
+.coupon-title {
+  font-weight: 700;
+  color: var(--green);
+}
+.coupon-applied.warn .coupon-title {
+  color: #7a4d10;
+}
+.coupon-applied .button {
+  min-height: 44px;
+  flex-shrink: 0;
+}
+.coupon-error {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  margin: var(--s2) 0 var(--s3);
+  padding: var(--s3) var(--s4);
+  background: #fdecea;
+  border: 1px solid #e2a9a3;
+  border-left: 4px solid var(--red);
+  border-radius: var(--r1);
+  color: #6f1d1b;
+  font-size: var(--fs-sm);
+}
+.coupon-error p {
+  margin: var(--s1) 0 0;
+}
+.coupon-error-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.coupon-current {
+  color: var(--green);
+  font-weight: 700;
+}
 /* Fireworks burst (Lottie). A manual popover, so it sits above the cart dialog; taps pass through. */
 .burst-layer {
   inset: 0;

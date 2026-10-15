@@ -18,7 +18,7 @@ import { ImageIndexContext, loadImageIndex, type ImageIndex } from "./images";
 import { useSheet } from "./sheet/useSheet";
 import type { SheetState, SheetStore } from "./sheet/store";
 import {
-  CouponList,
+  CouponBox,
   Modal,
   OfferStrip,
   PhotoLinks,
@@ -1206,30 +1206,13 @@ function Shop({
                       </div>
                     );
                   })}
-                  <label className="field coupon-field">
-                    Coupon code
-                    <input
-                      value={coupon}
-                      maxLength={40}
-                      autoComplete="off"
-                      autoCapitalize="characters"
-                      aria-describedby="coupon-message"
-                      onChange={(e) => setCoupon(e.target.value)}
-                    />
-                  </label>
-                  <CouponList offers={offers} onPick={setCoupon} />
-                  <p
-                    id="coupon-message"
-                    className={
-                      amount.offer.status === "applied" ||
-                      amount.offer.status === "none"
-                        ? "muted"
-                        : "error"
-                    }
-                    role="status"
-                  >
-                    {amount.offer.message}
-                  </p>
+                  <CouponBox
+                    offers={offers}
+                    subtotal={amount.subtotal}
+                    applied={coupon}
+                    result={amount.offer}
+                    onApply={setCoupon}
+                  />
                   <PriceSummary amount={amount} />
                   <button
                     className="button primary full"
@@ -1646,14 +1629,12 @@ function PriceSummary({ amount }: { amount: ReturnType<typeof totals> }) {
           <strong>−{rupees(amount.discount)}</strong>
         </p>
       )}
-      <p>
-        <span>Delivery / fulfilment charge</span>
-        <span>
-          {amount.delivery === null
-            ? "Seller will confirm"
-            : rupees(amount.delivery)}
-        </span>
-      </p>
+      {amount.delivery !== null && (
+        <p>
+          <span>Delivery / fulfilment charge</span>
+          <span>{rupees(amount.delivery)}</span>
+        </p>
+      )}
       {amount.tax !== null && (
         <p>
           <span>Configured tax</span>

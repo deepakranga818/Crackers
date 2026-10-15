@@ -99,8 +99,6 @@ export function totals(
     tax,
     amount,
     label: allChargesKnown ? "Total" : "Estimated amount",
-    text:
-      rupees(amount) +
-      (delivery === null ? " + applicable fulfilment charge" : ""),
+    text: rupees(amount),
   };
 }

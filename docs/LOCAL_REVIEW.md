@@ -37,13 +37,14 @@ Tick each at a phone width (~390px) and a desktop width (~1366px).
 4. **Search, filter, sort:** search a product name and a category; "Clear filters" works; every sort option reorders.
 5. **Dialogs:** Details opens; Escape closes it and focus returns to the card; gallery thumbnails switch photos; pieces per pack and shots show only when the sheet has them.
 6. **Cart:** add items; − and +; type a quantity (try 0, 100, a letter); Remove then **Undo removal**; **Clear cart** asks to confirm; refresh and the cart is restored.
-7. **Coupons:** with an enabled coupon in the sheet, type it in the cart in lower case with spaces; try an unknown and a disabled code; check the min/max boundaries and that only one offer applies.
+7. **Coupons:** with an enabled coupon in the sheet, type it in the cart in lower case with spaces and press **Apply** (typing alone applies nothing); the green card shows it with **Remove coupon**. Try an unknown and a disabled code: a red "Coupon not applied" box explains why and nothing is saved. Check the min/max boundaries and that only one offer applies.
 8. **Failure handling:** switch the network off, then press Refresh: the products stay with a "couldn't check" banner. In checkout, "Continue to WhatsApp" must not prepare anything and must keep the cart and form.
 9. **Changes before sending:** with the cart open, change a price in the sheet, then press Continue to WhatsApp: a "Your order changed" list appears and nothing is sent until you accept.
 10. **Review and dry run:** every item with ID, quantity, price, discount, charge, buyer and fulfilment is listed; "View the complete WhatsApp message" shows the full text; the demo shows "nothing was sent". For the long-order path add about 25 products: Copy or Download is required first.
 11. **Image fallbacks:** a product with no image link shows "Product image coming soon"; a screenshot link not yet saved shows a "View photo" link.
 12. **Sound, fireworks and reduced motion:** the firecrackers play when the page opens (browsers that block that play them on your first tap); the header button mutes them and the choice is remembered. Add to cart and the WhatsApp step each play the fireworks over the page, including over the cart; "reduce motion" stops those and the diya animation.
-13. **Coupon list:** in the cart, "View coupon codes" lists the enabled codes under the Coupon code box; "Use" fills it. The offers strip link reads "View offers".
+13. **Coupon list:** in the cart, "View coupon codes" lists the enabled codes under the Coupon code box; each has an **Apply** button (the applied one reads "Applied"), so another code can replace it in one tap. The offers strip link reads "View offers".
+14. **Delivery charge:** the "Delivery / fulfilment charge" row appears only when a charge is configured (`chargePaise` in `src/business.ts`; the demo has ₹50 and free samples). With none, the row and the "+ applicable fulfilment charge" suffix are absent.
 
 ## Known limitations
 
