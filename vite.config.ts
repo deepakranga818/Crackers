@@ -1,22 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { fileURLToPath } from "node:url";
-// Test-only modes: each serves different product data or configuration. They exist for the
-// local dev server and must never end up in a deployable build.
-//   private-fixture: tests/fixtures/make-fixture.mjs (confirmed test units, used by Playwright)
-//   checkout-demo:   demo/make-demo-data.mjs (`npm run demo`, hand-testing the whole checkout)
-const productData: Record<string, string> = {
-  "private-fixture": "./tests/fixtures/products-with-units.json",
-  "checkout-demo": "./demo/products-checkout-demo.json",
-};
-const devOnlyModes = ["demo", ...Object.keys(productData)];
+// `checkout-demo` is a dev-server-only mode (a dry-run checkout with sample fulfilment methods).
+// It reads the same live sheet as everything else and must never end up in a deployable build.
+const devOnlyModes = ["checkout-demo"];
 export default defineConfig(({ mode, command }) => {
   if (command === "build" && devOnlyModes.includes(mode))
     throw new Error(
-      `--mode ${mode} is for the local dev server only and cannot be built. Use \`npm run build:offline\`.`,
+      `--mode ${mode} is for the local dev server only and cannot be built. Use \`npm run build\`.`,
     );
   return {
     plugins: [react()],
+    // Relative base: the same build works at a domain root and under a GitHub Pages
+    // project path such as /<repository>/.
     base: "./",
     // Catalogue and demo servers can run together without replacing each other's
     // optimized dependencies during startup.
@@ -32,18 +27,6 @@ export default defineConfig(({ mode, command }) => {
         "react/jsx-runtime",
         "react/jsx-dev-runtime",
       ],
-    },
-    resolve: {
-      alias: productData[mode]
-        ? [
-            {
-              find: /^\.\/products\.json$/,
-              replacement: fileURLToPath(
-                new URL(productData[mode], import.meta.url),
-              ),
-            },
-          ]
-        : [],
     },
   };
 });

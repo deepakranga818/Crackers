@@ -8,7 +8,7 @@
 - **Private friends site on GitHub Pages:** the owner chose to run this as a private list for themself and friends (`"audience": "private-friends"` in `source/publication-approval.json`). `.github/workflows/pages.yml` deploys on every push to `main` after `scripts/check-publication.mjs`, which passes for the private audience only while `index.html` keeps noindex and `public/robots.txt` keeps `Disallow: /`. Pages URLs are public: noindex hides the site from search engines but is not access control, so only share the link with people you trust. GitHub's terms still bar commercial-transaction sites, and the legal restrictions on selling crackers still apply to orders between friends. To take it down: repository Settings → Pages → Unpublish site.
 - **Public launch:** set `"audience": "public"` and the gate then requires every item in `source/verification.json` (including `hostApproval`) and the references in `source/publication-approval.json`, as before.
 - **Prepared alternative:** `netlify.toml` builds from the GitHub repo, runs the same gate and sets security headers; other static hosts (for example Cloudflare Pages) can use the same `npm run build` and `dist`. Netlify's [Acceptable Use Policy](https://www.netlify.com/legal/acceptable-use-policy/) requires lawful use and has no fireworks category; Cloudflare's [terms](https://www.cloudflare.com/policies/terms/) are likewise a general lawful-use clause. Neither is an approval. `hostApproval` stays unverified until the chosen host confirms in writing that this category is acceptable and the seller has legal clearance for the location.
-- **Ordering:** on the friends-and-family list a product can be ordered only with a seller-confirmed selling unit and a reviewed product type; today none has a unit, so the site is browse-only. Fulfilment, any charge and availability are settled with the seller on WhatsApp. All verification items stay unverified, so switching the audience to `public` closes ordering again until they are evidenced.
+- **Ordering:** on the friends-and-family list a product can be ordered when the sheet shows it visible, priced and in stock (Stock TRUE). Fulfilment, any charge and availability are settled with the seller on WhatsApp. All verification items stay unverified, so switching the audience to `public` closes ordering again until they are evidenced.
 
 ## Provider terms checked on 14 October 2026
 
@@ -23,7 +23,6 @@ The source is prepared for `https://github.com/deepakranga818/Crackers.git`. If 
 ```powershell
 git clone https://github.com/deepakranga818/Crackers.git
 cd Crackers
-python -m pip install -r requirements.txt
 npm ci
 npm test
 npm run build
@@ -52,4 +51,8 @@ Git Credential Manager may require owner sign-in. Do not put tokens in commands,
 
 ## Updates and rollback
 
-Edit the authoritative Google Sheet/config, run npm run sync, inspect reports and diff, run tests/build, commit and push. Existing static deployments require redeployment after Sheet changes. GitHub triggers the configured host build. Roll back via the provider’s previous approved deployment and revert the offending Git commit. For an urgent ordering pause, set orderingEnabled false, build/test and redeploy. Cached already-open clients can remain stale: seller must always reconfirm prices and availability. There is no service worker or offline checkout.
+**Catalogue data needs no deployment.** Edit the Google Sheet; open pages pick the change up within about a minute (refresh on load, every 60 s while visible, on return to the tab, and before each WhatsApp checkout). Google can take a little while to publish an edit. The deployed site only needs a new build for *code* changes, and for newly added **screenshot-page image links** (run `npm run images`, then commit the new files under `public/images/`; direct image URLs need nothing).
+
+For a code change: run the tests and `npm run build`, commit and push; GitHub triggers the configured host build. Roll back via the provider's previous approved deployment and revert the offending Git commit. To pause ordering urgently, set the sheet's products to Show on website = NO (or Stock = FALSE), or set `orderingEnabled` false in code and redeploy. Already-open clients can show stale data until their next refresh: the seller must always reconfirm prices and availability. There is no service worker or offline checkout.
+
+The site must be able to read the sheet from the browser: keep link sharing on "Anyone with the link: Viewer". The Netlify CSP in `netlify.toml` allows `https://docs.google.com` and `https://*.googleusercontent.com` for that; GitHub Pages sets no CSP.

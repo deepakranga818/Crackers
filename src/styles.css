@@ -1634,3 +1634,105 @@ html[data-sticky-off] header,
 html[data-sticky-off] .shop-bar {
   position: static;
 }
+
+/* 12. Live sheet states: loading, stale data, product facts, offers */
+.load-screen {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s6) var(--gutter);
+  text-align: center;
+}
+.load-screen .empty {
+  max-width: 520px;
+}
+.skeleton {
+  width: min(520px, 90vw);
+  height: 120px;
+  border-radius: var(--r2);
+  background: linear-gradient(90deg, var(--sand), var(--cream), var(--sand)) 0 0 / 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+@keyframes skeleton {
+  to {
+    background-position: -200% 0;
+  }
+}
+.stale-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  align-items: center;
+  justify-content: center;
+  background: #f4dca8;
+  color: var(--ink);
+  padding: var(--s2) var(--gutter);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+.fetched-line {
+  margin: 0 0 var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.facts {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin: 0 0 var(--s3);
+  padding: 0;
+}
+.facts li {
+  font-size: 12px;
+  background: var(--sand);
+  border-radius: 999px;
+  padding: 2px var(--s3);
+  color: var(--ink);
+}
+.photo-links {
+  margin: 0 0 var(--s3);
+  font-size: var(--fs-sm);
+  display: flex;
+  gap: var(--s3);
+  flex-wrap: wrap;
+}
+.photo-links a {
+  color: var(--saffron);
+}
+.description {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.coupon-field {
+  margin-top: var(--s3);
+}
+.callout.changes ul {
+  margin: var(--s2) 0 var(--s3);
+  padding-left: var(--s5);
+}
+.callout.error-callout {
+  border-left-color: var(--red);
+}
+.dev-details {
+  margin-top: var(--s4);
+  text-align: left;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.dev-details pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow: auto;
+}
+.product-info h3,
+.category-label,
+.cart-line h3 {
+  overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

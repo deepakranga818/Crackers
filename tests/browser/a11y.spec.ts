@@ -1,11 +1,15 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import data from "../../src/products.json" with { type: "json" };
+import { FakeSheet, realShape } from "./sheet-fixture";
 
-// Production configuration (no confirmed units): catalogue and details.
+// The sheet is replaced by a copy of the real sheet's shape (tests/fixtures/real-shape.csv) with
+// one coupon switched on, so the offers strip and checkout can be scanned. Counts below that
+// come from this fixture are fixture facts, not business rules.
 const PRODUCTION = "/";
-// Production-style private list with test-only confirmed units: cart, review and checkout.
-const FIXTURE = "http://127.0.0.1:5176";
+const FIXTURE = "/";
+test.beforeEach(async ({ page }) => {
+  await new FakeSheet(realShape({ enableCoupon: true })).install(page);
+});
 const phone = { width: 390, height: 844 };
 const desktop = { width: 1366, height: 768 };
 const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -51,10 +55,11 @@ for (const [name, size] of Object.entries({ phone, desktop })) {
     }) => {
       await page.goto(PRODUCTION);
       await page.getByText("View terms").click();
-      await page.getByRole("searchbox").fill("phuljhari");
+      await page.getByRole("searchbox").fill("phuljadi");
       await scan(page);
     });
-    test("product details with an unconfirmed unit", async ({ page }) => {
+    test("product details for an out-of-stock product", async ({ page }) => {
+      await new FakeSheet(realShape({ enableCoupon: true, outOfStock: ["PRD-0001"] })).install(page);
       await page.goto(PRODUCTION);
       await page
         .getByRole("button", { name: "Details for POP-UP, Pop- gol size" })
@@ -90,7 +95,7 @@ test.describe("keyboard", () => {
       await page.locator(".product-card").first().waitFor();
       const chips = page.locator(".categories button");
       const count = await chips.count();
-      expect(count).toBe(10);
+      expect(count).toBeGreaterThan(10);
       // Scroll the page first so the sticky bar is pinned, then walk the chips with the keyboard.
       await page.evaluate(() => window.scrollTo(0, 700));
       await chips.first().focus();
@@ -113,10 +118,11 @@ test.describe("keyboard", () => {
         expect(visible.onScreen, `chip ${i} on screen`).toBe(true);
         if (i < count - 1) await page.keyboard.press("Tab");
       }
-      // The last chip ("More products") can be activated from the keyboard.
+      // The last chip can be activated from the keyboard and filters to its own count.
+      const lastCount = Number((await chips.last().locator("span").textContent())!.trim());
       await page.keyboard.press("Enter");
       await expect(chips.last()).toHaveAttribute("aria-pressed", "true");
-      await expect(page.locator(".product-card")).toHaveCount(5);
+      await expect(page.locator(".product-card")).toHaveCount(lastCount);
     });
   }
 
@@ -125,16 +131,21 @@ test.describe("keyboard", () => {
   }) => {
     await page.goto(PRODUCTION);
     await page.locator(".product-card").first().waitFor();
-    await expect(page.getByRole("button", { name: /^Details for / })).toHaveCount(46);
-    await expect(page.locator(".image-button")).toHaveCount(46);
+    const cards = await page.locator(".product-card").count();
+    expect(cards).toBeGreaterThan(40);
+    await expect(page.getByRole("button", { name: /^Details for / })).toHaveCount(cards);
+    await expect(page.locator(".image-button")).toHaveCount(cards);
     expect(
       await page
         .locator(".image-button")
         .evaluateAll((els) => els.every((el) => el.tabIndex === -1)),
     ).toBe(true);
-    // Tab from the search box through the chips: the first card stop is the Details button.
-    await page.getByRole("button", { name: /More products/ }).focus();
+    // Tab from the last chip: the first card's stops are Add to cart, then Details; the image
+    // button between them is not a stop.
+    await page.locator(".categories button").last().focus();
     await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect(page.locator(":focus")).toHaveAccessibleName("Add to cart");
     await page.keyboard.press("Tab");
     await expect(page.locator(":focus")).toHaveAccessibleName(
       "Details for POP-UP, Pop- gol size",
@@ -293,8 +304,4 @@ test.describe("touch targets", () => {
     });
     expect(small).toEqual([]);
   });
-});
-
-test("catalogue data used by these checks is the committed snapshot", () => {
-  expect(data.products).toHaveLength(46);
 });

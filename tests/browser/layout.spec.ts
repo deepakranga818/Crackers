@@ -1,5 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { FakeSheet, realShape } from "./sheet-fixture";
+
+// Layout is measured against a copy of the real sheet's shape, not the live sheet.
+test.beforeEach(async ({ page }) => {
+  await new FakeSheet(realShape()).install(page);
+});
 
 // Measures where shopping content lands at real viewports and, in the "after" phase, asserts
 // the numeric targets. LAYOUT_PHASE=before records the baseline without asserting targets.

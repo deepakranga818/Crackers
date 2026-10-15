@@ -1,0 +1,80 @@
+DIWALI STORE,,,,,,,,,,,
+"Update products below. To add a product, insert a table row above the COUPONS & OFFERS section. Keep product IDs unchanged.",,,,,,,,,,,
+"Stock: TRUE = available, FALSE = out of stock. Pieces per pack = pack contents. Shots = firing count per item, not pack contents.",,,,,,,,,,,
+,,,,,,,,,,,
+Product ID,Product name,Category,Selling price (₹),MRP (₹),Pieces per pack,Stock,Show on website,Short description,Image links,Notes,Shots
+PRD-0001,POP-UP,Pop- gol size,₹10.00,₹14.00,,TRUE,YES,,https://prnt.sc/3dlBP4GUl-q6,Confirm pack contents and MRP.,
+PRD-0002,POP-UP,Pop- long size,₹20.00,₹28.00,,TRUE,YES,,https://prnt.sc/mxCumn90fWqD,Confirm pack contents and MRP.,
+PRD-0003,TILLI,Tilli bomb,₹20.00,₹28.00,,TRUE,YES,,https://prnt.sc/D9IPqYVHlVoz,Confirm pack contents and MRP.,
+PRD-0004,15cm Ronak,Phuljadi - Small,₹20.00,₹28.00,,TRUE,YES,,"https://prnt.sc/f1Jh2KypzZE8
+https://prnt.sc/iovzsYklaeep",Confirm pack contents and MRP.,
+PRD-0005,18cm Pogo,Phuljadi,₹40.00,₹56.00,,TRUE,YES,,"https://prnt.sc/qfNTm6qjbol_
+https://prnt.sc/M3wZhabrzP1p",Confirm pack contents and MRP.,
+PRD-0006,18cm Kuber colored,Phuljadi -Color,₹80.00,₹112.00,,TRUE,YES,,https://prnt.sc/3GC6mwQeU6Nr,Confirm pack contents and MRP.,
+PRD-0007,35cm Pogo,Phuljadi - Medium,₹70.00,₹98.00,,TRUE,YES,,https://prnt.sc/Bh-AkEr9o84S,Confirm pack contents and MRP.,
+PRD-0008,40cm Sikha,Phuljadi - Big Size,₹150.00,₹210.00,,TRUE,YES,,https://prnt.sc/XCBuvDJR-LI2,Confirm pack contents and MRP.,
+PRD-0009,50cm Pogo,Phuljadi - Big Size,₹200.00,₹280.00,,TRUE,YES,,https://prnt.sc/KWkZ_MnHKDUC,Confirm pack contents and MRP.,
+PRD-0010,G.C. Ashoka KS,Ground Chakkar - Small,₹150.00,₹210.00,,TRUE,YES,,"https://prnt.sc/A17l3yIk_SdW
+https://prnt.sc/PCAb8v8rEolF",Confirm pack contents and MRP.,
+PRD-0011,G.C. Special MR,Chakkari -Small,₹180.00,₹252.00,,TRUE,YES,,https://prnt.sc/mZYCBPS8z7qd,Confirm pack contents and MRP.,
+PRD-0012,G.C. DLX Dukans,Ground Chakkar - Medium,₹200.00,₹280.00,,TRUE,YES,,https://prnt.sc/OxzrGWmaMYDl,Confirm pack contents and MRP.,
+PRD-0013,G.C. DLX HD,Ground Chakkar - Medium,₹300.00,₹420.00,,TRUE,YES,,https://prnt.sc/FWgGy2OBc5-k,Confirm pack contents and MRP.,
+PRD-0014,45cm CK G.C.,Ground Chakkar - Big Size,₹400.00,₹560.00,,TRUE,YES,,https://prnt.sc/dIBxOQ_Vctyn,Confirm pack contents and MRP.,
+PRD-0015,Bullet small RK,Bullet Bomb - Small,₹60.00,₹84.00,,TRUE,YES,,https://prnt.sc/F3qVlCPgspiu,Confirm pack contents and MRP.,
+PRD-0016,Bullet Flash RL,Bullet Bomb,₹120.00,₹168.00,,TRUE,YES,,https://prnt.sc/zxnFMdumMa-_,Confirm pack contents and MRP.,
+PRD-0017,Dholak 777 RL,Bomb - Big,₹250.00,₹350.00,,TRUE,YES,,https://prnt.sc/I4H-OCJjKlrh,Confirm pack contents and MRP.,
+PRD-0018,Hydro Foil CK,Bomb - Sutli,₹250.00,₹350.00,,TRUE,YES,,https://prnt.sc/baU3pGb1WDMQ,Confirm pack contents and MRP.,
+PRD-0019,22 chorsa Turkey,Murga chaap,₹20.00,₹28.00,,TRUE,YES,,https://prnt.sc/IfRk4Tb6OJQ9,Confirm pack contents and MRP.,
+PRD-0020,2 Sound Cracker KS,Bomb,₹80.00,₹112.00,,TRUE,YES,,https://prnt.sc/q6e7dWALaChP,Confirm pack contents and MRP.,
+PRD-0021,Loose 100 piece MR,Bijli Bomb,₹80.00,₹112.00,,TRUE,YES,,"https://prnt.sc/gUseMWKC0_uk
+https://prnt.sc/edAA3hDusRjK",Confirm pack contents and MRP.,
+PRD-0022,Loose 50 piece Rathna,Bijli Bomb,₹50.00,₹70.00,,TRUE,YES,,"https://prnt.sc/Mj6b8QNbvk6c
+https://prnt.sc/ae5Z90WTdc_g",Confirm pack contents and MRP.,
+PRD-0023,1000 laddi RL,laddi,₹500.00,₹700.00,,TRUE,YES,,https://prnt.sc/86JHW66IQ2Jk,Confirm pack contents and MRP.,
+PRD-0024,2000 Laddi RL,laddi,₹800.00,"₹1,120.00",,TRUE,YES,,https://prnt.sc/sj97FFtPyxQX,Confirm pack contents and MRP.,
+PRD-0025,F.P. Special Malty,Anar - Small,₹150.00,₹210.00,,TRUE,YES,,https://prnt.sc/HmaG0HY19KNa,Confirm pack contents and MRP.,
+PRD-0026,F.P. Nano RL,Anar - Medium,₹250.00,₹350.00,,TRUE,YES,,https://prnt.sc/kCqHJKoLLWGQ,Confirm pack contents and MRP.,
+PRD-0027,F.P. Ashoka CORO,Anar - Medium,₹350.00,₹490.00,,TRUE,YES,,"https://prnt.sc/wgilOuOZ3fTm
+https://prnt.sc/hXDF-Q13MiRQ",Confirm pack contents and MRP.,
+PRD-0028,Color Koti DLX MR,ANAR - Big size,₹600.00,₹840.00,,TRUE,YES,,https://prnt.sc/0gp8xxYK0LTl,Confirm pack contents and MRP.,
+PRD-0029,Bunty-Bubly RL,Anar Bomb,₹180.00,₹252.00,5,TRUE,YES,,https://prnt.sc/PDd6j2XjDr9z,Confirm pack contents and MRP.,
+PRD-0030,Ganga Jamana RL,Anar Bomb,₹200.00,₹280.00,5,TRUE,YES,,https://prnt.sc/gJ8TbLCjLd9S,Confirm pack contents and MRP.,
+PRD-0031,Mighty RL /ANTI Banti,Anar bomb,₹300.00,₹420.00,10,TRUE,YES,,https://prnt.sc/WHFxrVGiJHr5,Confirm pack contents and MRP.,
+PRD-0032,Rocket Bomb KS,Rockets - Small,₹650.00,₹910.00,,TRUE,YES,,https://prnt.sc/5t6j1UIfXnsa,Confirm pack contents and MRP.,
+PRD-0033,2 Sound Rocket KS,Rockets,₹700.00,₹980.00,,TRUE,YES,,https://prnt.sc/xEFRVmPi2-Z9,Confirm pack contents and MRP.,
+PRD-0034,Lunik Ex. Coro,Rockets,₹200.00,₹280.00,,TRUE,YES,,https://prnt.sc/sK6g3lAOOfLy,Confirm pack contents and MRP.,
+PRD-0035,Zitiwala Rocket Coro,Rockets,₹350.00,₹490.00,,TRUE,YES,,https://prnt.sc/9q43eyjenoYR,Confirm pack contents and MRP.,
+PRD-0036,Penta Missile AZ,Single shot,₹450.00,₹630.00,5,TRUE,YES,,https://prnt.sc/ofwSB_xAoQLv,Confirm pack contents and MRP.,1
+PRD-0037,3 piece Shower SRL,Fountain Rocket,₹550.00,₹770.00,3,TRUE,YES,,https://prnt.sc/FTp6L68hZqSw,Confirm pack contents and MRP.,
+PRD-0038,3 piece Shower NSV,Single shot Rocket Flower,₹350.00,₹490.00,3,TRUE,YES,,https://prnt.sc/PLNyTq39bXEy,Confirm pack contents and MRP.,1
+PRD-0039,7 Shot Special,Sky shot,₹350.00,₹490.00,,TRUE,YES,,https://prnt.sc/kqQ-_n7m1NfK,Confirm pack contents and MRP.,7
+PRD-0040,12 shot 105 cdo AZ,Sky shot,₹750.00,"₹1,050.00",,TRUE,YES,,"https://prnt.sc/4DzuYnN5tf6L
+https://prnt.sc/-9MbOvdSfPlR",Confirm pack contents and MRP.,12
+PRD-0041,12 shot honey moon AZ,Sky shot,₹800.00,"₹1,120.00",,TRUE,YES,,https://prnt.sc/i0bx2Q60s5RB,Confirm pack contents and MRP.,12
+PRD-0042,16 shot AZ,Sky shot,₹800.00,"₹1,120.00",,TRUE,YES,,https://prnt.sc/0GpWpTnib6tQ,Confirm pack contents and MRP.,16
+PRD-0043,15 shot RL/ Teenager choice,Sky shot,₹750.00,"₹1,050.00",,TRUE,YES,,https://prnt.sc/ri2NFJlC6a7M,Confirm pack contents and MRP.,15
+PRD-0044,AK 47 MR,Anar - Handhandle,₹550.00,₹770.00,,TRUE,YES,,https://prnt.sc/gJEouHiqbgeB,Confirm pack contents and MRP.,
+PRD-0045,60 Shot,Sky shot,"₹1,500.00","₹2,100.00",,TRUE,YES,,,Confirm pack contents and MRP.,60
+PRD-0046,100 Shot,Sky shot,"₹2,200.00","₹3,080.00",,TRUE,YES,,,Confirm pack contents and MRP.,100
+,,,,,,,,,,,
+,,,,,,,,,,,
+COUPONS & OFFERS,,,,,,,,,,,
+Discount value: Percent 10 means 10% off. Fixed 100 means ₹100 off. Existing coupons stay OFF until order limits are confirmed.,,,,,,,,,,,
+,,,,,,,,,,,
+Offer name,Mode,Coupon code,Discount type,Discount value,Minimum order (₹),Maximum order (₹),Enabled,Notes,,,
+CRACK10 offer,Coupon,CRACK10,Percent,10,"₹1,000.00",,NO,10% off upto 2000 — confirm meaning.,,,
+CRACK15 offer,Coupon,CRACK15,Percent,15,"₹1,500.00",,NO,15% off upto 5000 — confirm meaning.,,,
+CRACK20 offer,Coupon,CRACK20,Percent,20,"₹2,000.00",,NO,20% off above 5000 — confirm meaning.,,,
+,,,,,,,,,,,
+Minimum order = smallest qualifying subtotal. Maximum order = largest qualifying subtotal. Both include the entered amount; blank means no limit.,,,,,,,,,,,
+"Offers apply to all products. One best offer, no stacking. For Automatic offers leave code blank. No expiry or savings cap. Add rows above SHOP SETTINGS.",,,,,,,,,,,
+,,,,,,,,,,,
+,,,,,,,,,,,
+SHOP SETTINGS,,,,,,,,,,,
+,,,,,,,,,,,
+Setting,Value,Meaning,,,,,,,,,
+Shop name,,Enter your shop name.,,,,,,,,,
+WhatsApp number,919992230740,Country code and digits only.,,,,,,,,,
+,,,,,,,,,,,
+MRPs are preserved from your original sheet. Verify them before using crossed-out prices. Keep original screenshot links until direct product images are ready.,,,,,,,,,,,
+Website importer must read TRUE/FALSE stock and inclusive minimum/maximum order limits. Stock is availability only; no quantity tracking.,,,,,,,,,,,

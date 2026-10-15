@@ -1,311 +1,337 @@
 import { test, expect } from "@playwright/test";
-import data from "../../src/products.json" with { type: "json" };
-test("production catalogue: all products, reference prices hidden, no ordering without confirmed units", async ({
-  page,
-}) => {
+import { FakeSheet, product, products, sheet } from "./sheet-fixture";
+
+// Mocked integration tests: a fake sheet stands in for Google, so counts here are fixture
+// counts, not business rules. See live-sheet.spec.ts for the real sheet.
+const card = (page: import("@playwright/test").Page, name: string) =>
+  page.locator(".product-card").filter({ hasText: name });
+const refresh = (page: import("@playwright/test").Page) => page.getByRole("button", { name: "Refresh", exact: true }).click();
+
+test("renders products from the sheet; Notes and internal text never reach the page", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Alpha", notes: "INTERNAL-NOTE-123" }), product(2, { name: "Beta", category: "Rockets" })] });
   await page.goto("/");
-  await expect(page.locator(".product-card")).toHaveCount(46);
-  // The Sheet's MRP column is not shown as a reference price until the owner confirms it.
+  await expect(page.locator(".product-card")).toHaveCount(2);
+  await expect(card(page, "Alpha").locator(".price-row")).toContainText("₹100");
+  await expect(card(page, "Alpha").locator(".price-row del")).toHaveText(/₹140/);
+  await expect(page.getByRole("button", { name: /Sky shot 1/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Rockets 1/ })).toBeVisible();
+  expect(await page.content()).not.toContain("INTERNAL-NOTE-123");
+  await expect(page.getByText(/Prices fetched at/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Test Shop" }).first()).toBeVisible();
+});
+
+test("an MRP that is missing, equal or lower is never struck through", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "NoMrp", mrp: "" }), product(2, { name: "Equal", mrp: "₹100.00" }), product(3, { name: "Lower", mrp: "₹50.00" }), product(4, { name: "Junk", mrp: "abc" })] });
+  await page.goto("/");
+  await expect(page.locator(".product-card")).toHaveCount(4);
   await expect(page.locator(".product-card .price-row del")).toHaveCount(0);
-  await expect(page.locator(".product-card .save")).toHaveCount(0);
-  await expect(
-    page.locator(".product-card").filter({ hasText: /% off|MRP/ }),
-  ).toHaveCount(0);
-  const { pricePaise } = data.products[0];
-  await expect(
-    page.locator(".product-card").first().locator(".price-row"),
-  ).toHaveText(`₹${pricePaise / 100}`);
-  // No product has a confirmed selling unit, so nothing can be ordered and the page says so.
-  await expect(
-    page.getByText("Browsing only until selling units are confirmed"),
-  ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /Open cart/ })).toHaveCount(0);
-  await expect(
-    page.getByText("Unit not confirmed · can’t be ordered yet"),
-  ).toHaveCount(46);
-  await expect(page.getByRole("link", { name: "Open WhatsApp" })).toHaveCount(0);
-  await page.getByRole("searchbox").fill("phuljhari");
-  await page.getByRole("button", { name: /Sparklers \/ Phuljadi/ }).click();
-  await expect(page.locator(".product-card")).toHaveCount(6);
-  await page.getByRole("button", { name: /Sound Crackers \/ Bombs/ }).click();
+});
+
+test("a new product, a new category and a price edit appear after Refresh, with no reload or code change", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: products(2) });
+  await page.goto("/");
+  await expect(page.locator(".product-card")).toHaveCount(2);
+  fake.set({ products: [product(1, { price: "₹250.00" }), product(2), product(3, { name: "Brand New", category: "Fountains" })] });
+  await refresh(page);
+  await expect(page.locator(".product-card")).toHaveCount(3);
+  await expect(card(page, "Product 1").locator(".price-row")).toContainText("₹250");
+  await expect(page.getByRole("button", { name: /Fountains 1/ })).toBeVisible();
+});
+
+test("the page refreshes by itself about every 60 seconds while visible", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: products(1) });
+  await page.clock.install();
+  await page.goto("/");
+  await expect(page.locator(".product-card")).toHaveCount(1);
+  const before = fake.requests;
+  fake.set({ products: products(2) });
+  await page.clock.fastForward(61_000);
+  await expect(page.locator(".product-card")).toHaveCount(2);
+  expect(fake.requests).toBeGreaterThan(before);
+});
+
+test("stock FALSE keeps the product visible as Out of stock and blocks adding it", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Gone", stock: "FALSE" }), product(2, { name: "Here" }), product(3, { name: "Blank", stock: "" })] });
+  await page.goto("/");
+  await expect(card(page, "Gone")).toContainText("Out of stock");
+  await expect(card(page, "Gone").getByRole("button", { name: "Add to cart" })).toHaveCount(0);
+  await expect(card(page, "Blank")).toContainText("Out of stock");
+  await expect(card(page, "Here").getByRole("button", { name: "Add to cart" })).toBeVisible();
+  // No invented scarcity.
+  await expect(page.locator("body")).not.toContainText(/only \d+ left|remaining|hurry/i);
+  await card(page, "Gone").getByRole("button", { name: /Details/ }).click();
+  await expect(page.getByRole("dialog")).toContainText("Out of stock");
+  await expect(page.getByRole("dialog").getByRole("button", { name: /Add to cart/ })).toHaveCount(0);
+});
+
+test("stock flips after refresh: a product becomes unavailable, then available again", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Flip" })] });
+  await page.goto("/");
+  await expect(card(page, "Flip").getByRole("button", { name: "Add to cart" })).toBeVisible();
+  fake.set({ products: [product(1, { name: "Flip", stock: "false" })] });
+  await refresh(page);
+  await expect(card(page, "Flip")).toContainText("Out of stock");
+  fake.set({ products: [product(1, { name: "Flip", stock: "TRUE" })] });
+  await refresh(page);
+  await expect(card(page, "Flip").getByRole("button", { name: "Add to cart" })).toBeVisible();
+});
+
+test("Show on website NO hides a product everywhere; categories with no visible product vanish", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Shown" }), product(2, { name: "Secret", category: "Only hidden", show: "NO" })] });
+  await page.goto("/");
+  await expect(page.locator(".product-card")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: /Only hidden/ })).toHaveCount(0);
+  await page.getByRole("searchbox").fill("Secret");
   await expect(page.getByText("No crackers match these filters")).toBeVisible();
-  await page.getByRole("button", { name: "Clear filters" }).first().click();
-  await page
-    .getByRole("button", { name: "Details for POP-UP, Pop- gol size" })
-    .click();
-  await expect(page.getByRole("dialog")).toContainText(
-    "can’t be ordered until the seller confirms its selling unit",
-  );
-  // Customer-facing labels, with the source values unchanged underneath.
-  await expect(page.getByRole("dialog")).toContainText("Type");
-  await expect(page.getByRole("dialog")).toContainText("Reference");
-  await expect(page.getByRole("dialog")).not.toContainText("Original category");
+});
+
+test("a selected category that disappears falls back to All and keeps search and sort", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Aa one", category: "Alpha" }), product(2, { name: "Aa two", category: "Alpha" }), product(3, { name: "Zeta", category: "Beta" })] });
+  await page.goto("/");
+  await page.getByRole("searchbox").fill("aa");
+  await page.getByLabel("Sort products").selectOption("high");
+  await page.getByRole("button", { name: /^Alpha/ }).click();
+  await expect(page.locator(".product-card")).toHaveCount(2);
+  fake.set({ products: [product(2, { name: "Aa two", category: "Gamma" }), product(3, { name: "Zeta", category: "Beta" })] });
+  await refresh(page);
+  await expect(page.getByRole("button", { name: /^All products/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("searchbox")).toHaveValue("aa");
+  await expect(page.getByLabel("Sort products")).toHaveValue("high");
+  await expect(page.locator(".product-card")).toHaveCount(1);
+});
+
+test("pieces per pack and shots are shown independently and only when valid", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({
+    products: [
+      product(1, { name: "PackOnly", pieces: "5" }),
+      product(2, { name: "ShotsOnly", shots: "100" }),
+      product(3, { name: "Both", pieces: "10", shots: "25" }),
+      product(4, { name: "12 shot Named", shots: "12" }),
+      product(5, { name: "Neither", pieces: "0", shots: "x" }),
+    ],
+  });
+  await page.goto("/");
+  await expect(card(page, "PackOnly").locator(".facts")).toHaveText("5 pieces per pack");
+  await expect(card(page, "ShotsOnly").locator(".facts")).toHaveText("100 shots");
+  await expect(card(page, "Both").locator(".facts li")).toHaveText(["10 pieces per pack", "25 shots"]);
+  // The name already says "12 shot": the card does not repeat it, the details do.
+  await expect(card(page, "12 shot Named").locator(".facts")).toHaveCount(0);
+  await card(page, "12 shot Named").getByRole("button", { name: /Details/ }).click();
+  await expect(page.getByRole("dialog")).toContainText("Shots12");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(card(page, "Neither").locator(".facts")).toHaveCount(0);
 });
-test("a restored cart cannot reach checkout while products have no confirmed unit", async ({
-  page,
-}) => {
-  await page.addInitScript(
-    ({ version }) =>
-      localStorage.setItem(
-        "diwali-cart-v1",
-        JSON.stringify({
-          schema: 1,
-          catalogueVersion: version,
-          items: { "dc-001": 2 },
-        }),
-      ),
-    { version: data.version },
+
+test("images: a direct URL renders, a broken one and a missing one fall back; page links offer View photo", async ({ page }) => {
+  await page.route("https://cdn.example.test/ok.png", (r) =>
+    r.fulfill({ status: 200, contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", "base64") }),
   );
+  await page.route("https://cdn.example.test/broken.png", (r) => r.fulfill({ status: 404, body: "no" }));
+  const fake = await new FakeSheet().install(page);
+  fake.set({
+    products: [
+      product(1, { name: "Direct", images: "https://cdn.example.test/ok.png" }),
+      product(2, { name: "Broken", images: "https://cdn.example.test/broken.png" }),
+      product(3, { name: "NoImage", images: "" }),
+      product(4, { name: "Screenshot", images: "https://prnt.sc/not-downloaded-yet" }),
+    ],
+  });
   await page.goto("/");
-  // No cart, no mobile cart bar, no handoff path of any kind.
-  await expect(page.getByRole("button", { name: /Open cart/ })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "Cart summary" })).toHaveCount(0);
-  await expect(
-    page.getByRole("button", { name: /Continue to WhatsApp/ }),
-  ).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Open WhatsApp" })).toHaveCount(0);
+  await expect(card(page, "Direct").locator("img")).toHaveAttribute("src", "https://cdn.example.test/ok.png");
+  await expect(card(page, "Broken").getByText(/Product image/)).toBeVisible();
+  await expect(card(page, "NoImage").getByText(/Product image/)).toBeVisible();
+  await expect(card(page, "Screenshot").getByText(/Product image/)).toBeVisible();
+  await expect(card(page, "Screenshot").getByRole("link", { name: /View photo/ })).toHaveAttribute("href", "https://prnt.sc/not-downloaded-yet");
+  // Every product stays usable.
+  await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(4);
 });
-test("private list takes an order end to end and never claims it was sent", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    window.open = (url?: string | URL) => {
-      (window as any).__whatsapp = String(url);
-      return { opener: null } as any;
-    };
-  });
-  await page.setViewportSize({ width: 390, height: 800 });
-  // Production private-list configuration with test-only confirmed units (vite --mode private-fixture).
-  await page.goto("http://127.0.0.1:5176");
-  await expect(
-    page.getByText(/Test fixture · units are not seller confirmed/),
-  ).toBeVisible();
-  // 41 products are orderable; the five with an unreviewed product type stay blocked.
-  await expect(page.getByRole("button", { name: "Add to cart" })).toHaveCount(41);
-  await expect(
-    page.getByText("Product type is being reviewed · can’t be ordered yet"),
-  ).toHaveCount(5);
-  await page.getByRole("button", { name: "Add to cart" }).first().click();
-  const proceed = page.getByRole("button", {
-    name: "Proceed to buyer details",
-  });
-  if (!(await proceed.isVisible()))
-    await page
-      .getByRole("region", { name: "Cart summary" })
-      .getByRole("button")
-      .click();
-  await proceed.click();
-  await page.getByLabel("Full name *").fill("Deepak");
-  await page.getByLabel("Mobile number *").fill("9992230740");
-  await page.getByRole("checkbox").check();
-  await page
-    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
-    .click();
-  const url = await page.evaluate(() => (window as any).__whatsapp);
-  const message = new URL(url).searchParams.get("text")!;
-  const first = data.products[0];
-  expect(new URL(url).pathname).toBe("/919992230740");
-  expect(message).toContain(
-    `1. *${first.name} (${first.originalCategory})* — Qty: 1 × ₹${first.pricePaise / 100} = ₹${first.pricePaise / 100} (Box (test fixture, not seller confirmed))`,
-  );
-  expect(message).toContain("*Buyer:* Deepak");
-  expect(message).toContain("*Amount before delivery charge:");
-  expect(message).not.toMatch(/fulfilment|to be confirmed/i);
-  await expect(page.locator("body")).not.toContainText(
-    /order (sent|confirmed|placed)/i,
-  );
+
+test("a saved local copy is used only for a screenshot link still in the sheet cell", async ({ page }) => {
+  await page.route("**/images/index.json", (r) => r.fulfill({ json: { "https://prnt.sc/saved": "images/dc-001-1.webp", "https://prnt.sc/removed": "images/dc-002-1.webp" } }));
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Saved", images: "https://prnt.sc/saved" }), product(2, { name: "Changed", images: "https://prnt.sc/different" })] });
+  await page.goto("/");
+  await expect(card(page, "Saved").locator("img")).toHaveAttribute("src", /images\/dc-001-1\.webp$/);
+  await expect(card(page, "Changed").locator("img")).toHaveCount(0);
 });
-test("a restored cart holding a blocked product stays out of checkout until it is removed", async ({
-  page,
-}) => {
-  const blocked = data.products.find((p) => !p.categoryReviewed)!;
-  await page.addInitScript(
-    ({ version, blockedId }) =>
-      localStorage.setItem(
-        "diwali-cart-v1",
-        JSON.stringify({
-          schema: 1,
-          catalogueVersion: version,
-          items: { "dc-001": 1, [blockedId]: 1 },
-        }),
-      ),
-    { version: `fixture-${data.version}`, blockedId: blocked.id },
-  );
-  await page.setViewportSize({ width: 390, height: 800 });
-  await page.goto("http://127.0.0.1:5176");
-  await page.getByRole("button", { name: /Open cart, 2 units/ }).click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toContainText(
-    "ordering information changed; review required",
-  );
-  await expect(dialog).toContainText("Product type needs seller review");
-  const proceed = dialog.getByRole("button", {
-    name: "Proceed to buyer details",
-  });
-  await expect(proceed).toBeDisabled();
-  await dialog
-    .getByRole("button", { name: `Remove ${blocked.name}, ${blocked.id}` })
-    .click();
-  await expect(proceed).toBeEnabled();
-});
-test("mobile cart restores and opens a concise discounted WhatsApp order directly", async ({
-  page,
-}) => {
+
+test("long names, long categories and long descriptions stay inside their cards on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.addInitScript(() => {
-    window.open = (url) => {
-      window.__whatsapp = String(url);
-      return { opener: null };
-    };
-    Object.defineProperty(window, "AudioContext", {
-      value: class {
-        constructor() {
-          throw Error("Audio blocked");
-        }
-      },
-    });
-  });
-  await page.goto("http://127.0.0.1:5174");
-  await page.getByRole("button", { name: "Enable festive sound" }).click();
-  await expect(
-    page.getByText("Sound is unavailable. Shopping still works."),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Add to cart" }).first().click();
-  await page.getByRole("button", { name: "Add to cart" }).first().click();
-  await page.getByRole("button", { name: /Open cart, 2 units/ }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Increase POP-UP dc-001 quantity" })
-    .click();
-  await page
-    .getByRole("dialog")
-    .getByRole("textbox", { name: "POP-UP dc-002 quantity", exact: true })
-    .fill("2");
-  await page
-    .getByRole("dialog")
-    .getByRole("textbox", { name: "POP-UP dc-002 quantity", exact: true })
-    .press("Tab");
-  await expect(page.locator(".price-summary")).toContainText("₹60");
-  await expect(page.locator(".price-summary")).toContainText("₹54");
-  await page
-    .getByRole("button", { name: "Remove POP-UP, dc-002", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Undo removal" }).click();
-  await page.getByRole("button", { name: "Close dialog" }).click();
-  await page.reload();
-  await page.getByRole("button", { name: /Open cart, 4 units/ }).click();
-  await page.getByRole("button", { name: "Proceed to buyer details" }).click();
-  await page
-    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
-    .click();
-  await expect(page.locator("#buyer-name")).toBeFocused();
-  await page.getByLabel("Full name *").fill("दीपक रांगा");
-  await page.getByLabel("Mobile number *").fill("+91 99922-30740");
-  await page.getByLabel("Order notes").fill("₹ & + # % 🎆");
-  await page.getByRole("checkbox").check();
-  await page
-    .getByRole("button", { name: "Continue to WhatsApp", exact: true })
-    .click();
-  await expect(
-    page.getByText(
-      "WhatsApp opened. If you sent the request, wait for the seller’s confirmation.",
-    ),
-  ).toBeVisible();
-  const url = await page.evaluate(() => window.__whatsapp);
-  const message = new URL(url).searchParams.get("text");
-  expect(new URL(url).pathname).toBe("/919992230740");
-  expect(message).toContain("दीपक रांगा");
-  expect(message).toContain("Product subtotal: ₹60");
-  expect(message).toContain("Offer (10% off): −₹6");
-  expect(message).toContain("Total: ₹54");
-  expect(message).not.toContain("Catalogue version");
-  // The review sits above the button: items and totals visible, the full message collapsed
-  // by default and identical to the text WhatsApp was opened with.
-  const review = page.locator(".review-summary");
-  await expect(review).toBeVisible();
-  await expect(review).toContainText("Review your request");
-  await expect(review).toContainText("दीपक रांगा");
-  await expect(review.locator(".price-summary")).toContainText("₹54");
-  await expect(page.locator(".complete-message")).not.toHaveAttribute("open", "");
-  await page.getByText("View the complete WhatsApp message").click();
-  expect(await page.locator(".complete-message pre").textContent()).toBe(
-    message,
-  );
-  await expect(
-    page.getByRole("heading", { name: "Checkout", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Close dialog" }).click();
-  await expect(
-    page.getByRole("button", { name: /Open cart, 4 units/ }),
-  ).toBeVisible();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-});
-test("corrupt and unavailable storage do not break catalogue or demo cart", async ({
-  page,
-}) => {
-  await page.addInitScript(() =>
-    localStorage.setItem("diwali-cart-v1", "bad json"),
-  );
-  await page.goto("http://127.0.0.1:5174");
-  await page.getByRole("button", { name: /Open cart/ }).click();
-  await expect(
-    page.getByText("Saved cart could not be read. Started with an empty cart."),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Close dialog" }).click();
-  await page.addInitScript(() => {
-    Storage.prototype.setItem = () => {
-      throw Error("blocked");
-    };
-    Storage.prototype.getItem = () => {
-      throw Error("blocked");
-    };
-  });
-  await page.reload();
-  await page.getByRole("button", { name: "Add to cart" }).first().click();
-  await page.getByRole("button", { name: /Open cart, 1 units/ }).click();
-  await expect(
-    page.getByText(
-      "Browser storage is unavailable. Your cart lasts for this visit.",
-    ),
-  ).toBeVisible();
-});
-test("responsive layouts, reduced motion, 200 percent text and keyboard focus", async ({
-  page,
-}) => {
+  const fake = await new FakeSheet().install(page);
+  const long = "Extraordinarily".repeat(12);
+  fake.set({ products: [product(1, { name: `Giant ${long} sky shot`, category: `Category ${long}`, desc: `Description ${long}` })] });
   await page.goto("/");
-  for (const width of [320, 360, 390, 430, 768, 1280]) {
-    await page.setViewportSize({ width, height: 900 });
-    await expect(page.locator("h1")).toBeVisible();
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth <= innerWidth,
-      ),
-    ).toBe(true);
-    await page.screenshot({
-      path: `reports/screenshots/catalogue-${width}.png`,
-      fullPage: true,
+  await expect(page.locator(".product-card")).toHaveCount(1);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  expect(overflow).toBe(false);
+  await page.locator(".product-card").getByRole("button", { name: /Details/ }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
+});
+
+test("markup in sheet text is displayed as text, never executed", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "<img src=x onerror=window.__pwned=1>", desc: "<script>window.__pwned=1</script>", category: "<b>Bold</b>" })], settings: [["Shop name", "<i>Shop</i>"], ["WhatsApp number", "919876543210"]] });
+  await page.goto("/");
+  await expect(page.locator(".product-card h3")).toHaveText("<img src=x onerror=window.__pwned=1>");
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => (window as any).__pwned)).toBeUndefined();
+  expect(await page.locator(".product-card h3 img, .product-card b, header i").count()).toBe(0);
+});
+
+test("duplicate Product IDs are rejected as a whole: no products, a plain message", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1), product(1)] });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /couldn’t load/ })).toBeVisible();
+  await expect(page.locator(".product-card")).toHaveCount(0);
+  await expect(page.getByText(/being updated and can’t be read/)).toBeVisible();
+  // Developer detail is available, and names the row and field.
+  await page.getByText("Technical details").click();
+  await expect(page.locator(".dev-details pre")).toContainText("Duplicate Product ID");
+});
+
+test("empty catalogue: an explanation, not a blank page", async ({ page }) => {
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [] });
+  await page.goto("/");
+  await expect(page.getByText("No crackers are listed right now")).toBeVisible();
+  fake.set({ products: products(1) });
+  await page.getByRole("button", { name: "Check again" }).click();
+  await expect(page.locator(".product-card")).toHaveCount(1);
+});
+
+test.describe("loading and failure states", () => {
+  test("initial loading is announced, then replaced by products", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.delayMs = 800;
+    await page.goto("/");
+    await expect(page.getByText("Loading the latest prices…")).toBeVisible();
+    await expect(page.locator(".product-card")).toHaveCount(2);
+  });
+  test("a sign-in page is reported as an access problem, with Try again", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.body = "<!DOCTYPE html><html><head><title>Sign in - Google Accounts</title></head></html>";
+    fake.contentType = "text/html; charset=utf-8";
+    await page.goto("/");
+    await expect(page.getByText(/isn’t available to the public/)).toBeVisible();
+    await expect(page.locator(".product-card")).toHaveCount(0);
+    fake.body = sheet();
+    fake.contentType = "text/csv";
+    await page.getByRole("button", { name: "Try again" }).click();
+    await expect(page.locator(".product-card")).toHaveCount(2);
+  });
+  test("HTTP 403 and a network failure with no cache show an error, never demo products", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.status = 403;
+    await page.goto("/");
+    await expect(page.getByText(/isn’t available to the public/)).toBeVisible();
+    fake.status = 200;
+    fake.abort = true;
+    await page.getByRole("button", { name: "Try again" }).click();
+    await expect(page.getByText(/couldn’t reach the price list/)).toBeVisible();
+    await expect(page.locator(".product-card")).toHaveCount(0);
+  });
+  test("a failed refresh keeps products browsable and says prices could not be verified", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    await page.goto("/");
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    fake.abort = true;
+    await refresh(page);
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toBeVisible();
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    fake.abort = false;
+    await page.getByRole("button", { name: "Try again" }).click();
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toHaveCount(0);
+  });
+  test("an invalid sheet on refresh never replaces the good data", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.set({ products: [product(1, { name: "Good" })] });
+    await page.goto("/");
+    await expect(page.locator(".product-card h3")).toHaveText("Good");
+    fake.body = sheet({ products: [product(1, { name: "Bad" }), product(1, { name: "Bad" })] });
+    await refresh(page);
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toBeVisible();
+    await expect(page.locator(".product-card h3")).toHaveText("Good");
+  });
+});
+
+test.describe("cached and uncached start-up, offline, tab resume", () => {
+  test("cached start-up shows saved data immediately while a slow fetch runs, then updates", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.set({ products: [product(1, { name: "Saved copy", price: "₹100.00" })] });
+    await page.goto("/");
+    await expect(card(page, "Saved copy")).toBeVisible();
+    fake.set({ products: [product(1, { name: "Saved copy", price: "₹120.00" })] });
+    fake.delayMs = 1500;
+    await page.reload();
+    await expect(card(page, "Saved copy")).toBeVisible();
+    await expect(page.getByText(/Showing the last saved prices/)).toBeVisible();
+    await expect(card(page, "Saved copy").locator(".price-row")).toContainText("₹120", { timeout: 8000 });
+    await expect(page.getByText(/Showing the last saved prices/)).toHaveCount(0);
+  });
+  test("offline browsing: products stay, flagged as unverified, and recover when back online", async ({ page, context }) => {
+    const fake = await new FakeSheet().install(page);
+    await page.goto("/");
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    fake.abort = true;
+    await context.setOffline(true);
+    await refresh(page);
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toBeVisible();
+    await expect(page.getByText(/You are offline/)).toBeVisible();
+    fake.abort = false;
+    await context.setOffline(false);
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toHaveCount(0, { timeout: 10_000 });
+  });
+  test("cached start-up with the sheet unreachable stays browsable and flagged", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    await page.goto("/");
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    fake.abort = true;
+    await page.reload();
+    await expect(page.locator(".product-card")).toHaveCount(2);
+    await expect(page.getByText(/couldn’t check for the latest prices/)).toBeVisible();
+  });
+  test("an old or corrupt cache is ignored, not trusted", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.abort = true;
+    await page.addInitScript(() => {
+      localStorage.setItem("diwali-sheet-v2", JSON.stringify({ schema: 2, spreadsheetId: "other-sheet", fetchedAt: Date.now(), snapshot: { products: [] } }));
     });
-  }
-  await page.setViewportSize({ width: 640, height: 900 });
-  await page.evaluate(() => (document.documentElement.style.fontSize = "200%"));
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  expect(
-    await page
-      .locator(".firework")
-      .first()
-      .evaluate((el) => getComputedStyle(el).animationName),
-  ).toBe("none");
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /couldn’t load/ })).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("diwali-sheet-v2"))).toBeNull();
+  });
+  test("tab hidden then shown after 60 s+ refreshes; shown again right away does not", async ({ page }) => {
+    const fake = await new FakeSheet().install(page);
+    fake.set({ products: products(1) });
+    await page.clock.install();
+    await page.goto("/");
+    await expect(page.locator(".product-card")).toHaveCount(1);
+    const setVisibility = (state: "hidden" | "visible") =>
+      page.evaluate((s) => {
+        Object.defineProperty(document, "visibilityState", { configurable: true, get: () => s });
+        document.dispatchEvent(new Event("visibilitychange"));
+      }, state);
+    await setVisibility("hidden");
+    const hiddenAt = fake.requests;
+    await page.clock.fastForward(5 * 60_000);
+    expect(fake.requests).toBe(hiddenAt); // no polling in the background
+    fake.set({ products: products(3) });
+    await setVisibility("visible");
+    await expect(page.locator(".product-card")).toHaveCount(3);
+    const after = fake.requests;
+    await setVisibility("visible");
+    await page.waitForTimeout(100);
+    expect(fake.requests).toBe(after); // data is fresh: no extra request
+  });
 });

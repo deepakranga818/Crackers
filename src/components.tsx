@@ -1,32 +1,23 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { Product } from "./model";
+import type { Offer, Product } from "./model";
+import { resolveImages, useImageIndex } from "./images";
+import { describeOffer } from "./sheet/offers";
 import { isCheckoutDemo } from "./business";
 import { rupees } from "./pricing";
 
-// Selling price only, unless `reference` says the owner has confirmed the Sheet's MRP values
-// are genuine reference prices; then the struck-through MRP and the saving are shown too.
-export function Price({
-  product: p,
-  reference = false,
-}: {
-  product: Product;
-  reference?: boolean;
-}) {
-  if (p.pricePaise === null) return <strong>Price needs review</strong>;
+// Selling price, plus the sheet's MRP struck through when it is a number above the selling
+// price. The MRP is a comparison price only; it is never treated as a discount or coupon.
+export function Price({ product: p }: { product: Product }) {
+  if (p.pricePaise === null) return <strong>Price unavailable</strong>;
   const mrp = p.mrpPaise;
   return (
     <span className="price">
       <strong>{rupees(p.pricePaise)}</strong>
-      {reference && mrp != null && mrp > p.pricePaise && (
-        <>
-          <del className="mrp">
-            <span className="sr-only">MRP </span>
-            {rupees(mrp)}
-          </del>
-          <span className="save">
-            {Math.round(100 - (p.pricePaise * 100) / mrp)}% off
-          </span>
-        </>
+      {mrp != null && mrp > p.pricePaise && (
+        <del className="mrp">
+          <span className="sr-only">MRP </span>
+          {rupees(mrp)}
+        </del>
       )}
     </span>
   );
@@ -84,33 +75,30 @@ export function useStickyOffset() {
   }, []);
 }
 
-// The offer tiers in plain words: a one-line summary that opens to the exact thresholds.
-export function OfferStrip({
-  offers,
-}: {
-  offers: { code: string | null; text: string; percent: number }[];
-}) {
-  if (!offers.length) return null;
+// The enabled offers in plain words: a one-line summary that opens to the terms.
+export function OfferStrip({ offers }: { offers: Offer[] }) {
+  const active = offers.filter((o) => o.enabled);
+  if (!active.length) return null;
   return (
     <details className="offers">
       <summary>
         <span>
-          Offers · {offers.map((o) => `${o.percent}%`).join(", ")} off your
-          product total
+          {active.length === 1 ? "1 offer available" : `${active.length} offers available`}
         </span>
         <span className="offers-toggle">View terms</span>
       </summary>
       <ul>
-        {offers.map((o) => (
-          <li key={o.text}>
+        {active.map((o) => (
+          <li key={o.row}>
             {o.code && <span className="code">{o.code}</span>}
-            {o.text}
+            {o.name}: {describeOffer(o)}
+            {o.mode === "automatic" ? " · applied automatically" : " · enter the code in your cart"}
           </li>
         ))}
       </ul>
       <p>
-        Applied automatically to your product total, before any fulfilment
-        charge. There is no code to enter.
+        Only the single best offer applies to your product total, before any
+        fulfilment charge. Offers are not combined.
       </p>
     </details>
   );
@@ -175,20 +163,25 @@ export function ProductImage({
   product: Product;
   large?: boolean;
 }) {
-  const [index, setIndex] = useState(0),
-    [failed, setFailed] = useState(false);
-  const src = product.images[index];
+  const index = useImageIndex();
+  const { sources } = resolveImages(product, index);
+  const [current, setCurrent] = useState(0),
+    [failed, setFailed] = useState<Record<string, boolean>>({});
+  const usable = sources.filter((s) => !failed[s]);
+  const src = usable[Math.min(current, Math.max(usable.length - 1, 0))];
   return (
     <div className={large ? "product-image large" : "product-image"}>
-      {src && !failed ? (
+      {src ? (
         <img
-          src={`${import.meta.env.BASE_URL}${src}`}
-          alt={`${product.name} packaging, image ${index + 1}`}
+          key={src}
+          src={src}
+          alt={`${product.name} packaging, image ${sources.indexOf(src) + 1}`}
           width="480"
           height="360"
           loading="lazy"
           decoding="async"
-          onError={() => setFailed(true)}
+          referrerPolicy="no-referrer"
+          onError={() => setFailed((f) => ({ ...f, [src]: true }))}
         />
       ) : (
         <div className="image-fallback">
@@ -200,20 +193,17 @@ export function ProductImage({
           </span>
         </div>
       )}
-      {!large && product.images.length > 1 && (
-        <span className="photo-count">{product.images.length} photos</span>
+      {!large && usable.length > 1 && (
+        <span className="photo-count">{usable.length} photos</span>
       )}
-      {large && product.images.length > 1 && (
+      {large && usable.length > 1 && (
         <div className="gallery-controls">
-          {product.images.map((_, i) => (
+          {usable.map((_, i) => (
             <button
               key={i}
               aria-label={`View product image ${i + 1}`}
-              aria-pressed={index === i}
-              onClick={() => {
-                setIndex(i);
-                setFailed(false);
-              }}
+              aria-pressed={current === i}
+              onClick={() => setCurrent(i)}
             >
               {i + 1}
             </button>
@@ -221,6 +211,21 @@ export function ProductImage({
         </div>
       )}
     </div>
+  );
+}
+// "View photo" links for image cells that are web pages with no saved local copy yet.
+export function PhotoLinks({ product }: { product: Product }) {
+  const { pages } = resolveImages(product, useImageIndex());
+  if (!pages.length) return null;
+  return (
+    <p className="photo-links">
+      {pages.map((href, i) => (
+        <a key={href} href={href} target="_blank" rel="noopener noreferrer">
+          View photo{pages.length > 1 ? ` ${i + 1}` : ""}
+          <span className="sr-only"> of {product.name} (opens in a new tab)</span>
+        </a>
+      ))}
+    </p>
   );
 }
 export function Quantity({

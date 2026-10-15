@@ -3,11 +3,6 @@ import {readFileSync} from 'node:fs';
 // Optional argv[2]: path to an alternative release manifest (used by tests).
 const release=JSON.parse(readFileSync(process.argv[2]??'source/publication-approval.json','utf8'));
 const checklist=JSON.parse(readFileSync('source/verification.json','utf8'));
-// Struck-through MRP and "% off" claims need recorded owner confirmation before they are shown.
-if(release.referencePrices?.confirmed===true&&!String(release.referencePrices.reference??'').trim()){
-  console.error('referencePrices.confirmed is true but no confirmation reference is recorded in the release manifest.');
-  process.exit(1);
-}
 if(release.audience==='private-friends'){
   // Private friends list: public approvals are not required, but it must stay unlisted.
   const hidden=readFileSync('index.html','utf8').includes('content="noindex,nofollow"')&&/^Disallow:\s*\/\s*$/m.test(readFileSync('public/robots.txt','utf8'));

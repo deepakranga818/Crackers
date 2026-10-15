@@ -1,6 +1,7 @@
-import type { Business, Buyer, Cart, Product } from "./model";
+import type { Business, Buyer, Cart, Snapshot } from "./model";
 import { normalizeMobile, safeField, validateBuyer } from "./buyer";
 import { blockedReason, orderingAllowed, rupees, totals } from "./pricing";
+
 export type RequestDraft = {
   fingerprint: string;
   reference: string;
@@ -9,29 +10,36 @@ export type RequestDraft = {
   url: string;
   long: boolean;
 };
+
+export const RECIPIENT_ERROR =
+  "The seller’s WhatsApp number is missing or invalid, so your order can’t be prepared right now. Your cart is saved. Please try again shortly or contact the seller directly.";
+
+/**
+ * Builds the WhatsApp request from one snapshot: the exact data the customer reviewed. Nothing is
+ * sent; the returned link only prepares a message. The recipient comes from the sheet's SHOP
+ * SETTINGS; there is no fallback number.
+ */
 export function makeRequest(
   cart: Cart,
-  products: Product[],
+  snapshot: Snapshot,
   buyer: Buyer,
   c: Business,
+  coupon: string,
   previous?: RequestDraft,
 ): RequestDraft {
+  const recipient = snapshot.settings.whatsapp;
+  if (!recipient || !/^[1-9]\d{10,14}$/.test(recipient))
+    throw Error(RECIPIENT_ERROR);
+  const byId = new Map(snapshot.products.map((p) => [p.id, p]));
   if (
     !orderingAllowed(c) ||
     !Object.keys(cart).length ||
     Object.keys(validateBuyer(buyer, c)).length ||
-    Object.keys(cart).some(
-      (id) =>
-        !products.find((p) => p.id === id) ||
-        blockedReason(
-          products.find((p) => p.id === id)!,
-          c,
-        ),
-    )
+    Object.keys(cart).some((id) => blockedReason(byId.get(id), c))
   )
     throw Error("Request is not ready. Review product and buyer details.");
   const method = c.fulfilment.find((f) => f.id === buyer.method && f.verified)!;
-  const calculated = totals(cart, products, c, method);
+  const calculated = totals(cart, snapshot.products, snapshot.offers, c, method, coupon);
   const clean = Object.fromEntries(
     Object.entries(buyer).map(([k, v]) => [
       k,
@@ -41,13 +49,10 @@ export function makeRequest(
   const fingerprint = JSON.stringify([
     Object.entries(cart).sort(),
     clean,
-    c.catalogueVersion,
-    c.whatsapp,
+    snapshot.version,
+    recipient,
     c.urlThreshold,
     calculated,
-    products
-      .filter((p) => p.id in cart)
-      .map((p) => [p.id, p.pricePaise, p.sellingUnit]),
     method,
     c.tax,
   ]);
@@ -67,24 +72,27 @@ export function makeRequest(
       timeZone: "Asia/Kolkata",
     }).format(new Date()) + " (Asia/Kolkata)";
   // WhatsApp bold is a single asterisk. No emoji: they showed up as replacement characters on the seller's WhatsApp.
-  const lines = ["*DIWALI CRACKERS ORDER*", ""];
+  const lines = ["*DIWALI CRACKERS ORDER*"];
+  if (snapshot.settings.shopName)
+    lines.push(`Shop: ${safeField(snapshot.settings.shopName)}`);
+  lines.push("");
   Object.entries(cart).forEach(([id, qty], i) => {
-    const p = products.find((p) => p.id === id)!;
-    // Only a seller-confirmed unit is shown; unknown and local-demo units never reach the message.
-    const unit =
-      p.sellingUnit && !p.sellingUnit.startsWith("Demo unit")
-        ? ` (${safeField(p.sellingUnit)})`
-        : "";
+    const p = byId.get(id)!;
     lines.push(
-      `${i + 1}. *${safeField(p.name)} (${safeField(p.originalCategory)})* — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}${unit}`,
+      `${i + 1}. *${safeField(p.name)}* (ID: ${safeField(p.id)}) — Qty: ${qty} × ${rupees(p.pricePaise!)} = ${rupees(p.pricePaise! * qty)}`,
     );
+    const pack = [
+      p.piecesPerPack ? `${p.piecesPerPack} pieces per pack` : "",
+      p.shots ? `${p.shots} shots` : "",
+    ].filter(Boolean);
+    if (pack.length) lines.push(`   ${pack.join(" · ")}`);
   });
-  lines.push("", `Product subtotal: ${rupees(calculated.subtotal)}`);
-  if (calculated.discount > 0)
-    lines.push(
-      `Offer (${calculated.discountBasisPoints / 100}% off): −${rupees(calculated.discount)}`,
-    );
-  if (calculated.couponCode) lines.push(`Coupon: ${calculated.couponCode}`);
+  lines.push("", `Subtotal: ${rupees(calculated.subtotal)}`);
+  if (calculated.offerName && calculated.discount > 0) {
+    lines.push(`Offer: ${safeField(calculated.offerName)}`);
+    if (calculated.couponCode) lines.push(`Coupon: ${safeField(calculated.couponCode)}`);
+    lines.push(`Discount: −${rupees(calculated.discount)}`);
+  }
   if (calculated.delivery)
     lines.push(`Fulfilment charge: ${rupees(calculated.delivery)}`);
   if (calculated.tax !== null)
@@ -94,7 +102,7 @@ export function makeRequest(
     calculated.label === "Total"
       ? "Total"
       : calculated.delivery === null
-        ? "Amount before delivery charge"
+        ? "Merchandise total (before any delivery charge)"
         : "Estimated amount";
   lines.push(
     "",
@@ -103,25 +111,22 @@ export function makeRequest(
     `*Buyer:* ${clean.name}`,
     `*Mobile:* ${normalizeMobile(buyer.mobile)}`,
   );
-  // Fulfilment appears only when it is a real choice; undecided or demo arrangements stay out.
-  const pickupAddress = !method.id.startsWith("demo-") && method.address;
+  // Fulfilment appears only when it is a real choice.
   if (method.type === "delivery")
     lines.push(
       "*Fulfilment:* Delivery",
       `*Address:* ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].map(safeField).join(", ")}`,
     );
-  else if (pickupAddress)
-    lines.push(`*Fulfilment:* Pickup — ${safeField(pickupAddress)}`);
+  else if (method.address)
+    lines.push(`*Fulfilment:* Pickup — ${safeField(method.address)}`);
   if (clean.landmark) lines.push(`*Landmark:* ${clean.landmark}`);
   if (clean.notes) lines.push(`*Notes:* ${clean.notes}`);
   lines.push("", "Wishing you and your family a very Happy Diwali!");
   const message = lines.join("\n");
-  const full = `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(message)}`;
+  const full = `https://wa.me/${recipient}?text=${encodeURIComponent(message)}`;
   const long = full.length > c.urlThreshold;
   const url = long
-    ? `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(`Order request ${reference}. I will paste the complete request or attach its text file. Please confirm availability, fulfilment and final amount.`)}`
+    ? `https://wa.me/${recipient}?text=${encodeURIComponent(`Order request ${reference}. I will paste the complete request or attach its text file. Please confirm availability, fulfilment and final amount.`)}`
     : full;
-  if (c.whatsapp !== "919992230740")
-    throw Error("Unexpected WhatsApp recipient");
   return { fingerprint, reference, created, message, url, long };
 }

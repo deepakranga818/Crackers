@@ -1,31 +1,30 @@
 import type { Product } from "./model";
-const aliases: Record<string, string> = {
-  phuljadi: "sparklers",
-  phuljhari: "sparklers",
-  sparkler: "sparklers",
-  sparklers: "sparklers",
-  chakkar: "spinners",
-  chakkari: "spinners",
-  spinner: "spinners",
-  spinners: "spinners",
-  anar: "pots",
-  "flower pot": "pots",
-  laddi: "strings",
-  ladi: "strings",
-  string: "strings",
-  strings: "strings",
-};
+
+export type Category = { key: string; label: string };
+
+// Categories come from the visible products themselves: a new category in the sheet appears
+// without a code change, and one with no visible products disappears. Spelling variants that
+// differ only by case or spacing are one category (the first spelling seen is the label);
+// different wording is never merged.
+export function deriveCategories(products: Product[]): Category[] {
+  const seen = new Map<string, Category>();
+  for (const p of products)
+    if (p.visible && p.categoryKey && !seen.has(p.categoryKey))
+      seen.set(p.categoryKey, { key: p.categoryKey, label: p.category });
+  return [...seen.values()];
+}
+
 export function matches(p: Product, query: string) {
   const q = query.trim().toLocaleLowerCase();
   return (
     !q ||
-    [p.name, p.originalCategory, p.categoryLabel, p.variantLabel || ""]
+    [p.name, p.category, p.description ?? "", p.id]
       .join(" ")
       .toLocaleLowerCase()
-      .includes(q) ||
-    aliases[q] === p.categoryId
+      .includes(q)
   );
 }
+
 export function filterProducts(
   products: Product[],
   query: string,
@@ -35,7 +34,9 @@ export function filterProducts(
   return products
     .filter(
       (p) =>
-        matches(p, query) && (category === "all" || p.categoryId === category),
+        p.visible &&
+        matches(p, query) &&
+        (category === "all" || p.categoryKey === category),
     )
     .sort((a, b) =>
       sort === "low"

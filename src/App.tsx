@@ -1,51 +1,148 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { actualCatalogueUrl, config, isCheckoutDemo, modeCopy } from "./business";
+import { deriveCategories, filterProducts, matches } from "./catalogue";
 import {
-  actualCatalogueUrl,
-  catalogueSource,
-  categories,
-  config,
-  isCheckoutDemo,
-  isLocalDemo,
-  modeCopy,
-  products,
-} from "./business";
-import { filterProducts, matches } from "./catalogue";
-import { useCart } from "./cart";
-import {
-  anyOrderable,
-  blockedReason,
-  offerSummary,
-  quantity,
-  rupees,
-  totals,
-} from "./pricing";
-import { emptyBuyer, type Buyer, type Product } from "./model";
+  diffSummary,
+  priceChanges,
+  summarize,
+  useCart,
+  type OrderSummary,
+} from "./cart";
+import { blockedReason, orderingAllowed, quantity, rupees, totals } from "./pricing";
+import { emptyBuyer, type Buyer, type Product, type Snapshot } from "./model";
 import { validateBuyer } from "./buyer";
-import { makeRequest, type RequestDraft } from "./whatsapp";
+import { RECIPIENT_ERROR, makeRequest, type RequestDraft } from "./whatsapp";
 import { useAudio } from "./audio";
+import { ImageIndexContext, loadImageIndex, type ImageIndex } from "./images";
+import { useSheet } from "./sheet/useSheet";
+import type { SheetState, SheetStore } from "./sheet/store";
 import {
   Modal,
   OfferStrip,
+  PhotoLinks,
   Price,
   ProductImage,
   Quantity,
   useStickyOffset,
 } from "./components";
 
-// Shopper wording for why a product can't be ordered. The unit is shown on its own line,
-// so a missing unit is not repeated here.
-const shopperReason: Record<string, string> = {
-  "Product type needs seller review":
-    "Product type is being reviewed · can’t be ordered yet",
-};
+// A neutral descriptive heading, used only while the sheet's Shop name is blank. It is not a
+// business name and is never put in the WhatsApp message.
+const DEFAULT_HEADING = "Diwali crackers";
+const time = (ms: number) =>
+  new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit" }).format(
+    ms,
+  );
+// An Indian number such as 919876543210 becomes "+91 98765 43210"; other lengths are shown as digits after a plus sign.
+const phoneDisplay = (n: string) =>
+  /^91\d{10}$/.test(n) ? `+91 ${n.slice(2, 7)} ${n.slice(7)}` : `+${n}`;
+// A card shows the shot count only when the name does not already say it.
+const nameStatesShots = (p: Product) =>
+  p.shots !== null &&
+  new RegExp(`\\b${p.shots}\\s*-?\\s*shots?\\b`, "i").test(p.name);
+
+// Customer wording for why the data could not be loaded. Detail stays in the console.
+function failureText(state: SheetState) {
+  switch (state.error?.kind) {
+    case "access":
+      return "The price list isn’t available to the public right now. The seller needs to check its sharing settings.";
+    case "structure":
+      return "The price list is being updated and can’t be read yet. Please try again in a few minutes.";
+    case "empty":
+      return "The price list is empty right now. Please try again shortly.";
+    case "timeout":
+      return "The price list took too long to load.";
+    default:
+      return navigator.onLine
+        ? "We couldn’t reach the price list. Check your connection and try again."
+        : "You appear to be offline.";
+  }
+}
 
 export default function App() {
+  const { store, state } = useSheet();
+  const [images, setImages] = useState<ImageIndex>({});
+  useEffect(() => {
+    const c = new AbortController();
+    void loadImageIndex(c.signal).then(setImages);
+    return () => c.abort();
+  }, []);
+  return (
+    <ImageIndexContext.Provider value={images}>
+      {state.snapshot ? (
+        <Shop snapshot={state.snapshot} state={state} store={store} />
+      ) : (
+        <LoadScreen state={state} store={store} />
+      )}
+    </ImageIndexContext.Provider>
+  );
+}
+
+// Initial loading, or no usable data at all (no cache and the fetch failed). Never shows
+// placeholder products.
+function LoadScreen({ state, store }: { state: SheetState; store: SheetStore }) {
+  return (
+    <main className="load-screen" aria-live="polite">
+      {state.phase === "loading" ? (
+        <>
+          <div className="skeleton" aria-hidden="true" />
+          <p role="status">Loading the latest prices…</p>
+        </>
+      ) : (
+        <div className="empty" role="alert">
+          <span aria-hidden="true">✧</span>
+          <h1>We couldn’t load the crackers list</h1>
+          <p>{failureText(state)}</p>
+          <button
+            className="button primary"
+            onClick={() => void store.refresh({ force: true }).catch(() => {})}
+          >
+            Try again
+          </button>
+          {state.error && (
+            <details className="dev-details">
+              <summary>Technical details</summary>
+              <pre>
+                {state.error.message}
+                {"\n"}
+                {JSON.stringify(state.error.diagnostics, null, 2)}
+              </pre>
+            </details>
+          )}
+        </div>
+      )}
+    </main>
+  );
+}
+
+function Shop({
+  snapshot,
+  state,
+  store,
+}: {
+  snapshot: Snapshot;
+  state: SheetState;
+  store: SheetStore;
+}) {
+  const { products, offers, settings } = snapshot;
+  const heading = settings.shopName ?? DEFAULT_HEADING;
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const listed = products.filter((p) => p.visible);
+  const categories = deriveCategories(products);
   const [query, setQuery] = useState(""),
-    [category, setCategory] = useState("all"),
+    [categoryChoice, setCategory] = useState("all"),
     [sort, setSort] = useState("source");
-  const [detail, setDetail] = useState<Product | null>(null),
+  // A category that has disappeared (renamed, or its last product hidden) falls back to All
+  // without losing the search or sort.
+  const category = categories.some((c) => c.key === categoryChoice)
+    ? categoryChoice
+    : "all";
+  const [detailId, setDetailId] = useState<string | null>(null),
     [cartOpen, setCartOpen] = useState(false),
     [stage, setStage] = useState<"cart" | "buyer">("cart");
+  // The open product is looked up by ID on every render, so a refresh updates its price and stock.
+  const detail = detailId ? (byId.get(detailId) ?? null) : null;
+  const setDetail = (p: Product | null) => setDetailId(p?.id ?? null);
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [toast, setToast] = useState(""),
     [undo, setUndo] = useState<{ p: Product; qty: number } | null>(null);
@@ -63,29 +160,39 @@ export default function App() {
     null,
   );
   const [downloadRequested, setDownloadRequested] = useState(false);
+  // What the customer last reviewed, and what changed since (see checkout()).
+  const reviewed = useRef<OrderSummary | null>(null);
+  const [changes, setChanges] = useState<string[]>([]);
+  const [checkoutError, setCheckoutError] = useState("");
   const requestPrepared =
     !draft?.long || preparedFingerprint === draft.fingerprint;
   const tapGuard = useRef(0);
+  const checking = useRef(false);
   const announce = useCallback((s: string) => setToast(s), []);
-  const { cart, save, update, notice } = useCart(products, config, announce);
+  const { cart, coupon, setCoupon, seen, names, save, update, acknowledge, notice } =
+    useCart(config, announce);
   const audio = useAudio(config.soundVolume);
   useStickyOffset();
-  // Ordering is offered only when at least one product can really be ordered; a price
-  // without a confirmed unit is for browsing.
-  const canOrder = anyOrderable(products, config);
+  const canOrder = orderingAllowed(config);
   const mode = modeCopy(canOrder);
-  const offers = offerSummary(config.offers);
   const method = config.fulfilment.find(
     (f) => f.id === buyer.method && f.verified,
   );
-  const amount = totals(cart, products, config, method);
-  const selected = products.filter((p) => p.id in cart);
+  const amount = totals(cart, products, offers, config, method, coupon);
+  // Header badge counts everything saved, including items that can't be ordered right now.
+  const cartUnits = Object.values(cart).reduce((a, b) => a + b, 0);
+  // Every saved item stays visible, even if the sheet no longer lists it.
+  const selected = Object.keys(cart).map((id) => ({
+    id,
+    qty: cart[id],
+    product: byId.get(id),
+  }));
   // The exact request WhatsApp would open, built only once the form is valid so the shopper can
   // inspect it before continuing. Same builder and same draft as the handoff itself.
   let preview: RequestDraft | undefined;
   if (cartOpen && stage === "buyer") {
     try {
-      preview = makeRequest(cart, products, buyer, config, draft);
+      preview = makeRequest(cart, snapshot, buyer, config, coupon, draft);
     } catch {
       preview = undefined;
     }
@@ -94,24 +201,46 @@ export default function App() {
     ? "Not chosen yet"
     : method.type === "delivery"
       ? `Delivery to ${[buyer.address, buyer.locality, buyer.city, buyer.state, buyer.pin].filter((v) => v.trim()).join(", ") || "an address you enter above"}`
-      : method.address && !method.id.startsWith("demo-")
+      : method.address
         ? `Pickup — ${method.address}`
         : method.label;
   const visible = filterProducts(products, query, category, sort);
-  const searchProducts = products.filter((p) => matches(p, query));
+  const searchProducts = listed.filter((p) => matches(p, query));
   useEffect(() => {
     setDraft(undefined);
     setHandoff("");
     setDryRun(null);
     setPreparedFingerprint(null);
-  }, [cart]);
+  }, [cart, coupon]);
   const cartReady =
     canOrder &&
     selected.length > 0 &&
-    selected.every((p) => !blockedReason(p, config));
+    selected.every((l) => !blockedReason(l.product, config));
   useEffect(() => {
-    if (detail) setDetailQuantity(cart[detail.id] || 1);
-  }, [detail]);
+    if (detailId) setDetailQuantity(cart[detailId] || 1);
+  }, [detailId]);
+  // Seen once the catalogue arrives or changes: compare the customer's saved items with the
+  // newly fetched data and say what moved. Nothing is removed or re-priced silently.
+  const lastVersion = useRef<string | null>(null);
+  const lastSnapshot = useRef<Snapshot | null>(null);
+  useEffect(() => {
+    const previous = lastSnapshot.current;
+    lastSnapshot.current = snapshot;
+    if (lastVersion.current === snapshot.version) return;
+    lastVersion.current = snapshot.version;
+    if (!Object.keys(cart).length) return;
+    const notes = previous
+      ? diffSummary(
+          reviewed.current ?? summarize(cart, previous, config, coupon, names),
+          summarize(cart, snapshot, config, coupon, names),
+        )
+      : priceChanges(cart, seen, products);
+    if (notes.length) setChanges((c) => [...new Set([...c, ...notes])]);
+  }, [snapshot.version]);
+  // Keep the category chip, a stale detail view and the cart consistent after a refresh.
+  useEffect(() => {
+    if (category !== categoryChoice) setCategory("all");
+  }, [category, categoryChoice]);
   useEffect(() => {
     if (cartOpen && stage === "buyer")
       requestAnimationFrame(() =>
@@ -134,18 +263,22 @@ export default function App() {
       window.removeEventListener("offline", listener);
     };
   }, []);
+  const pageTitle = settings.shopName
+    ? `${settings.shopName} · ${config.seo.title}`
+    : config.seo.title;
   useEffect(() => {
-    document.title = config.seo.title;
+    document.title = pageTitle;
+    document
+      .querySelector('meta[property="og:title"]')
+      ?.setAttribute("content", pageTitle);
+  }, [pageTitle]);
+  useEffect(() => {
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute("content", config.seo.description);
-    for (const [property, value] of [
-      ["og:title", config.seo.title],
-      ["og:description", config.seo.description],
-    ])
-      document
-        .querySelector(`meta[property="${property}"]`)
-        ?.setAttribute("content", value);
+    document
+      .querySelector('meta[property="og:description"]')
+      ?.setAttribute("content", config.seo.description);
     const entries: [string, string | null][] = [
       ["canonical", config.seo.canonical],
       ["og:image", config.seo.ogImage],
@@ -180,12 +313,14 @@ export default function App() {
     }
     return result;
   }
-  function remove(p: Product) {
+  function removeLine(id: string, name: string) {
     const next = { ...cart };
-    delete next[p.id];
+    const qty = next[id];
+    delete next[id];
     save(next);
-    setUndo({ p, qty: cart[p.id] });
-    announce(`${p.name} removed.`);
+    const p = byId.get(id);
+    if (p) setUndo({ p, qty });
+    announce(`${name} removed.`);
     setStage("cart");
     setHandoff("");
     audio.tone("remove");
@@ -194,7 +329,25 @@ export default function App() {
     setCartOpen(true);
     setStage("cart");
   }
-  function checkout() {
+  // The customer has seen and accepted the current data: later differences are "changes".
+  function accept() {
+    reviewed.current = summarize(cart, snapshot, config, coupon, names);
+    setChanges([]);
+    setCheckoutError("");
+    acknowledge(products);
+  }
+  function proceed() {
+    accept();
+    setBuyer((b) => ({
+      ...b,
+      method: b.method || config.fulfilment.find((f) => f.verified)?.id || "",
+    }));
+    setStage("buyer");
+  }
+  // Continue to WhatsApp. Always fetches the sheet first; the message is built from exactly the
+  // snapshot that fetch returned, and only if it matches what the customer reviewed.
+  async function checkout() {
+    if (checking.current) return; // double click / parallel attempt
     const next = validateBuyer(buyer, config);
     setErrors(next);
     if (Object.keys(next).length) {
@@ -203,21 +356,59 @@ export default function App() {
       );
       return;
     }
+    if (changes.length) return;
+    if (!navigator.onLine) {
+      setCheckoutError(
+        "You are offline, so the current prices can’t be confirmed and your order was not prepared. Your cart and details are saved. Reconnect and try again.",
+      );
+      return;
+    }
+    checking.current = true;
+    setBusy(true);
+    setCheckoutError("");
+    store.lock();
     try {
-      const current = makeRequest(cart, products, buyer, config, draft);
+      let fresh: Snapshot;
+      try {
+        fresh = await store.refreshForCheckout();
+      } catch {
+        setCheckoutError(
+          "We couldn’t confirm the current prices and availability, so your order was not prepared. Your cart and details are saved. Check your connection and try again.",
+        );
+        return;
+      }
+      const now = summarize(cart, fresh, config, coupon, names);
+      const diffs = diffSummary(reviewed.current ?? now, now);
+      const blocked = now.lines.filter((l) => l.state !== "ok");
+      if (diffs.length || blocked.length) {
+        setChanges(
+          diffs.length
+            ? diffs
+            : blocked.map((l) => `${l.name} can’t be ordered right now.`),
+        );
+        setHandoff("");
+        return;
+      }
+      const current = makeRequest(cart, fresh, buyer, config, coupon, draft);
       setDraft(current);
       setManualCopy(false);
       setDownloadRequested(false);
       handoffRequest(current);
     } catch (error) {
-      announce((error as Error).message);
+      setCheckoutError((error as Error).message);
+    } finally {
+      checking.current = false;
+      setBusy(false);
+      store.unlock();
     }
   }
   function handoffRequest(provided?: RequestDraft) {
     if (Date.now() - tapGuard.current < 1000) return;
     try {
       const current =
-        provided ?? makeRequest(cart, products, buyer, config, draft);
+        provided ??
+        draft ??
+        makeRequest(cart, snapshot, buyer, config, coupon, draft);
       if (!navigator.onLine) {
         setHandoff(
           "You are offline. Copy or download your request, then retry when connected.",
@@ -231,8 +422,6 @@ export default function App() {
         return;
       }
       tapGuard.current = Date.now();
-      setBusy(true);
-      window.setTimeout(() => setBusy(false), 1000);
       if (isCheckoutDemo) {
         // Dry run: show what would have been opened. WhatsApp is never contacted.
         setDryRun(current);
@@ -358,6 +547,27 @@ export default function App() {
           </>
         )}
       </div>
+      {(state.stale || state.refreshing) && state.error && (
+        <div className="stale-banner" role="status">
+          <span>
+            We couldn’t check for the latest prices and availability, so what
+            you see may be out of date
+            {state.fetchedAt ? ` (last checked ${time(state.fetchedAt)})` : ""}.
+          </span>
+          <button
+            className="text-button"
+            disabled={state.refreshing}
+            onClick={() => void store.refresh({ force: true }).catch(() => {})}
+          >
+            {state.refreshing ? "Checking…" : "Try again"}
+          </button>
+        </div>
+      )}
+      {state.stale && !state.error && (
+        <div className="stale-banner" role="status">
+          Showing the last saved prices while we check for updates…
+        </div>
+      )}
       <header data-sticky="header">
         <a className="brand" href="#">
           <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -365,7 +575,7 @@ export default function App() {
             <path d="M24 4q-13 17 0 22Q34 21 24 4" fill="currentColor" />
           </svg>
           <span>
-            {config.brand}
+            {heading}
             <small>Light up the celebration</small>
           </span>
         </a>
@@ -395,12 +605,12 @@ export default function App() {
             <button
               className="cart-button"
               onClick={openCart}
-              aria-label={`Open cart, ${amount.units} units`}
+              aria-label={`Open cart, ${cartUnits} units`}
             >
               <span aria-hidden="true">🛒</span>{" "}
               <span className="cart-label">Cart</span>{" "}
-              <span className="badge" key={amount.units}>
-                {amount.units}
+              <span className="badge" key={cartUnits}>
+                {cartUnits}
               </span>
             </button>
           )}
@@ -470,6 +680,20 @@ export default function App() {
           aria-labelledby="catalogue-title"
         >
           <OfferStrip offers={offers} />
+          {state.fetchedAt && (
+            <p className="fetched-line">
+              Prices fetched at {time(state.fetchedAt)}.{" "}
+              <button
+                className="text-button"
+                disabled={state.refreshing}
+                onClick={() =>
+                  void store.refresh({ force: true }).catch(() => {})
+                }
+              >
+                {state.refreshing ? "Refreshing…" : "Refresh"}
+              </button>
+            </p>
+          )}
           <div className="shop-bar" data-sticky="bar">
             <div className="search-row">
               <label className="search">
@@ -477,7 +701,7 @@ export default function App() {
                 <input
                   aria-label="Search crackers"
                   type="search"
-                  placeholder="Search products, Phuljadi, Anar…"
+                  placeholder="Search products or categories…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -499,21 +723,21 @@ export default function App() {
               aria-label="Product categories. Counts follow your search."
               title="Counts follow your search"
             >
-              {categories.map((c) => {
+              {[{ key: "all", label: "All products" }, ...categories].map((c) => {
                 const count =
-                  c.id === "all"
+                  c.key === "all"
                     ? searchProducts.length
-                    : searchProducts.filter((p) => p.categoryId === c.id)
+                    : searchProducts.filter((p) => p.categoryKey === c.key)
                         .length;
                 return (
                   <button
-                    key={c.id}
-                    aria-pressed={category === c.id}
+                    key={c.key}
+                    aria-pressed={category === c.key}
                     className={
-                      (category === c.id ? "active" : "") +
+                      (category === c.key ? "active" : "") +
                       (count === 0 ? " none" : "")
                     }
-                    onClick={() => setCategory(c.id)}
+                    onClick={() => setCategory(c.key)}
                     // The browser leaves a half-visible chip half hidden; reveal it fully.
                     onFocus={(e) =>
                       e.currentTarget.scrollIntoView({
@@ -533,9 +757,9 @@ export default function App() {
               <h2 id="catalogue-title">Crackers</h2>
               <p aria-live="polite">
                 <span className="lead-word">Showing </span>
-                <strong>{visible.length}</strong> of {products.length} products
+                <strong>{visible.length}</strong> of {listed.length} products
                 {category !== "all"
-                  ? ` · ${categories.find((c) => c.id === category)?.label}`
+                  ? ` · ${categories.find((c) => c.key === category)?.label}`
                   : ""}
                 {query ? ` · “${query}”` : ""}
               </p>
@@ -566,7 +790,21 @@ export default function App() {
               </select>
             </label>
           </div>
-          {!visible.length ? (
+          {!listed.length ? (
+            <div className="empty">
+              <span aria-hidden="true">✧</span>
+              <h3>No crackers are listed right now</h3>
+              <p>The seller’s list is empty at the moment. Please check back soon.</p>
+              <button
+                disabled={state.refreshing}
+                onClick={() =>
+                  void store.refresh({ force: true }).catch(() => {})
+                }
+              >
+                Check again
+              </button>
+            </div>
+          ) : !visible.length ? (
             <div className="empty">
               <span aria-hidden="true">✧</span>
               <h3>No crackers match these filters</h3>
@@ -584,52 +822,44 @@ export default function App() {
             <div className="product-grid">
               {visible.map((p) => {
                 const reason = blockedReason(p, config);
-                const unitKnown = !!p.sellingUnit?.trim();
+                const stock = p.inStock ? null : "Out of stock";
                 return (
                   <article className="product-card" key={p.id}>
                     <button
                       className="image-button"
                       tabIndex={-1}
                       onClick={() => setDetail(p)}
-                      aria-label={`View ${p.name}, ${p.originalCategory} details${p.images.length > 1 ? `, ${p.images.length} photos` : ""}${p.images.length ? "" : ", Product image coming soon"}`}
+                      aria-label={`View ${p.name}${p.category ? `, ${p.category}` : ""} details`}
                     >
                       <ProductImage product={p} />
                     </button>
                     <div className="product-info">
-                      <p className="category-label">{p.categoryLabel}</p>
+                      {p.category && <p className="category-label">{p.category}</p>}
                       <h3>{p.name}</h3>
-                      <p className="variant">
-                        {p.variantLabel || p.originalCategory}
-                      </p>
                       <div className="price-row">
-                        <Price
-                          product={p}
-                          reference={config.showReferencePrices}
-                        />
+                        <Price product={p} />
                       </div>
-                      <p className={unitKnown ? "unit-note" : "unit-note pending"}>
-                        {unitKnown
-                          ? `Unit: ${p.sellingUnit}`
-                          : "Unit not confirmed · can’t be ordered yet"}
-                      </p>
-                      {p.availability === "unavailable" && (
-                        <p className="blocked">Currently unavailable</p>
+                      {(p.piecesPerPack || (p.shots && !nameStatesShots(p))) && (
+                        <ul className="facts" aria-label="Pack details">
+                          {p.piecesPerPack && (
+                            <li>{p.piecesPerPack} pieces per pack</li>
+                          )}
+                          {p.shots && !nameStatesShots(p) && (
+                            <li>{p.shots} shots</li>
+                          )}
+                        </ul>
                       )}
-                      {p.importIssues.length > 0 && (
-                        <p className="error">Product data needs correction</p>
+                      {stock && <p className="blocked">{stock}</p>}
+                      {!stock && reason && reason !== "Ordering is currently disabled" && (
+                        <p className="blocked">{reason}</p>
                       )}
-                      {reason && shopperReason[reason] && (
-                        <p className="blocked">{shopperReason[reason]}</p>
-                      )}
+                      <PhotoLinks product={p} />
                       <div className="card-actions">
                         {!reason &&
                           (cart[p.id] ? (
                             <Quantity
                               value={cart[p.id]}
-                              max={Math.min(
-                                config.maxQuantity,
-                                p.maxQuantityPerRequest,
-                              )}
+                              max={config.maxQuantity}
                               name={`${p.name} ${p.id}`}
                               onChange={(v) => change(p, v)}
                             />
@@ -644,7 +874,7 @@ export default function App() {
                         <button
                           className="details-button"
                           onClick={() => setDetail(p)}
-                          aria-label={`Details for ${p.name}, ${p.originalCategory}`}
+                          aria-label={`Details for ${p.name}${p.category ? `, ${p.category}` : ""}`}
                         >
                           Details
                         </button>
@@ -673,17 +903,23 @@ export default function App() {
       </main>
       <footer id="contact">
         <div className="footer-brand">
-          <h2>{config.brand}</h2>
+          <h2>{heading}</h2>
           <p>A catalogue for the festival of lights.</p>
         </div>
         <div>
           <h3>Contact the seller</h3>
-          <a href={`tel:+${config.whatsapp}`}>{config.phoneDisplay}</a>
+          {settings.whatsapp ? (
+            <a href={`tel:+${settings.whatsapp}`}>
+              {phoneDisplay(settings.whatsapp)}
+            </a>
+          ) : (
+            <p>Contact details are being updated.</p>
+          )}
           {config.address && <p>{config.address}</p>}
           {config.hours && <p>{config.hours}</p>}
-          {canOrder && !isCheckoutDemo && (
+          {canOrder && !isCheckoutDemo && settings.whatsapp && (
             <a
-              href={`https://wa.me/${config.whatsapp}`}
+              href={`https://wa.me/${settings.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -716,20 +952,13 @@ export default function App() {
         </div>
         <div className="footer-bottom">
           <p>
-            Prices come from the seller’s{" "}
-            <a
-              href={catalogueSource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              shared price list
-            </a>
-            ; the seller confirms every detail.
+            Prices and availability come from the seller’s current price list;
+            the seller confirms every detail.
           </p>
           <span>Made for a thoughtful celebration ✧</span>
         </div>
       </footer>
-      {canOrder && amount.units > 0 && !cartOpen && !detail && (
+      {canOrder && cartUnits > 0 && !cartOpen && !detail && (
         <>
           <div
             className="mobile-cart-bar"
@@ -738,7 +967,7 @@ export default function App() {
           >
             <div>
               <strong>
-                {amount.units} {amount.units === 1 ? "unit" : "units"} selected
+                {cartUnits} {cartUnits === 1 ? "unit" : "units"} selected
               </strong>
               <span>Product subtotal {rupees(amount.subtotal)}</span>
               {amount.discount > 0 && (
@@ -749,7 +978,7 @@ export default function App() {
             </div>
             <button
               className="button primary"
-              aria-label={`Review cart, ${amount.units} units`}
+              aria-label={`Review cart, ${cartUnits} units`}
               onClick={openCart}
             >
               View cart
@@ -785,72 +1014,50 @@ export default function App() {
         >
           <ProductImage product={detail} large />
           <div className="detail-content">
-            <p className="category-label">{detail.categoryLabel}</p>
-            <p className="variant">
-              {detail.variantLabel || detail.originalCategory}
-            </p>
+            {detail.category && (
+              <p className="category-label">{detail.category}</p>
+            )}
             <div id="detail-summary">
               <p className="detail-price">
-                <Price product={detail} reference={config.showReferencePrices} />
+                <Price product={detail} />
               </p>
-              <p
-                className={
-                  detail.sellingUnit?.trim() ? "unit-note" : "unit-note pending"
-                }
-              >
-                {detail.sellingUnit?.trim()
-                  ? `Unit: ${detail.sellingUnit}`
-                  : "Unit not confirmed · can’t be ordered yet"}
-              </p>
+              {!detail.inStock && <p className="blocked">Out of stock</p>}
             </div>
+            {detail.description && (
+              <p className="description">{detail.description}</p>
+            )}
             <dl>
-              <dt>Type</dt>
-              <dd>{detail.originalCategory}</dd>
-              {detail.packDetails && (
+              {detail.category && (
                 <>
-                  <dt>Pack information</dt>
-                  <dd>
-                    {detail.packDetails}
-                    {!detail.sellingUnit?.trim() &&
-                      " (describes the pack, not the selling unit)"}
-                  </dd>
+                  <dt>Category</dt>
+                  <dd>{detail.category}</dd>
                 </>
               )}
-              <dt>Reference</dt>
+              {detail.piecesPerPack && (
+                <>
+                  <dt>Pieces per pack</dt>
+                  <dd>{detail.piecesPerPack}</dd>
+                </>
+              )}
+              {detail.shots && (
+                <>
+                  <dt>Shots</dt>
+                  <dd>{detail.shots}</dd>
+                </>
+              )}
+              <dt>Product ID</dt>
               <dd>{detail.id}</dd>
             </dl>
-            {detail.verifiedSpecifications.map((s) => (
-              <p key={s}>{s}</p>
-            ))}
-            {detail.certificationDetails && (
-              <p>{detail.certificationDetails}</p>
-            )}
+            <PhotoLinks product={detail} />
             {config.policies.safety && <p>{config.policies.safety}</p>}
-            {!detail.sellingUnit?.trim() && (
-              <p className="callout">
-                This product can’t be ordered until the seller confirms its
-                selling unit.
-              </p>
-            )}
-            {!detail.categoryReviewed && (
-              <p className="callout">
-                This product’s category requires seller review.
-              </p>
-            )}
-            {detail.availability === "unavailable" && (
-              <p className="callout">Currently unavailable.</p>
-            )}
             {!blockedReason(detail, config) && (
               <div className="detail-actions">
                 <Quantity
                   value={detailQuantity}
-                  max={Math.min(config.maxQuantity, detail.maxQuantityPerRequest)}
+                  max={config.maxQuantity}
                   name={detail.name}
                   onChange={(v) => {
-                    const n = quantity(
-                      v,
-                      Math.min(config.maxQuantity, detail.maxQuantityPerRequest),
-                    );
+                    const n = quantity(v, config.maxQuantity);
                     if (n === null) {
                       announce("Enter a valid whole quantity.");
                       return false;
@@ -902,6 +1109,33 @@ export default function App() {
             </div>
           )}
           {notice && <p className="callout">{notice}</p>}
+          {changes.length > 0 && (
+            <div className="callout changes" role="alert">
+              <strong>Your order changed since you last looked.</strong>
+              <ul>
+                {changes.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+              <button className="button secondary" onClick={accept}>
+                OK, review my updated order
+              </button>
+            </div>
+          )}
+          {checkoutError && (
+            <div className="callout error-callout" role="alert">
+              <p>{checkoutError}</p>
+              {checkoutError !== RECIPIENT_ERROR && (
+                <button
+                  className="button secondary"
+                  disabled={busy}
+                  onClick={() => void checkout()}
+                >
+                  Try again
+                </button>
+              )}
+            </div>
+          )}
           {stage === "cart" && (
             <div className="cart-content">
               {!selected.length ? (
@@ -912,59 +1146,94 @@ export default function App() {
               ) : (
                 <>
                   <p className="muted">
-                    {amount.units} total units · quantities do not reserve stock
+                    {cartUnits} total units · quantities do not reserve stock
                   </p>
-                  {selected.map((p) => (
-                    <div className="cart-line" key={p.id}>
-                      <div>
-                        <h3>{p.name}</h3>
-                        <p>{p.originalCategory}</p>
-                        <small>
-                          {p.sellingUnit || "Selling unit unconfirmed"}
-                        </small>
-                        <p>
-                          {rupees(p.pricePaise!)} each ·{" "}
-                          <strong>{rupees(p.pricePaise! * cart[p.id])}</strong>
-                        </p>
-                        {blockedReason(p, config) && (
-                          <p className="error">{blockedReason(p, config)}</p>
+                  {selected.map(({ id, qty, product: p }) => {
+                    const reason = blockedReason(p, config);
+                    return (
+                      <div className="cart-line" key={id}>
+                        <div>
+                          <h3>{p?.name ?? names[id] ?? id}</h3>
+                          {p?.category && <p>{p.category}</p>}
+                          {p && (
+                            <small>
+                              {[
+                                p.piecesPerPack
+                                  ? `${p.piecesPerPack} pieces per pack`
+                                  : "",
+                                p.shots && !nameStatesShots(p)
+                                  ? `${p.shots} shots`
+                                  : "",
+                                `ID ${p.id}`,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </small>
+                          )}
+                          {p && p.pricePaise !== null && (
+                            <p>
+                              {rupees(p.pricePaise)} each ·{" "}
+                              <strong>{rupees(p.pricePaise * qty)}</strong>
+                            </p>
+                          )}
+                          {reason && <p className="error">{reason}</p>}
+                        </div>
+                        {p && !reason ? (
+                          <Quantity
+                            name={`${p.name} ${p.id}`}
+                            value={qty}
+                            max={config.maxQuantity}
+                            onChange={(v) => change(p, v)}
+                          />
+                        ) : (
+                          <span className="muted">Qty {qty}</span>
                         )}
+                        <button
+                          className="text-button remove"
+                          onClick={() => removeLine(id, p?.name ?? names[id] ?? id)}
+                          aria-label={`Remove ${p?.name ?? names[id] ?? id}, ${id}`}
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <Quantity
-                        name={`${p.name} ${p.id}`}
-                        value={cart[p.id]}
-                        max={Math.min(
-                          config.maxQuantity,
-                          p.maxQuantityPerRequest,
-                        )}
-                        onChange={(v) => change(p, v)}
-                      />
-                      <button
-                        className="text-button remove"
-                        onClick={() => remove(p)}
-                        aria-label={`Remove ${p.name}, ${p.id}`}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  <label className="field coupon-field">
+                    Coupon code
+                    <input
+                      value={coupon}
+                      maxLength={40}
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      aria-describedby="coupon-message"
+                      onChange={(e) => setCoupon(e.target.value)}
+                    />
+                  </label>
+                  <p
+                    id="coupon-message"
+                    className={
+                      amount.offer.status === "applied" ||
+                      amount.offer.status === "none"
+                        ? "muted"
+                        : "error"
+                    }
+                    role="status"
+                  >
+                    {amount.offer.message}
+                  </p>
                   <PriceSummary amount={amount} />
                   <button
                     className="button primary full"
-                    disabled={!cartReady}
-                    onClick={() => {
-                      setBuyer((b) => ({
-                        ...b,
-                        method:
-                          b.method ||
-                          config.fulfilment.find((f) => f.verified)?.id ||
-                          "",
-                      }));
-                      setStage("buyer");
-                    }}
+                    disabled={!cartReady || changes.length > 0}
+                    onClick={proceed}
                   >
                     Proceed to buyer details
                   </button>
+                  {!cartReady && (
+                    <p className="muted">
+                      Remove the items marked unavailable to continue.
+                    </p>
+                  )}
                   <button
                     className="text-button"
                     onClick={() => setClearConfirm(true)}
@@ -987,7 +1256,7 @@ export default function App() {
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
-                checkout();
+                void checkout();
               }}
             >
               <p>
@@ -1021,7 +1290,7 @@ export default function App() {
                   )}
                 </label>
               )}
-              {method?.type === "pickup" && !isLocalDemo && (
+              {method?.type === "pickup" && (
                 <p className="callout">
                   {method.address || config.address
                     ? `Pickup location: ${method.address || config.address}`
@@ -1061,18 +1330,34 @@ export default function App() {
               <section className="review-summary" aria-labelledby="review-title">
                 <h3 id="review-title">Review your request</h3>
                 <ul className="review-lines">
-                  {selected.map((p) => (
-                    <li key={p.id}>
+                  {selected.map(({ id, qty, product: p }) => (
+                    <li key={id}>
                       <div className="review-item">
-                        <strong>{p.name}</strong>
-                        <span>{p.variantLabel || p.originalCategory}</span>
-                        {p.sellingUnit && <small>Unit: {p.sellingUnit}</small>}
+                        <strong>{p?.name ?? names[id] ?? id}</strong>
+                        {p?.category && <span>{p.category}</span>}
+                        <small>
+                          {[
+                            `ID ${id}`,
+                            p?.piecesPerPack
+                              ? `${p.piecesPerPack} pieces per pack`
+                              : "",
+                            p?.shots ? `${p.shots} shots` : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </small>
                       </div>
                       <div className="review-amount">
-                        <span>
-                          {cart[p.id]} × {rupees(p.pricePaise!)}
-                        </span>
-                        <strong>{rupees(p.pricePaise! * cart[p.id])}</strong>
+                        {p?.pricePaise != null ? (
+                          <>
+                            <span>
+                              {qty} × {rupees(p.pricePaise)}
+                            </span>
+                            <strong>{rupees(p.pricePaise * qty)}</strong>
+                          </>
+                        ) : (
+                          <span>Qty {qty}</span>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -1188,9 +1473,15 @@ export default function App() {
               <button
                 className="button whatsapp full"
                 type="submit"
-                disabled={busy || (!!draft?.long && !requestPrepared)}
+                disabled={
+                  busy ||
+                  changes.length > 0 ||
+                  (!!draft?.long && !requestPrepared)
+                }
               >
-                {handoff && !draft?.long
+                {busy
+                  ? "Checking the latest prices…"
+                  : handoff && !draft?.long
                   ? isCheckoutDemo
                     ? "Run the dry run again"
                     : "Open WhatsApp again"
@@ -1340,7 +1631,7 @@ function PriceSummary({ amount }: { amount: ReturnType<typeof totals> }) {
       {amount.discount > 0 && (
         <p className="offer-saving">
           <span>
-            {amount.discountBasisPoints / 100}% offer
+            {amount.offerName}
             {amount.couponCode ? ` (${amount.couponCode})` : ""}
           </span>
           <strong>−{rupees(amount.discount)}</strong>

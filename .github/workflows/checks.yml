@@ -3,9 +3,8 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
-  # Deterministic: builds and tests against the committed src/products.json snapshot.
-  # No Google Sheet fetch and no image downloads, so a Sheet or network change cannot
-  # fail or alter a UI test.
+  # Deterministic: every test serves fixture CSV in place of the Google Sheet, so a sheet or
+  # network change cannot fail a test. The real-sheet check is separate (`npm run test:live`).
   ui:
     runs-on: ubuntu-latest
     steps:
@@ -14,14 +13,9 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install -r requirements.txt
       - run: npm ci
-      - run: npm run build:offline
+      - run: npm run build
       - run: npm test
-      - run: python -m unittest discover -s tests -p test_import.py
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - uses: actions/upload-artifact@v4
@@ -33,19 +27,3 @@ jobs:
             reports/layout-metrics.json
             reports/redesign
           retention-days: 7
-  # Live import verification: re-syncs the Google Sheet and fails if the committed snapshot
-  # is stale. Kept apart from the UI job so Sheet drift is reported without blocking UI checks.
-  live-sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install -r requirements.txt
-      - run: npm ci
-      - run: npm run test:live
