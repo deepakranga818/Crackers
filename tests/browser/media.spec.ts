@@ -69,15 +69,19 @@ async function watchAudio(page: Page, block = false) {
 const soundOn = (page: Page) => page.getByRole("button", { name: "Sound on · mute", exact: true });
 const soundOff = (page: Page) => page.getByRole("button", { name: "Enable festive sound", exact: true });
 
-test("the firecrackers play when the page opens (or on the first tap), give a nonzero signal, and muting is remembered", async ({ page }) => {
+const crackers = (page: Page) => page.evaluate(() => (window as any).__crackers as number);
+
+test("sound is on from the start, the firecrackers play on load (or the first tap) with a nonzero signal, and muting is remembered", async ({ page }) => {
   await watchAudio(page);
   await page.goto("/");
-  // The page tries on load. Whether a browser (or a slow CI machine) lets that through is not
+  // Never shown as muted: the button reads "Sound on" from the first paint.
+  await expect(soundOn(page)).toBeVisible();
+  await expect(soundOff(page)).toHaveCount(0);
+  // Whether the browser (or a slow CI machine) lets the load-time attempt through is not
   // guaranteed, so the promise tested is: playing by itself, or on the first tap.
   await page.waitForTimeout(900);
-  if (!(await soundOn(page).isVisible())) await page.locator("h1").click();
-  await expect(soundOn(page)).toBeVisible();
-  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
+  if (!(await crackers(page))) await page.locator("h1").click();
+  await expect.poll(() => crackers(page)).toBe(1);
   const peak = await page.evaluate(async () => {
     let peak = 0;
     for (let n = 0; n < 40; n++) {
@@ -102,28 +106,38 @@ test("the firecrackers play when the page opens (or on the first tap), give a no
   await expect(soundOff(page)).toBeVisible();
 });
 
-test("where the browser blocks autoplay, the first tap on the page starts the firecrackers, once", async ({ page }) => {
-  await watchAudio(page, true);
+test("an old 'muted' value from the earlier opt-in version does not keep anyone silent", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("diwali-sound", "false"));
   await page.goto("/");
-  await expect(soundOff(page)).toBeVisible();
-  await page.waitForTimeout(700); // longer than the load-time attempt waits
-  expect(await page.evaluate(() => (window as any).__crackers)).toBe(0);
-  await page.locator("h1").click();
-  await expect(soundOn(page)).toBeVisible();
-  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
-  await page.locator("h1").click();
-  await page.waitForTimeout(400);
-  expect(await page.evaluate(() => (window as any).__crackers)).toBe(1);
   await expect(soundOn(page)).toBeVisible();
 });
 
-test("where autoplay is blocked, tapping the sound button first turns sound on instead of starting and muting it", async ({ page }) => {
+test("where the browser blocks autoplay, sound still reads On, and the first tap on the page starts the firecrackers, once", async ({ page }) => {
   await watchAudio(page, true);
   await page.goto("/");
+  await expect(soundOn(page)).toBeVisible();
+  await page.waitForTimeout(700); // longer than the load-time attempt waits
+  expect(await crackers(page)).toBe(0);
+  await page.locator("h1").click();
+  await expect.poll(() => crackers(page)).toBe(1);
+  await page.locator("h1").click();
+  await page.waitForTimeout(400);
+  expect(await crackers(page)).toBe(1);
+  await expect(soundOn(page)).toBeVisible();
+});
+
+test("where autoplay is blocked, pressing the sound button first mutes (it was on) and the crackers never start; pressing again turns it back on", async ({ page }) => {
+  await watchAudio(page, true);
+  await page.goto("/");
+  await soundOn(page).click();
+  await expect(soundOff(page)).toBeVisible();
+  await page.locator("h1").click(); // a later tap must not start anything while muted
+  await page.waitForTimeout(400);
+  expect(await crackers(page)).toBe(0);
+  await expect(soundOff(page)).toBeVisible();
   await soundOff(page).click();
   await expect(soundOn(page)).toBeVisible();
-  await page.locator("h1").click(); // a later tap must not replay the crackers or toggle anything
+  await page.locator("h1").click();
   await page.waitForTimeout(400);
-  expect(await page.evaluate(() => (window as any).__crackers)).toBe(0);
-  await expect(soundOn(page)).toBeVisible();
+  expect(await crackers(page)).toBe(0); // the chime played; the crackers are only for page open
 });

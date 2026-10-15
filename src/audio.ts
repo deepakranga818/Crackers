@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { createSoundPlayer, type SoundKind } from "./sound-player";
 
 export function useAudio(volume: number) {
-  // On unless the visitor has turned it off before: the crackers play when the page opens.
+  // On for everyone until they press mute (remembered as "diwali-sound-off"). `enabled` is that
+  // choice and is what the button shows; `activated` is whether the browser has actually let
+  // audio start yet, which it only does after the first tap or key press.
   const [enabled, setEnabled] = useState(() => {
     try {
-      return localStorage.getItem("diwali-sound") !== "false";
+      return localStorage.getItem("diwali-sound-off") !== "1";
     } catch {
       return true;
     }
@@ -15,7 +17,9 @@ export function useAudio(volume: number) {
   const [player] = useState(() => createSoundPlayer(volume));
   // Removes the "first tap" listener below once the toggle button has settled things itself.
   const stopWaiting = useRef(() => {});
+  // Sound really could not start: say so and show it as off, so the button can try again.
   const unavailable = () => {
+    setEnabled(false);
     setActivated(false);
     setStatus(
       "Sound is unavailable. Shopping still works. Check browser or device mute settings, then try Enable festive sound again.",
@@ -27,14 +31,15 @@ export function useAudio(volume: number) {
   }
   function remember(value: boolean) {
     try {
-      localStorage.setItem("diwali-sound", String(value));
+      if (value) localStorage.removeItem("diwali-sound-off");
+      else localStorage.setItem("diwali-sound-off", "1");
     } catch {
       /* Preference lasts this visit. */
     }
   }
   function toggle() {
     stopWaiting.current();
-    if (enabled && activated) {
+    if (enabled) {
       setEnabled(false);
       setActivated(false);
       setStatus("");
@@ -98,7 +103,7 @@ export function useAudio(volume: number) {
     toggle,
     tone,
     status,
-    isOn: enabled && activated,
-    label: enabled && activated ? "Sound on · mute" : "Enable festive sound",
+    isOn: enabled,
+    label: enabled ? "Sound on · mute" : "Enable festive sound",
   };
 }
