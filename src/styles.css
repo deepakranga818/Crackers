@@ -1486,7 +1486,8 @@ footer a {
   .product-image {
     aspect-ratio: 16 / 10;
   }
-  /* Tight enough that all ten chips share one row at 1366px. */
+  /* One row at every font: wrapping made the row's height (and so where products start)
+     depend on the font's width. Wider fonts scroll sideways, with the edge shadows, like phones. */
   .categories {
     gap: 6px;
   }
@@ -1508,11 +1509,6 @@ footer a {
     .categories button {
       min-height: 40px;
     }
-  }
-  .categories {
-    flex-wrap: wrap;
-    overflow: visible;
-    background: none;
   }
 }
 @media (min-width: 1500px) {

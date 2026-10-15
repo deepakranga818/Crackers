@@ -90,3 +90,7 @@ Added after the redesign so the owner can test by hand without deploying: the ac
 
 **Not tested:** reaching the servers from a phone (this machine cannot test its own firewall; Node.js is allowed only on the Public profile and this network is Private); real WhatsApp; the demo's look on a real phone.
 
+## CI finding after the first deploy (15 October 2026)
+
+The first CI run on Linux failed one layout test (`layout at 1366x768`: the first card's price was below the fold). Cause: on desktop the category chips wrapped to two rows with any font wider than Segoe UI, which pushed products down about 45px; the Windows margin was only 10px. Fix: desktop chips are now a single-row scroller with the same edge shadows as phones, so the row height no longer depends on the font. Measured at 1366×768 with Segoe UI, Arial (Liberation Sans metrics) and Verdana (DejaVu-like): chip row 52px, shop bar 115px, first price bottom 758 / 752 / 754px (viewport 768). With wider fonts one chip at the right edge sits behind the scroll shadow; keyboard focus scrolls it into view. Also: layout targets are measured at the stated *viewport* size; a real 1366×768 laptop browser has roughly 100px less visible height than the screen, so the first-screen target is not met there.
+
