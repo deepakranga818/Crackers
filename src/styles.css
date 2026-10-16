@@ -859,6 +859,40 @@ footer a {
   align-items: center;
   min-height: 44px;
 }
+/* The seller's number is the one thing a visitor may come here for: big, gold, tappable. */
+footer a.contact-number {
+  display: flex;
+  width: fit-content;
+  gap: var(--s2);
+  margin: var(--s2) 0 var(--s3);
+  padding: var(--s2) var(--s4);
+  min-height: 48px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  background: #ffffff0f;
+}
+footer a.contact-whatsapp {
+  display: flex;
+  width: fit-content;
+  justify-content: center;
+  padding: var(--s2) var(--s5);
+  min-height: 46px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  background: var(--green);
+}
+footer a.contact-number:hover,
+footer a.contact-whatsapp:hover {
+  filter: brightness(1.15);
+}
 .footer-bottom {
   border-top: 1px solid #4c3855;
   padding-top: var(--s4);

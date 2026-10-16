@@ -96,5 +96,6 @@ export const emptyBuyer: Buyer = {
   pin: "",
   landmark: "",
   notes: "",
-  acknowledged: false,
+  // Ticked from the start (the notice is next to the button); the visitor can untick it.
+  acknowledged: true,
 };

@@ -164,3 +164,40 @@ test("with reduced motion the fireworks never appear, and adding still works", a
   expect(await isOpen(page)).toBe(false);
   await expect(burst(page).locator("svg")).toHaveCount(0);
 });
+
+test("the sharing acknowledgement starts ticked; unticking it still blocks the request with a visible message", async ({ page }) => {
+  await setup(page);
+  await add(page);
+  await page.getByRole("button", { name: /Open cart/ }).click();
+  await cart(page).getByRole("button", { name: "Proceed to buyer details" }).click();
+  await page.getByLabel("Full name *").fill("Asha Rao");
+  await page.getByLabel("Mobile number *").fill("9876543210");
+  const ack = page.getByRole("checkbox");
+  await expect(ack).toBeChecked();
+  await ack.uncheck();
+  await page.getByRole("button", { name: /Continue to WhatsApp/ }).click();
+  await expect(cart(page)).toContainText("Acknowledge sharing these details with the seller");
+  expect(await page.evaluate(() => (window as any).__opened)).toEqual([]);
+  await ack.check();
+  await page.getByRole("button", { name: /Continue to WhatsApp/ }).click();
+  await expect(cart(page).getByText(/WhatsApp opened/)).toBeVisible();
+});
+
+test("the footer shows the seller's number as a large tappable call link plus a WhatsApp button", async ({ page }) => {
+  await stubWindowOpen(page);
+  const fake = await new FakeSheet().install(page);
+  fake.set({ products: [product(1, { name: "Alpha" })], settings: [["Shop name", "Test Shop"], ["WhatsApp number", "+91 99922 30740"]] });
+  await page.goto("/");
+  const number = page.locator("footer a.contact-number");
+  await expect(number).toHaveText(/\+91 99922 30740/);
+  await expect(number).toHaveAttribute("href", "tel:+919992230740");
+  await expect(number).toHaveAccessibleName("Call +91 99922 30740");
+  const whatsapp = page.locator("footer a.contact-whatsapp");
+  await expect(whatsapp).toHaveText("Chat on WhatsApp");
+  await expect(whatsapp).toHaveAttribute("href", "https://wa.me/919992230740");
+  // Separate lines, not run together.
+  const [n, w] = await Promise.all([number.boundingBox(), whatsapp.boundingBox()]);
+  expect(w!.y).toBeGreaterThanOrEqual(n!.y + n!.height);
+  expect(n!.height).toBeGreaterThanOrEqual(44);
+  await number.scrollIntoViewIfNeeded();
+});

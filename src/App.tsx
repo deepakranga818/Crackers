@@ -915,7 +915,12 @@ function Shop({
         <div>
           <h3>Contact the seller</h3>
           {settings.whatsapp ? (
-            <a href={`tel:+${settings.whatsapp}`}>
+            <a
+              className="contact-number"
+              href={`tel:+${settings.whatsapp}`}
+              aria-label={`Call ${phoneDisplay(settings.whatsapp)}`}
+            >
+              <span aria-hidden="true">📞</span>
               {phoneDisplay(settings.whatsapp)}
             </a>
           ) : (
@@ -925,11 +930,12 @@ function Shop({
           {config.hours && <p>{config.hours}</p>}
           {canOrder && !isCheckoutDemo && settings.whatsapp && (
             <a
+              className="contact-whatsapp"
               href={`https://wa.me/${settings.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Open WhatsApp
+              Chat on WhatsApp
             </a>
           )}
         </div>
